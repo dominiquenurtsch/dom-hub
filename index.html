@@ -1,0 +1,2614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Dominique's Hub — Personal Operations</title>
+<link rel="icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/icon-180.png">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Dom Hub">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #fff;
+  --text: #e8e8e8;
+  --text-secondary: #ccc;
+  --text-muted: #999;
+  --text-faint: #777;
+  --white: #fff;
+  --teal: #2dd4a8;
+  --teal-bright: #34eabd;
+  --teal-glow: rgba(45,212,168,0.15);
+  --teal-subtle: rgba(45,212,168,0.07);
+  --red-soft: #ef6b6b;
+  --amber: #f0a840;
+  --green: #34d399;
+  --glass-bg: rgba(255,255,255,0.08);
+  --glass-bg-heavy: rgba(255,255,255,0.12);
+  --glass-border: rgba(255,255,255,0.12);
+  --glass-border-subtle: rgba(255,255,255,0.08);
+  --glass-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  --glass-blur: 30px;
+  --sidebar-bg: rgba(255,255,255,0.06);
+  --font: 'Inter', -apple-system, sans-serif;
+  --sidebar-w: 256px;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:15px;overflow-x:hidden}
+body{font-family:var(--font);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;background:#0a0a0a;max-width:100vw}
+.bg-layer{position:fixed;inset:0;z-index:0;background:url('wallpaper.jpg') center center/cover no-repeat}
+.bg-layer::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,0.5)}
+.app{display:flex;min-height:100vh;position:relative;z-index:2}
+.sidebar{width:var(--sidebar-w);min-height:100vh;position:fixed;left:0;top:0;background:rgba(0,0,0,0.4);backdrop-filter:blur(40px) saturate(1.4);-webkit-backdrop-filter:blur(40px) saturate(1.4);border-right:1px solid var(--glass-border);display:flex;flex-direction:column;z-index:100;transition:transform var(--transition);box-shadow:4px 0 30px rgba(0,0,0,0.15)}
+.sidebar-brand{padding:28px 22px 22px;border-bottom:1px solid rgba(255,255,255,0.06)}
+.sidebar-brand h1{font-family:var(--font);font-size:1.3rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#fff;line-height:1.2}
+.sidebar-brand .subtitle{font-size:0.62rem;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-top:5px;font-weight:500}
+.sidebar-nav{flex:1;padding:14px 10px;display:flex;flex-direction:column;gap:2px}
+.nav-item{display:flex;align-items:center;gap:11px;padding:10px 14px;border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition);font-size:0.84rem;font-weight:400;color:rgba(255,255,255,0.55);border:1px solid transparent;user-select:none}
+.nav-item:hover{background:rgba(45,212,168,0.06);color:var(--white)}
+.nav-item.active{background:rgba(45,212,168,0.1);color:var(--teal);border-color:rgba(45,212,168,0.18);font-weight:600}
+.nav-item .nav-icon{width:20px;text-align:center;font-size:0.85rem;opacity:0.6}
+.nav-item.active .nav-icon{opacity:1}
+.sidebar-links{padding:0 10px 14px;border-top:1px solid rgba(255,255,255,0.06);padding-top:14px}
+.sidebar-links-title{font-size:0.6rem;text-transform:uppercase;letter-spacing:0.14em;color:rgba(255,255,255,0.3);margin-bottom:8px;padding-left:14px;font-weight:500}
+.sidebar-link{display:flex;align-items:center;gap:9px;padding:7px 14px;font-size:0.76rem;color:rgba(255,255,255,0.5);text-decoration:none;border-radius:var(--radius-sm);transition:all var(--transition)}
+.sidebar-link:hover{background:rgba(255,255,255,0.06);color:var(--white)}
+.sidebar-footer{padding:16px 20px;border-top:1px solid rgba(255,255,255,0.06);font-size:0.68rem;color:rgba(255,255,255,0.4);letter-spacing:0.04em}
+.sidebar-footer .domain{color:var(--teal);font-weight:600;letter-spacing:0.06em}
+.mobile-toggle{display:none;position:fixed;top:14px;left:14px;z-index:200;width:42px;height:42px;border-radius:var(--radius-sm);background:rgba(0,0,0,0.4);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);color:#fff;font-size:1.1rem;cursor:pointer;align-items:center;justify-content:center;box-shadow:var(--glass-shadow)}
+.main{margin-left:var(--sidebar-w);flex:1;padding:30px 34px;min-height:100vh;max-width:100%;overflow-x:hidden}
+.card{background:var(--glass-bg);backdrop-filter:blur(var(--glass-blur)) saturate(1.3);-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(1.3);border:1px solid var(--glass-border);border-radius:var(--radius);padding:22px;position:relative;overflow:hidden;transition:all var(--transition);box-shadow:var(--glass-shadow)}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.1) 50%,transparent 100%)}
+.card:hover{border-color:rgba(255,255,255,0.18);box-shadow:0 8px 40px rgba(0,0,0,0.25)}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.card-title{font-family:var(--font);font-size:0.95rem;font-weight:600;color:var(--black);letter-spacing:0}
+.card-badge{font-size:0.6rem;padding:3px 10px;border-radius:20px;letter-spacing:0.08em;text-transform:uppercase;font-weight:600}
+.badge-teal{background:rgba(45,212,168,0.12);color:var(--teal);border:1px solid rgba(45,212,168,0.25)}
+.badge-amber{background:rgba(240,168,64,0.12);color:var(--amber);border:1px solid rgba(240,168,64,0.2)}
+.badge-red{background:rgba(239,107,107,0.12);color:var(--red-soft);border:1px solid rgba(239,107,107,0.2)}
+.badge-silver{background:rgba(255,255,255,0.06);color:var(--text-muted);border:1px solid rgba(255,255,255,0.1)}
+.tab-panel{display:none;animation:fadeUp 0.4s ease}
+.tab-panel.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.section-header{margin-bottom:24px}
+.section-header h2{font-family:var(--font);font-size:1.6rem;font-weight:600;color:var(--white);letter-spacing:-0.01em;text-shadow:0 2px 12px rgba(0,0,0,0.4)}
+.section-header .updated{font-size:0.7rem;color:rgba(255,255,255,0.8);margin-top:4px;letter-spacing:0.02em;text-shadow:0 1px 4px rgba(0,0,0,0.4)}
+.metrics-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px}
+@media(min-width:768px){.metrics-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:24px}}
+.metric-tile{text-align:center;padding:20px 14px}
+.metric-value{font-family:var(--font);font-size:1.4rem;font-weight:600;color:var(--black);letter-spacing:-0.01em;line-height:1}
+@media(min-width:768px){.metric-value{font-size:1.8rem}}
+.metric-value.teal{color:var(--teal)}
+.metric-label{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--text-muted);margin-top:7px;font-weight:500}
+.data-table{width:100%;border-collapse:collapse}
+.data-table th{font-size:0.62rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--text-faint);padding:9px 13px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.06);font-weight:600}
+.data-table td{padding:11px 13px;font-size:0.8rem;border-bottom:1px solid rgba(255,255,255,0.03);color:var(--text-secondary)}
+.data-table tr:hover td{background:rgba(255,255,255,0.04)}
+.content-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.content-card{padding:18px;border-radius:var(--radius-sm);background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08)}
+.content-card h4{font-family:var(--font);font-size:0.98rem;color:var(--black);margin-bottom:6px;font-weight:500}
+.content-card p{font-size:0.76rem;color:var(--text-muted);line-height:1.5}
+.content-tag{font-size:0.58rem;padding:2px 8px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--text-muted);letter-spacing:0.04em;font-weight:500}
+.empty-state{text-align:center;padding:50px 20px;color:var(--text-muted)}
+.empty-state .icon{font-size:2.2rem;margin-bottom:14px;opacity:0.35}
+.empty-state h3{font-family:var(--font);font-size:1.15rem;color:var(--text);font-weight:400;margin-bottom:6px}
+.empty-state p{font-size:0.78rem;line-height:1.6;max-width:380px;margin:0 auto}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.quick-links{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.quick-link{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:18px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--text-muted);font-size:0.7rem;text-decoration:none;transition:all var(--transition);letter-spacing:0.03em;font-weight:500;cursor:pointer}
+.quick-link:hover{border-color:rgba(45,212,168,0.3);color:var(--teal);background:var(--teal-subtle)}
+.shimmer{background:linear-gradient(90deg,rgba(255,255,255,0.03) 25%,rgba(255,255,255,0.08) 50%,rgba(255,255,255,0.03) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--radius-sm);height:20px}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.finance-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.finance-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.8rem}
+.finance-row:last-child{border-bottom:none}
+.finance-row .label{color:var(--text-muted)}
+.finance-row .value{color:var(--white);font-weight:600}
+.btn{padding:6px 14px;border-radius:8px;background:var(--teal);border:none;color:#000;font-weight:700;font-size:0.75rem;cursor:pointer;font-family:var(--font);transition:all 0.2s}
+.btn:hover{filter:brightness(1.1)}
+.btn-ghost{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--text-muted);font-weight:500}
+.btn-ghost:hover{border-color:rgba(255,255,255,0.2);color:#fff}
+.btn-danger{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.15);color:var(--red-soft)}
+.modal-overlay{display:none;position:fixed;inset:0;z-index:500;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.modal-card{position:relative;z-index:1;width:500px;max-width:92vw;max-height:85vh;overflow-y:auto;background:#1a1a2e;border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:24px;box-shadow:0 24px 80px rgba(0,0,0,0.4)}
+.modal-title{font-size:1rem;font-weight:700;color:#fff;margin-bottom:16px}
+.form-group{margin-bottom:12px}
+.form-label{font-size:0.65rem;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.1em;display:block;margin-bottom:4px}
+.form-input{width:100%;padding:10px 12px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:#fff;font-size:0.82rem;font-family:var(--font);outline:none;box-sizing:border-box;transition:border-color 0.2s}
+.form-input:focus{border-color:rgba(45,212,168,0.4)}
+textarea.form-input{min-height:100px;resize:vertical}
+select.form-input{cursor:pointer;background:#1a1a1a}
+.progress-bar{height:6px;border-radius:3px;background:rgba(255,255,255,0.06);overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;background:var(--teal);transition:width 0.3s}
+
+/* ─── PIN Screen ─── */
+.pin-screen{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;transition:opacity 0.5s ease,visibility 0.5s ease}
+.pin-screen.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.pin-bg{position:absolute;inset:0;background:url('wallpaper.jpg') center center/cover no-repeat}
+.pin-bg::after{content:'';position:absolute;inset:0;backdrop-filter:blur(30px) saturate(1.2);-webkit-backdrop-filter:blur(30px) saturate(1.2);background:rgba(0,0,0,0.3)}
+.pin-card{position:relative;z-index:1;background:rgba(255,255,255,0.12);backdrop-filter:blur(40px) saturate(1.5);-webkit-backdrop-filter:blur(40px) saturate(1.5);border:1px solid rgba(255,255,255,0.15);border-radius:24px;padding:48px 40px;text-align:center;width:340px;max-width:90vw;box-shadow:0 24px 80px rgba(0,0,0,0.3)}
+.pin-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);border-radius:24px 24px 0 0}
+.pin-title{font-family:var(--font);font-size:1.1rem;font-weight:700;color:#fff;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px}
+.pin-sub{font-family:var(--font);font-size:0.65rem;color:rgba(255,255,255,0.45);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:28px}
+.pin-divider{width:40px;height:1px;background:rgba(255,255,255,0.15);margin:0 auto 24px}
+.pin-label{font-size:0.6rem;color:rgba(255,255,255,0.5);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:12px}
+.pin-inputs{display:flex;gap:10px;justify-content:center;margin-bottom:20px}
+.pin-input{width:48px;height:56px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:#fff;font-family:var(--font);font-size:1.4rem;font-weight:600;text-align:center;outline:none;transition:all 0.2s ease;-webkit-appearance:none;-moz-appearance:textfield}
+.pin-input::-webkit-inner-spin-button,.pin-input::-webkit-outer-spin-button{-webkit-appearance:none}
+.pin-input:focus{border-color:rgba(16,185,129,0.5);background:rgba(16,185,129,0.08);box-shadow:0 0 20px rgba(16,185,129,0.1)}
+.pin-input.error{border-color:rgba(220,74,74,0.6);background:rgba(220,74,74,0.08);animation:pinShake 0.4s ease}
+@keyframes pinShake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.pin-error{font-size:0.7rem;color:#e85d5d;height:20px;margin-bottom:4px;opacity:0;transition:opacity 0.2s}
+.pin-error.show{opacity:1}
+
+/* ─── Tablet (≤900px) ─── */
+@media(max-width:900px){
+.sidebar{transform:translateX(-100%);width:280px;background:rgba(10,10,10,0.92);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px)}
+.sidebar.open{transform:translateX(0)}
+.mobile-toggle{display:flex}
+.main{margin-left:0;padding:16px 14px;padding-top:60px;max-width:100vw;overflow-x:hidden}
+.grid-2{grid-template-columns:1fr}
+.finance-grid{grid-template-columns:1fr}
+.content-grid{grid-template-columns:1fr}
+.card{padding:16px;border-radius:12px}
+.section-header h2{font-size:1.35rem}
+.metric-value{font-size:1.5rem}
+.metric-tile{padding:14px 10px}
+.data-table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;white-space:nowrap}
+.data-table thead,.data-table tbody,.data-table tr{display:table;width:100%;table-layout:auto}
+.data-table thead{display:table-header-group}
+.data-table th,.data-table td{padding:8px 10px;font-size:0.72rem}
+}
+
+/* ─── Phone (≤520px) ─── */
+@media(max-width:520px){
+.main{padding:12px 10px;padding-top:56px}
+.section-header{margin-bottom:16px}
+.section-header h2{font-size:1.2rem}
+.section-header .updated{font-size:0.62rem}
+.metric-value{font-size:1.25rem}
+.metric-label{font-size:0.55rem;letter-spacing:0.08em}
+.metric-tile{padding:12px 8px}
+.card{padding:12px;border-radius:10px}
+.card-header{margin-bottom:12px;flex-wrap:wrap;gap:6px}
+.card-title{font-size:0.82rem}
+.card-badge{font-size:0.5rem;padding:2px 6px}
+.data-table th{font-size:0.55rem;padding:6px 8px}
+.data-table td{font-size:0.7rem;padding:8px 8px}
+.finance-row{font-size:0.72rem;padding:7px 0}
+.content-card{padding:12px}
+.content-card h4{font-size:0.85rem}
+.content-card p{font-size:0.7rem}
+.quick-link{font-size:0.62rem;padding:4px 10px}
+.empty-state{padding:30px 16px}
+.empty-state .icon{font-size:1.8rem}
+.empty-state h3{font-size:1rem}
+.empty-state p{font-size:0.72rem}
+.pin-card{padding:36px 28px;border-radius:20px}
+.pin-input{width:42px;height:48px;font-size:1.2rem;border-radius:10px}
+.sidebar{width:260px}
+.nav-item{font-size:0.78rem;padding:8px 12px;gap:9px}
+.nav-item .nav-icon{font-size:0.78rem;width:18px}
+.sidebar-brand{padding:20px 18px 16px}
+.sidebar-brand h1{font-size:1rem}
+.sidebar-brand .subtitle{font-size:0.55rem}
+.sidebar-links{padding:0 8px 10px;padding-top:10px}
+.sidebar-link{font-size:0.7rem;padding:6px 12px}
+.sidebar-footer{padding:12px 16px;font-size:0.6rem}
+.modal-card{padding:18px;border-radius:16px}
+}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.12);border-radius:3px}::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.2)}
+</style>
+</head>
+<body>
+<!-- PIN Screen -->
+<div class="pin-screen" id="pin-screen">
+  <div class="pin-bg"></div>
+  <div class="pin-card">
+    <div class="pin-title">Dominique's Hub</div>
+    <div class="pin-sub">Personal Operations</div>
+    <div class="pin-divider"></div>
+    <div class="pin-label">Enter PIN</div>
+    <div class="pin-inputs" id="pin-inputs">
+      <input class="pin-input" type="text" maxlength="1" inputmode="numeric" autocomplete="off">
+      <input class="pin-input" type="text" maxlength="1" inputmode="numeric" autocomplete="off">
+      <input class="pin-input" type="text" maxlength="1" inputmode="numeric" autocomplete="off">
+      <input class="pin-input" type="text" maxlength="1" inputmode="numeric" autocomplete="off">
+    </div>
+    <div class="pin-error" id="pin-error">Incorrect PIN</div>
+  </div>
+</div>
+
+<div class="bg-layer"></div>
+<button class="mobile-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
+<div class="app">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <h1>Dominique's Hub</h1>
+      <div class="subtitle">Personal Operations</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-item active" data-tab="overview"><span class="nav-icon">◈</span><span>Overview</span></div>
+      <div class="nav-item" data-tab="checklists"><span class="nav-icon">☑</span><span>Checklists</span></div>
+      <div class="nav-item" data-tab="notes"><span class="nav-icon">✎</span><span>Notes</span></div>
+      <div class="nav-item" data-tab="goals"><span class="nav-icon">⊕</span><span>Goals</span></div>
+      <div class="nav-item" data-tab="finances"><span class="nav-icon">◇</span><span>Finances</span></div>
+      <div class="nav-item" data-tab="whoop"><span class="nav-icon">♡</span><span>Training & Recovery</span></div>
+      <div class="nav-item" data-tab="properties"><span class="nav-icon">🏠</span><span>Investment Properties</span></div>
+    </nav>
+    <div class="sidebar-links">
+      <div class="sidebar-links-title">Quick Links</div>
+      <a href="https://github.com" class="sidebar-link" target="_blank">◉ GitHub</a>
+      <a href="https://mail.google.com" class="sidebar-link" target="_blank">✉ Gmail</a>
+      <a href="https://calendar.google.com" class="sidebar-link" target="_blank">▤ Calendar</a>
+    </div>
+    <div class="sidebar-footer"><div class="domain">dom-hub.vercel.app</div><div style="margin-top:3px">Dominique's Hub © 2026</div></div>
+  </aside>
+
+  <main class="main">
+    <!-- ═══ OVERVIEW TAB ═══ -->
+    <div class="tab-panel active" id="tab-overview">
+      <div class="section-header"><h2>Overview</h2><div class="updated" id="overview-updated">Loading...</div></div>
+      <div class="metrics-grid" id="overview-metrics">
+        <div class="card metric-tile"><div class="shimmer" style="width:50px;height:28px;margin:0 auto"></div><div class="metric-label">Loading</div></div>
+        <div class="card metric-tile"><div class="shimmer" style="width:50px;height:28px;margin:0 auto"></div><div class="metric-label">Loading</div></div>
+        <div class="card metric-tile"><div class="shimmer" style="width:50px;height:28px;margin:0 auto"></div><div class="metric-label">Loading</div></div>
+        <div class="card metric-tile"><div class="shimmer" style="width:50px;height:28px;margin:0 auto"></div><div class="metric-label">Loading</div></div>
+      </div>
+      <div class="grid-2" id="overview-panels">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Quick Navigation</span></div>
+          <div class="quick-links">
+            <span class="quick-link" onclick="switchTab('checklists')">☑ Checklists</span>
+            <span class="quick-link" onclick="switchTab('notes')">✎ Notes</span>
+            <span class="quick-link" onclick="switchTab('goals')">⊕ Goals</span>
+            <span class="quick-link" onclick="switchTab('finances')">◇ Finances</span>
+            <span class="quick-link" onclick="switchTab('whoop')">♡ Training & Recovery</span>
+            <span class="quick-link" onclick="switchTab('properties')">🏠 Properties</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Recent Activity</span></div>
+          <div id="overview-activity" style="font-size:0.78rem;color:var(--text-muted)">Loading...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ CHECKLISTS TAB ═══ -->
+    <div class="tab-panel" id="tab-checklists">
+      <div class="section-header">
+        <h2>Checklists</h2>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="updated" id="checklists-updated"></div>
+          <button class="btn" onclick="createChecklist()">+ New List</button>
+        </div>
+      </div>
+      <div id="checklists-content"></div>
+    </div>
+
+    <!-- ═══ NOTES TAB ═══ -->
+    <div class="tab-panel" id="tab-notes">
+      <div class="section-header">
+        <h2>Notes</h2>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="updated" id="notes-updated"></div>
+          <button class="btn" onclick="showNoteModal()">+ New Note</button>
+        </div>
+      </div>
+      <div id="notes-content"></div>
+    </div>
+
+    <!-- ═══ GOALS TAB ═══ -->
+    <div class="tab-panel" id="tab-goals">
+      <div class="section-header">
+        <h2>2026 Goals</h2>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="updated" id="goals-updated"></div>
+          <button class="btn btn-ghost" onclick="loadGoals()" style="font-size:0.68rem">Refresh</button>
+          <button class="btn" onclick="showGoalModal()">+ New Goal</button>
+        </div>
+      </div>
+      <div id="goals-content"></div>
+    </div>
+
+    <!-- ═══ FINANCES TAB ═══ -->
+    <div class="tab-panel" id="tab-finances">
+      <div class="section-header">
+        <h2>Finances</h2>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="updated" id="finances-updated"></div>
+          <button class="btn" onclick="showFinanceModal()">+ Add Entry</button>
+        </div>
+      </div>
+      <div id="finances-content"></div>
+    </div>
+    <!-- ═══ WHOOP TAB ═══ -->
+    <div class="tab-panel" id="tab-whoop">
+      <div class="section-header">
+        <h2>Training & Recovery</h2>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="updated" id="whoop-updated"></div>
+          <button class="btn btn-ghost" onclick="loadWhoop()" style="font-size:0.68rem">Refresh</button>
+        </div>
+      </div>
+      <div id="whoop-content"><div class="empty-state"><div class="icon">♡</div><h3>Loading...</h3></div></div>
+    </div>
+
+    <!-- ═══ PROPERTIES TAB ═══ -->
+    <div class="tab-panel" id="tab-properties">
+      <div class="section-header">
+        <h2>Investment Properties</h2>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="updated" id="properties-updated"></div>
+          <button class="btn" onclick="showPropertyModal()">+ Add Property</button>
+        </div>
+      </div>
+      <div id="properties-content"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ═══ PROPERTY MODAL ═══ -->
+<div id="property-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:none;align-items:center;justify-content:center">
+  <div style="background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:24px;width:90%;max-width:520px;max-height:85vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="margin:0;font-size:1rem;color:#fff" id="property-modal-title">Add Property</h3>
+      <button onclick="closePropertyModal()" style="background:none;border:none;color:var(--text-faint);font-size:1.2rem;cursor:pointer">&times;</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <input id="prop-name" placeholder="Property name / address" class="input" style="width:100%">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <select id="prop-status" class="input"><option value="researching">Researching</option><option value="watching">Watching</option><option value="offer">Offer Made</option><option value="owned">Owned</option><option value="passed">Passed</option></select>
+        <select id="prop-type" class="input"><option value="house">House</option><option value="unit">Unit/Apartment</option><option value="townhouse">Townhouse</option><option value="land">Land</option><option value="duplex">Duplex</option></select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <input id="prop-price" type="number" placeholder="Price / Value $" class="input">
+        <input id="prop-rent" type="number" placeholder="Weekly Rent $" class="input">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <input id="prop-deposit" type="number" placeholder="Deposit $" class="input">
+        <input id="prop-rate" type="number" step="0.01" placeholder="Interest Rate %" class="input">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+        <input id="prop-beds" type="number" placeholder="Beds" class="input">
+        <input id="prop-baths" type="number" placeholder="Baths" class="input">
+        <input id="prop-cars" type="number" placeholder="Cars" class="input">
+      </div>
+      <input id="prop-suburb" placeholder="Suburb / Location" class="input" style="width:100%">
+      <input id="prop-url" placeholder="Listing URL" class="input" style="width:100%">
+      <textarea id="prop-notes" placeholder="Notes" class="input" rows="3" style="width:100%;resize:vertical"></textarea>
+      <button class="btn" onclick="saveProperty()" style="width:100%;margin-top:4px">Save Property</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ACTIVE WORKOUT MODAL ═══ -->
+<div class="modal-overlay" id="workout-modal">
+  <div class="modal-backdrop" onclick="minimizeWorkout()"></div>
+  <div class="modal-card" style="width:600px;max-height:92vh">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+      <div>
+        <div class="modal-title" style="margin-bottom:2px" id="workout-modal-title">Workout</div>
+        <div style="font-size:0.65rem;color:var(--text-faint)" id="workout-modal-time"></div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn" onclick="finishWorkout()">Finish Workout</button>
+        <button class="btn btn-ghost" onclick="minimizeWorkout()">Close</button>
+        <button class="btn btn-danger" onclick="cancelWorkout()" style="font-size:0.65rem">Discard</button>
+      </div>
+    </div>
+    <div id="workout-exercises"></div>
+    <div style="display:flex;gap:6px;margin-top:12px">
+      <input type="text" id="workout-new-exercise" class="form-input" placeholder="Add exercise..." style="flex:1;padding:8px 10px;font-size:0.78rem" onkeydown="if(event.key==='Enter')addWorkoutExercise()">
+      <button class="btn" onclick="addWorkoutExercise()" style="padding:8px 12px;font-size:0.7rem">Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ EXERCISE PB EDIT MODAL ═══ -->
+<div class="modal-overlay" id="pb-modal">
+  <div class="modal-backdrop" onclick="closeModal('pb-modal')"></div>
+  <div class="modal-card" style="width:380px">
+    <div class="modal-title">Update PB</div>
+    <input type="hidden" id="pb-template-id">
+    <input type="hidden" id="pb-exercise-idx">
+    <div id="pb-exercise-name" style="font-size:0.9rem;font-weight:600;color:#fff;margin-bottom:12px"></div>
+    <div class="form-group"><label class="form-label">Weight (kg)</label><input type="text" id="pb-weight" class="form-input" placeholder="e.g. 50"></div>
+    <div class="form-group"><label class="form-label">Sets x Reps</label><input type="text" id="pb-sets" class="form-input" placeholder="e.g. 3 x 10"></div>
+    <div class="form-group"><label class="form-label">Notes</label><input type="text" id="pb-notes" class="form-input" placeholder="e.g. failure, red strap..."></div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="btn" onclick="savePB()" style="flex:1">Save PB</button>
+      <button class="btn btn-ghost" onclick="closeModal('pb-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ WORKOUT DETAIL MODAL ═══ -->
+<div class="modal-overlay" id="workout-detail-modal">
+  <div class="modal-backdrop" onclick="closeModal('workout-detail-modal')"></div>
+  <div class="modal-card" style="width:600px;max-height:92vh">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div class="modal-title" id="workout-detail-title"></div>
+      <button class="btn btn-ghost" onclick="closeModal('workout-detail-modal')">Close</button>
+    </div>
+    <div id="workout-detail-content"></div>
+  </div>
+</div>
+
+<!-- ═══ NOTE MODAL ═══ -->
+<div class="modal-overlay" id="note-modal">
+  <div class="modal-backdrop" onclick="closeModal('note-modal')"></div>
+  <div class="modal-card">
+    <div class="modal-title" id="note-modal-title">New Note</div>
+    <input type="hidden" id="note-edit-id">
+    <div class="form-group"><label class="form-label">Title</label><input type="text" id="note-title" class="form-input" placeholder="Note title..."></div>
+    <div class="form-group"><label class="form-label">Content</label><textarea id="note-body" class="form-input" placeholder="Write your note..."></textarea></div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="btn" onclick="saveNote()" style="flex:1">Save</button>
+      <button class="btn btn-ghost" onclick="closeModal('note-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ GOAL MODAL ═══ -->
+<div class="modal-overlay" id="goal-modal">
+  <div class="modal-backdrop" onclick="closeModal('goal-modal')"></div>
+  <div class="modal-card">
+    <div class="modal-title" id="goal-modal-title">New Goal</div>
+    <input type="hidden" id="goal-edit-id">
+    <div class="form-group"><label class="form-label">Title</label><input type="text" id="goal-title" class="form-input" placeholder="Goal title..."></div>
+    <div class="form-group"><label class="form-label">Category</label>
+      <select id="goal-category" class="form-input">
+        <option value="Personal">Personal</option>
+        <option value="Health">Health</option>
+        <option value="Career">Career</option>
+        <option value="Finance">Finance</option>
+        <option value="Learning">Learning</option>
+        <option value="Project">Project</option>
+      </select>
+    </div>
+    <div class="form-group"><label class="form-label">Target Date</label><input type="date" id="goal-date" class="form-input"></div>
+    <div class="form-group"><label class="form-label">Status</label>
+      <select id="goal-status" class="form-input">
+        <option value="Not Started">Not Started</option>
+        <option value="In Progress">In Progress</option>
+        <option value="Complete">Complete</option>
+      </select>
+    </div>
+    <div class="form-group"><label class="form-label">Progress (<span id="goal-progress-label">0</span>%)</label>
+      <input type="range" id="goal-progress" min="0" max="100" value="0" style="width:100%;accent-color:var(--teal)" oninput="document.getElementById('goal-progress-label').textContent=this.value">
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="btn" onclick="saveGoal()" style="flex:1">Save</button>
+      <button class="btn btn-ghost" onclick="closeModal('goal-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FINANCE MODAL ═══ -->
+<div class="modal-overlay" id="finance-modal">
+  <div class="modal-backdrop" onclick="closeModal('finance-modal')"></div>
+  <div class="modal-card">
+    <div class="modal-title" id="finance-modal-title">Add Entry</div>
+    <input type="hidden" id="finance-edit-id">
+    <div class="form-group"><label class="form-label">Type</label>
+      <select id="finance-type" class="form-input">
+        <option value="income">Income</option>
+        <option value="expense">Expense</option>
+      </select>
+    </div>
+    <div class="form-group"><label class="form-label">Date</label><input type="date" id="finance-date" class="form-input"></div>
+    <div class="form-group"><label class="form-label">Amount</label><input type="number" step="0.01" id="finance-amount" class="form-input" placeholder="0.00"></div>
+    <div class="form-group"><label class="form-label">Description</label><input type="text" id="finance-desc" class="form-input" placeholder="e.g. Salary, Groceries..."></div>
+    <div class="form-group"><label class="form-label">Category</label>
+      <select id="finance-category" class="form-input">
+        <option value="Salary">Salary</option>
+        <option value="Freelance">Freelance</option>
+        <option value="Investment">Investment</option>
+        <option value="Housing">Housing</option>
+        <option value="Food">Food</option>
+        <option value="Transport">Transport</option>
+        <option value="Entertainment">Entertainment</option>
+        <option value="Utilities">Utilities</option>
+        <option value="Health">Health</option>
+        <option value="Shopping">Shopping</option>
+        <option value="Subscriptions">Subscriptions</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="btn" onclick="saveFinance()" style="flex:1">Save</button>
+      <button class="btn btn-ghost" onclick="closeModal('finance-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── PIN Gate ───
+const PIN='1234';
+const pinInputs=document.querySelectorAll('.pin-input');
+const pinError=document.getElementById('pin-error');
+const pinScreen=document.getElementById('pin-screen');
+
+if(sessionStorage.getItem('dom_hub_auth')==='true'){
+  pinScreen.classList.add('hidden');
+}
+
+function checkPin(){
+  const code=[...pinInputs].map(p=>p.value).join('');
+  if(code.length===4){
+    if(code===PIN){
+      sessionStorage.setItem('dom_hub_auth','true');
+      pinScreen.classList.add('hidden');
+    } else {
+      pinError.classList.add('show');
+      pinInputs.forEach(p=>{p.classList.add('error');p.value=''});
+      pinInputs[0].focus();
+      setTimeout(()=>{pinError.classList.remove('show');pinInputs.forEach(p=>p.classList.remove('error'))},1500);
+    }
+  }
+}
+pinInputs.forEach((input,i)=>{
+  input.addEventListener('input',()=>{
+    input.value=input.value.replace(/[^0-9]/g,'');
+    if(input.value.length>1) input.value=input.value.charAt(0);
+    if(input.value&&i<pinInputs.length-1) pinInputs[i+1].focus();
+    checkPin();
+  });
+  input.addEventListener('keydown',e=>{
+    if(e.key==='Backspace'){
+      if(input.value){input.value=''}
+      else if(i>0){pinInputs[i-1].focus();pinInputs[i-1].value=''}
+      e.preventDefault();
+    } else if(e.key>='0'&&e.key<='9'){
+      input.value='';
+    }
+  });
+});
+if(!sessionStorage.getItem('dom_hub_auth')) setTimeout(()=>pinInputs[0]?.focus(),300);
+
+// ─── Tab Navigation ───
+function switchTab(tab){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  const navItem=document.querySelector('.nav-item[data-tab="'+tab+'"]');
+  if(navItem) navItem.classList.add('active');
+  const panel=document.getElementById('tab-'+tab);
+  if(panel) panel.classList.add('active');
+  document.querySelector('.sidebar').classList.remove('open');
+}
+document.querySelectorAll('.nav-item').forEach(item=>{
+  item.addEventListener('click',()=>switchTab(item.dataset.tab));
+});
+
+// ─── Helpers ───
+function fmt(iso){if(!iso)return'—';return new Date(iso).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}
+function fmtShort(iso){if(!iso)return'—';return new Date(iso).toLocaleDateString('en-AU',{day:'numeric',month:'short'})}
+function fmt2(n){return n.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function $(v){return'$'+Number(v||0).toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+function openModal(id){document.getElementById(id).classList.add('open')}
+
+// ─── Data stores ───
+let _checklists=[];
+let _notes=[];
+let _goals=[];
+let _finances=[];
+let _templates=[];
+let _trainingLogs=[];
+let _activeWorkout=null;
+
+// ─── Load All Data ───
+async function loadAll(){
+  await Promise.all([loadChecklists(),loadNotes(),loadGoals(),loadFinances(),loadTraining(),loadWhoop(),loadProperties()]);
+  renderOverview();
+}
+
+// ════════════════════════════════════════
+// CHECKLISTS
+// ════════════════════════════════════════
+async function loadChecklists(){
+  try{
+    const res=await fetch('/api/checklists?t='+Date.now());
+    if(res.ok){const d=await res.json();_checklists=d.lists||[];if(d.updated)document.getElementById('checklists-updated').textContent='Saved: '+fmt(d.updated);renderChecklists()}
+  }catch(e){console.warn('Checklists load failed',e)}
+}
+async function saveChecklists(){
+  try{await fetch('/api/checklists',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'save',lists:_checklists})});document.getElementById('checklists-updated').textContent='Saved: '+fmt(new Date().toISOString())}catch(e){console.warn('Checklists save failed',e)}
+}
+function createChecklist(){
+  const name=prompt('Checklist name:');
+  if(!name||!name.trim())return;
+  _checklists.unshift({id:Date.now().toString(),name:name.trim(),items:[],created:new Date().toISOString(),collapsed:false});
+  saveChecklists();renderChecklists();renderOverview();
+}
+function deleteChecklist(id){
+  if(!confirm('Delete this checklist?'))return;
+  _checklists=_checklists.filter(l=>l.id!==id);
+  saveChecklists();renderChecklists();renderOverview();
+}
+function addChecklistItem(listId){
+  const input=document.getElementById('cl-input-'+listId);
+  if(!input||!input.value.trim())return;
+  const list=_checklists.find(l=>l.id===listId);
+  if(!list)return;
+  list.items.push({id:Date.now().toString(),text:input.value.trim(),done:false,added:new Date().toISOString()});
+  input.value='';
+  saveChecklists();renderChecklists();renderOverview();
+}
+function toggleCheckItem(listId,itemId){
+  const list=_checklists.find(l=>l.id===listId);if(!list)return;
+  const item=list.items.find(i=>i.id===itemId);if(!item)return;
+  item.done=!item.done;
+  if(item.done)item.completed=new Date().toISOString();else delete item.completed;
+  saveChecklists();renderChecklists();renderOverview();
+}
+function deleteCheckItem(listId,itemId){
+  const list=_checklists.find(l=>l.id===listId);if(!list)return;
+  list.items=list.items.filter(i=>i.id!==itemId);
+  saveChecklists();renderChecklists();renderOverview();
+}
+function toggleCollapseChecklist(id){
+  const list=_checklists.find(l=>l.id===id);if(!list)return;
+  list.collapsed=!list.collapsed;
+  renderChecklists();
+}
+function clearCompleted(listId){
+  const list=_checklists.find(l=>l.id===listId);if(!list)return;
+  const count=list.items.filter(i=>i.done).length;
+  if(!count||!confirm('Clear '+count+' completed item'+(count>1?'s':'')+'?'))return;
+  list.items=list.items.filter(i=>!i.done);
+  saveChecklists();renderChecklists();renderOverview();
+}
+function renderChecklists(){
+  const el=document.getElementById('checklists-content');if(!el)return;
+  if(!_checklists.length){
+    el.innerHTML='<div class="empty-state"><div class="icon">☑</div><h3>No checklists yet</h3><p>Create one to start tracking tasks</p></div>';
+    return;
+  }
+  const totalItems=_checklists.reduce((s,l)=>s+l.items.length,0);
+  const totalDone=_checklists.reduce((s,l)=>s+l.items.filter(i=>i.done).length,0);
+  let html='<div class="metrics-grid" style="margin-bottom:16px">';
+  html+='<div class="card metric-tile"><div class="metric-value">'+_checklists.length+'</div><div class="metric-label">Lists</div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value">'+totalItems+'</div><div class="metric-label">Total Items</div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value teal">'+totalDone+'</div><div class="metric-label">Completed</div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value" style="color:'+(totalItems-totalDone>0?'var(--amber)':'var(--teal)')+'">'+(totalItems-totalDone)+'</div><div class="metric-label">Remaining</div></div>';
+  html+='</div>';
+  html+='<div style="display:flex;flex-direction:column;gap:12px">';
+  _checklists.forEach(list=>{
+    const done=list.items.filter(i=>i.done).length;
+    const total=list.items.length;
+    const pct=total?Math.round((done/total)*100):0;
+    const barCol=pct===100?'var(--teal)':pct>=50?'var(--amber)':'var(--red-soft)';
+    html+='<div class="card" style="padding:0;overflow:hidden">';
+    html+='<div style="padding:14px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.04)" onclick="toggleCollapseChecklist(\''+list.id+'\')">';
+    html+='<span style="font-size:0.7rem;color:var(--text-faint);transition:transform 0.2s;transform:rotate('+(list.collapsed?'0':'90')+'deg)">▶</span>';
+    html+='<div style="flex:1"><div style="font-size:0.88rem;font-weight:700;color:#fff">'+list.name+'</div>';
+    html+='<div style="font-size:0.6rem;color:var(--text-faint);margin-top:2px">'+done+'/'+total+' complete'+(total?' · '+pct+'%':'')+'</div></div>';
+    if(total>0){html+='<div style="width:60px;height:4px;border-radius:2px;background:rgba(255,255,255,0.06);overflow:hidden"><div style="width:'+pct+'%;height:100%;border-radius:2px;background:'+barCol+';transition:width 0.3s"></div></div>';}
+    html+='<div style="display:flex;gap:4px">';
+    if(done>0)html+='<button onclick="event.stopPropagation();clearCompleted(\''+list.id+'\')" style="padding:3px 8px;border-radius:5px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:var(--text-faint);font-size:0.55rem;cursor:pointer;font-family:var(--font)">Clear done</button>';
+    html+='<button onclick="event.stopPropagation();deleteChecklist(\''+list.id+'\')" style="padding:3px 8px;border-radius:5px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.15);color:var(--red-soft);font-size:0.55rem;cursor:pointer;font-family:var(--font)">Delete</button>';
+    html+='</div></div>';
+    if(!list.collapsed){
+      html+='<div style="padding:0 16px 12px">';
+      const pending=list.items.filter(i=>!i.done);
+      const completed=list.items.filter(i=>i.done);
+      pending.forEach(item=>{
+        html+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.03)">';
+        html+='<div onclick="toggleCheckItem(\''+list.id+'\',\''+item.id+'\')" style="width:20px;height:20px;border-radius:5px;border:2px solid rgba(255,255,255,0.15);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.2s"></div>';
+        html+='<div style="flex:1;font-size:0.8rem;color:#fff">'+item.text+'</div>';
+        html+='<button onclick="deleteCheckItem(\''+list.id+'\',\''+item.id+'\')" style="padding:2px 6px;border-radius:4px;background:none;border:1px solid rgba(255,255,255,0.06);color:var(--text-faint);font-size:0.6rem;cursor:pointer;opacity:0.4;font-family:var(--font)" onmouseover="this.style.opacity=1;this.style.borderColor=\'rgba(239,68,68,0.3)\';this.style.color=\'var(--red-soft)\'" onmouseout="this.style.opacity=0.4;this.style.borderColor=\'rgba(255,255,255,0.06)\';this.style.color=\'var(--text-faint)\'">✕</button>';
+        html+='</div>';
+      });
+      completed.forEach(item=>{
+        html+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.03);opacity:0.45">';
+        html+='<div onclick="toggleCheckItem(\''+list.id+'\',\''+item.id+'\')" style="width:20px;height:20px;border-radius:5px;border:2px solid var(--teal);background:rgba(45,212,168,0.15);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.65rem;color:var(--teal)">✓</div>';
+        html+='<div style="flex:1;font-size:0.8rem;color:var(--text-muted);text-decoration:line-through">'+item.text+'</div>';
+        html+='<button onclick="deleteCheckItem(\''+list.id+'\',\''+item.id+'\')" style="padding:2px 6px;border-radius:4px;background:none;border:1px solid rgba(255,255,255,0.06);color:var(--text-faint);font-size:0.6rem;cursor:pointer;opacity:0.4;font-family:var(--font)">✕</button>';
+        html+='</div>';
+      });
+      html+='<div style="display:flex;gap:6px;margin-top:10px">';
+      html+='<input type="text" id="cl-input-'+list.id+'" class="form-input" placeholder="Add item..." style="flex:1;padding:8px 10px;font-size:0.78rem" onkeydown="if(event.key===\'Enter\')addChecklistItem(\''+list.id+'\')">';
+      html+='<button onclick="addChecklistItem(\''+list.id+'\')" class="btn" style="padding:8px 12px;font-size:0.7rem">Add</button>';
+      html+='</div></div>';
+    }
+    html+='</div>';
+  });
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+// ════════════════════════════════════════
+// NOTES
+// ════════════════════════════════════════
+async function loadNotes(){
+  try{
+    const res=await fetch('/api/notes?t='+Date.now());
+    if(res.ok){const d=await res.json();_notes=d.notes||[];if(d.updated)document.getElementById('notes-updated').textContent='Saved: '+fmt(d.updated);renderNotes()}
+  }catch(e){console.warn('Notes load failed',e)}
+}
+async function saveNotes(){
+  try{await fetch('/api/notes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'save',notes:_notes})});document.getElementById('notes-updated').textContent='Saved: '+fmt(new Date().toISOString())}catch(e){console.warn('Notes save failed',e)}
+}
+function showNoteModal(id){
+  const modal=document.getElementById('note-modal');
+  if(id){
+    const note=_notes.find(n=>n.id===id);if(!note)return;
+    document.getElementById('note-modal-title').textContent='Edit Note';
+    document.getElementById('note-edit-id').value=id;
+    document.getElementById('note-title').value=note.title;
+    document.getElementById('note-body').value=note.body;
+  } else {
+    document.getElementById('note-modal-title').textContent='New Note';
+    document.getElementById('note-edit-id').value='';
+    document.getElementById('note-title').value='';
+    document.getElementById('note-body').value='';
+  }
+  openModal('note-modal');
+}
+function saveNote(){
+  const id=document.getElementById('note-edit-id').value;
+  const title=document.getElementById('note-title').value.trim();
+  const body=document.getElementById('note-body').value.trim();
+  if(!title)return;
+  if(id){
+    const note=_notes.find(n=>n.id===id);if(!note)return;
+    note.title=title;note.body=body;note.modified=new Date().toISOString();
+  } else {
+    _notes.unshift({id:Date.now().toString(),title,body,created:new Date().toISOString(),modified:new Date().toISOString()});
+  }
+  closeModal('note-modal');
+  saveNotes();renderNotes();renderOverview();
+}
+function deleteNote(id){
+  if(!confirm('Delete this note?'))return;
+  _notes=_notes.filter(n=>n.id!==id);
+  saveNotes();renderNotes();renderOverview();
+}
+function renderNotes(){
+  const el=document.getElementById('notes-content');if(!el)return;
+  if(!_notes.length){
+    el.innerHTML='<div class="empty-state"><div class="icon">✎</div><h3>No notes yet</h3><p>Create a note to get started</p></div>';
+    return;
+  }
+  const sorted=[..._notes].sort((a,b)=>new Date(b.modified)-new Date(a.modified));
+  let html='<div class="content-grid">';
+  sorted.forEach(note=>{
+    const preview=note.body.length>120?note.body.substring(0,120)+'...':note.body;
+    html+='<div class="card content-card" style="cursor:pointer" onclick="showNoteModal(\''+note.id+'\')">';
+    html+='<h4>'+note.title+'</h4>';
+    html+='<p style="white-space:pre-wrap">'+preview+'</p>';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">';
+    html+='<span class="content-tag">'+fmtShort(note.modified)+'</span>';
+    html+='<button onclick="event.stopPropagation();deleteNote(\''+note.id+'\')" style="padding:2px 8px;border-radius:4px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.15);color:var(--red-soft);font-size:0.6rem;cursor:pointer;font-family:var(--font)">Delete</button>';
+    html+='</div></div>';
+  });
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+// ════════════════════════════════════════
+// GOALS
+// ════════════════════════════════════════
+async function loadGoals(){
+  try{
+    const res=await fetch('/api/goals?t='+Date.now());
+    if(res.ok){const d=await res.json();_goals=d.goals||[];apply2026Statuses(d.statuses_2026);if(d.updated)document.getElementById('goals-updated').textContent='Saved: '+fmt(d.updated);renderGoals()}
+  }catch(e){console.warn('Goals load failed',e)}
+}
+async function saveGoals(){
+  try{await fetch('/api/goals',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'save',goals:_goals})});document.getElementById('goals-updated').textContent='Saved: '+fmt(new Date().toISOString())}catch(e){console.warn('Goals save failed',e)}
+}
+function showGoalModal(id){
+  const modal=document.getElementById('goal-modal');
+  if(id){
+    const goal=_goals.find(g=>g.id===id);if(!goal)return;
+    document.getElementById('goal-modal-title').textContent='Edit Goal';
+    document.getElementById('goal-edit-id').value=id;
+    document.getElementById('goal-title').value=goal.title;
+    document.getElementById('goal-category').value=goal.category||'Personal';
+    document.getElementById('goal-date').value=goal.targetDate||'';
+    document.getElementById('goal-status').value=goal.status||'Not Started';
+    document.getElementById('goal-progress').value=goal.progress||0;
+    document.getElementById('goal-progress-label').textContent=goal.progress||0;
+  } else {
+    document.getElementById('goal-modal-title').textContent='New Goal';
+    document.getElementById('goal-edit-id').value='';
+    document.getElementById('goal-title').value='';
+    document.getElementById('goal-category').value='Personal';
+    document.getElementById('goal-date').value='';
+    document.getElementById('goal-status').value='Not Started';
+    document.getElementById('goal-progress').value=0;
+    document.getElementById('goal-progress-label').textContent='0';
+  }
+  openModal('goal-modal');
+}
+function saveGoal(){
+  const id=document.getElementById('goal-edit-id').value;
+  const title=document.getElementById('goal-title').value.trim();
+  if(!title)return;
+  const data={
+    title,
+    category:document.getElementById('goal-category').value,
+    targetDate:document.getElementById('goal-date').value,
+    status:document.getElementById('goal-status').value,
+    progress:parseInt(document.getElementById('goal-progress').value)||0,
+    modified:new Date().toISOString()
+  };
+  if(id){
+    const goal=_goals.find(g=>g.id===id);if(!goal)return;
+    Object.assign(goal,data);
+  } else {
+    _goals.unshift({id:Date.now().toString(),created:new Date().toISOString(),...data});
+  }
+  closeModal('goal-modal');
+  saveGoals();renderGoals();renderOverview();
+}
+function deleteGoal(id){
+  if(!confirm('Delete this goal?'))return;
+  _goals=_goals.filter(g=>g.id!==id);
+  saveGoals();renderGoals();renderOverview();
+}
+const _2026Goals=[
+  {cat:'Spirit',icon:'✝',color:'#a78bfa',items:[
+    {id:'86d1u1pv5',name:'Do Gods will not my own',status:'to do'},
+    {id:'86d1u1pvd',name:'Lean on his understanding',status:'to do'},
+    {id:'86d1u1pvx',name:'Daily Prayer',status:'to do'},
+    {id:'86d1u1pw7',name:'Study Scripture',status:'to do'},
+    {id:'86d1u1pwg',name:'Do new adventurous things, get out of comfort zone',status:'to do'},
+    {id:'86d1u1px0',name:'Less reactive More Discipline',status:'to do'},
+  ]},
+  {cat:'Mind',icon:'🧠',color:'#60a5fa',items:[
+    {id:'86d1u1pxj',name:'Follow Morning Routine Every Morning',status:'to do'},
+    {id:'86d1u1py4',name:'One Serious book per quarter',status:'to do'},
+    {id:'86d1u1pyk',name:'Meditations: Marcus Aurelius',status:'in progress'},
+    {id:'86d1u1pz4',name:'Book of Enoch: Bible book',status:'to do'},
+    {id:'86d1u1pzp',name:'Slower cleaner choices',status:'to do'},
+  ]},
+  {cat:'Body',icon:'💪',color:'#f472b6',items:[
+    {id:'86d1u1pzy',name:'Keep playing tennis comp',status:'to do'},
+    {id:'86d1u1q0d',name:'Maintain strict eating (smoothies, mince & steaks)',status:'to do'},
+    {id:'86d1u1q0t',name:'Follow workout plan every week (3x Strength)',status:'to do'},
+    {id:'86d1u1q10',name:'Improve sleep consistency and quality',status:'to do'},
+  ]},
+  {cat:'Travel',icon:'✈️',color:'var(--teal)',items:[
+    {id:'86d1u1q1b',name:'Regensburg & Italy (MAY) 15 Days',status:'to do'},
+    {id:'86d1u1q22',name:'Japan again (Osaka, Kyoto & Tokyo) 15 Days',status:'to do'},
+    {id:'86d1u1q2p',name:'Visit somewhere else? White Christmas?',status:'to do'},
+    {id:'86d1u1q37',name:'Hong Kong / China',status:'to do'},
+  ]},
+  {cat:'Legacy',icon:'🏛',color:'var(--amber)',items:[
+    {id:'86d1u1q3e',name:'Ring',status:'to do'},
+    {id:'86d1u1q3q',name:'Wealth building for future',status:'to do'},
+    {id:'86d1u1q44',name:'Journaling',status:'to do'},
+  ]},
+  {cat:'Growth',icon:'📈',color:'#34d399',items:[
+    {id:'86d1u1q4j',name:'Take advantage of credit cards for travel points',status:'to do'},
+    {id:'86d1u1q56',name:'Pay back Dom for investment deposit ASAP',status:'to do'},
+    {id:'86d1u1q5p',name:'Setup pay.com for credit card points',status:'to do'},
+    {id:'86d1u1q62',name:'Buy Gold & Silver commodities',status:'to do'},
+    {id:'86d1u1q6a',name:'Save for another Investment property deposit',status:'to do'},
+    {id:'86d1u1q6q',name:'Exceed Expectations at Vicom',status:'to do'},
+    {id:'86d1u1q7h',name:'Grow Rankify',status:'to do'},
+    {id:'86d1u1q7z',name:'Grow Hiatus',status:'to do'},
+  ]},
+  {cat:'Experiences',icon:'🎯',color:'#e879f9',items:[
+    {id:'86d1u1q8c',name:'Purchase Rifle & Scope — Go Hunting',status:'to do'},
+    {id:'86d1u1q8q',name:'Spend more time / plan more things with family',status:'to do'},
+  ]},
+];
+
+function toggleGoalDone(catIdx,itemIdx){
+  const item=_2026Goals[catIdx].items[itemIdx];
+  item.status=item.status==='complete'?'to do':'complete';
+  renderGoals();
+  save2026Statuses();
+}
+
+function save2026Statuses(){
+  const statuses={};
+  _2026Goals.forEach(c=>c.items.forEach(i=>{statuses[i.id]=i.status}));
+  fetch('/api/goals',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'save_2026',statuses})}).catch(e=>console.warn('2026 status save failed',e));
+}
+
+function apply2026Statuses(statuses){
+  if(!statuses)return;
+  _2026Goals.forEach(c=>c.items.forEach(i=>{if(statuses[i.id])i.status=statuses[i.id]}));
+}
+
+function renderGoals(){
+  const el=document.getElementById('goals-content');if(!el)return;
+
+  const allItems=_2026Goals.flatMap(c=>c.items);
+  const total=allItems.length;
+  const done=allItems.filter(i=>i.status==='complete').length;
+  const inProg=allItems.filter(i=>i.status==='in progress').length;
+  const pct=total?Math.round((done/total)*100):0;
+
+  let html='<div class="metrics-grid" style="margin-bottom:18px">';
+  html+='<div class="card metric-tile"><div class="metric-value">'+total+'</div><div class="metric-label">Total Goals</div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value teal">'+done+'</div><div class="metric-label">Complete</div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value" style="color:var(--amber)">'+inProg+'</div><div class="metric-label">In Progress</div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value">'+pct+'%</div><div class="metric-label">Overall</div></div>';
+  html+='</div>';
+
+  html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px">';
+  _2026Goals.forEach((cat,ci)=>{
+    const catDone=cat.items.filter(i=>i.status==='complete').length;
+    const catTotal=cat.items.length;
+    const catPct=catTotal?Math.round((catDone/catTotal)*100):0;
+
+    html+='<div class="card" style="padding:18px">';
+    html+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">';
+    html+='<div style="font-size:1.4rem">'+cat.icon+'</div>';
+    html+='<div style="flex:1"><div style="font-size:0.95rem;font-weight:700;color:'+cat.color+'">'+cat.cat+'</div>';
+    html+='<div style="font-size:0.55rem;color:var(--text-faint);margin-top:2px">'+catDone+'/'+catTotal+' complete</div></div>';
+    html+='<div style="font-size:1rem;font-weight:700;color:'+(catPct>=100?'var(--teal)':catPct>0?'var(--amber)':'var(--text-faint)')+'">'+catPct+'%</div>';
+    html+='</div>';
+
+    html+='<div style="height:3px;border-radius:2px;background:rgba(255,255,255,0.06);margin-bottom:14px;overflow:hidden"><div style="height:100%;width:'+catPct+'%;background:'+cat.color+';border-radius:2px;transition:width 0.3s"></div></div>';
+
+    cat.items.forEach((item,ii)=>{
+      const isDone=item.status==='complete';
+      const isInProg=item.status==='in progress';
+      html+='<div onclick="toggleGoalDone('+ci+','+ii+')" style="display:flex;align-items:flex-start;gap:10px;padding:8px 6px;border-radius:6px;cursor:pointer;transition:background 0.15s'+(isDone?';opacity:0.5':'')+'" onmouseenter="this.style.background=\'rgba(255,255,255,0.04)\'" onmouseleave="this.style.background=\'transparent\'">';
+      html+='<div style="width:18px;height:18px;border-radius:5px;border:2px solid '+(isDone?'var(--teal)':isInProg?'var(--amber)':'rgba(255,255,255,0.15)')+';flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px;background:'+(isDone?'rgba(45,212,168,0.15)':'transparent')+'">'+(isDone?'<span style="color:var(--teal);font-size:0.6rem;font-weight:700">✓</span>':'')+'</div>';
+      html+='<div style="flex:1;font-size:0.78rem;color:'+(isDone?'var(--text-faint)':'#fff')+';'+(isDone?'text-decoration:line-through;':'')+'">'+item.name+'</div>';
+      if(isInProg)html+='<span style="padding:1px 6px;border-radius:3px;background:rgba(240,168,64,0.1);color:var(--amber);font-size:0.5rem;font-weight:600;flex-shrink:0">IN PROGRESS</span>';
+      html+='</div>';
+    });
+
+    html+='</div>';
+  });
+  html+='</div>';
+
+  // Custom goals below
+  if(_goals.length){
+    html+='<div style="margin-top:24px;font-size:0.9rem;font-weight:700;color:#fff;margin-bottom:12px">Custom Goals</div>';
+    html+='<div style="display:flex;flex-direction:column;gap:12px">';
+    _goals.forEach(goal=>{
+      const statusCol=goal.status==='Complete'?'var(--teal)':goal.status==='In Progress'?'var(--amber)':'var(--text-faint)';
+      const catCols={Personal:'#a78bfa',Health:'#f472b6',Career:'#60a5fa',Finance:'var(--teal)',Learning:'var(--amber)',Project:'#34d399'};
+      const catCol=catCols[goal.category]||'var(--text-muted)';
+      html+='<div class="card" style="cursor:pointer" onclick="showGoalModal(\''+goal.id+'\')">';
+      html+='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px">';
+      html+='<div style="flex:1"><div style="font-size:0.92rem;font-weight:700;color:#fff">'+goal.title+'</div>';
+      html+='<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">';
+      html+='<span style="padding:2px 8px;border-radius:4px;background:rgba(255,255,255,0.06);color:'+catCol+';font-size:0.58rem;font-weight:600">'+goal.category+'</span>';
+      html+='<span style="padding:2px 8px;border-radius:4px;background:rgba(255,255,255,0.06);color:'+statusCol+';font-size:0.58rem;font-weight:600">'+goal.status+'</span>';
+      if(goal.targetDate)html+='<span style="padding:2px 8px;border-radius:4px;background:rgba(255,255,255,0.06);color:var(--text-faint);font-size:0.58rem">Due: '+fmtShort(goal.targetDate)+'</span>';
+      html+='</div></div>';
+      html+='<button onclick="event.stopPropagation();deleteGoal(\''+goal.id+'\')" style="padding:3px 8px;border-radius:5px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.15);color:var(--red-soft);font-size:0.55rem;cursor:pointer;font-family:var(--font);flex-shrink:0">Delete</button>';
+      html+='</div>';
+      html+='<div class="progress-bar"><div class="progress-fill" style="width:'+(goal.progress||0)+'%;background:'+(goal.progress>=100?'var(--teal)':goal.progress>=50?'var(--amber)':'var(--red-soft)')+'"></div></div>';
+      html+='<div style="font-size:0.6rem;color:var(--text-faint);margin-top:4px;text-align:right">'+(goal.progress||0)+'%</div>';
+      html+='</div>';
+    });
+    html+='</div>';
+  }
+
+  el.innerHTML=html;
+}
+
+// ════════════════════════════════════════
+// FINANCES
+// ════════════════════════════════════════
+async function loadFinances(){
+  try{
+    const res=await fetch('/api/finances?t='+Date.now());
+    if(res.ok){
+      const d=await res.json();
+      _finances=d.entries||[];
+      if(d.updated)document.getElementById('finances-updated').textContent='Saved: '+fmt(d.updated);
+      const COST_VERSION=3;
+      if(d.costTracking&&d.costTracking.length&&d.costsVersion>=COST_VERSION){
+        _costTracking=d.costTracking;
+        _weeklyIncome=d.weeklyIncome??0;
+      }else{
+        _costTracking=[..._defaultCosts];
+        _weeklyIncome=0;
+        saveCostTracking();
+      }
+      renderFinances();
+    }
+  }catch(e){console.warn('Finances load failed',e)}
+}
+async function saveCostTracking(){
+  try{await fetch('/api/finances',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'save_costs',items:_costTracking,weeklyIncome:_weeklyIncome,version:3})})}catch(e){console.warn('Cost tracking save failed',e)}
+}
+async function saveFinances(){
+  try{await fetch('/api/finances',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'save',entries:_finances})});document.getElementById('finances-updated').textContent='Saved: '+fmt(new Date().toISOString())}catch(e){console.warn('Finances save failed',e)}
+}
+function showFinanceModal(id){
+  if(id){
+    const entry=_finances.find(e=>e.id===id);if(!entry)return;
+    document.getElementById('finance-modal-title').textContent='Edit Entry';
+    document.getElementById('finance-edit-id').value=id;
+    document.getElementById('finance-type').value=entry.type;
+    document.getElementById('finance-date').value=entry.date;
+    document.getElementById('finance-amount').value=entry.amount;
+    document.getElementById('finance-desc').value=entry.description;
+    document.getElementById('finance-category').value=entry.category;
+  } else {
+    document.getElementById('finance-modal-title').textContent='Add Entry';
+    document.getElementById('finance-edit-id').value='';
+    document.getElementById('finance-type').value='expense';
+    document.getElementById('finance-date').value=new Date().toISOString().split('T')[0];
+    document.getElementById('finance-amount').value='';
+    document.getElementById('finance-desc').value='';
+    document.getElementById('finance-category').value='Other';
+  }
+  openModal('finance-modal');
+}
+function saveFinance(){
+  const id=document.getElementById('finance-edit-id').value;
+  const type=document.getElementById('finance-type').value;
+  const date=document.getElementById('finance-date').value;
+  const amount=parseFloat(document.getElementById('finance-amount').value);
+  const description=document.getElementById('finance-desc').value.trim();
+  const category=document.getElementById('finance-category').value;
+  if(!amount||!date)return;
+  if(id){
+    const entry=_finances.find(e=>e.id===id);if(!entry)return;
+    Object.assign(entry,{type,date,amount,description,category,modified:new Date().toISOString()});
+  } else {
+    _finances.push({id:Date.now().toString(),type,date,amount,description,category,created:new Date().toISOString()});
+  }
+  closeModal('finance-modal');
+  saveFinances();renderFinances();renderOverview();
+}
+function deleteFinance(id){
+  if(!confirm('Delete this entry?'))return;
+  _finances=_finances.filter(e=>e.id!==id);
+  saveFinances();renderFinances();renderOverview();
+}
+const _defaultCosts=[];
+let _costTracking=[];
+let _weeklyIncome=0;
+
+function fmtDate(d){if(!d)return'–';const p=d.split('-');return p[2]+'/'+p[1]+'/'+p[0].slice(2);}
+
+function deriveCosts(c){
+  let m=c.monthly;
+  if(!m&&c.annual)m=c.annual/12;
+  if(!m&&c.sixMonth)m=c.sixMonth/6;
+  if(!m&&c.weekly)m=c.weekly*52/12;
+  if(!m)m=0;
+  return{weekly:+(m*12/52).toFixed(2),monthly:+m.toFixed(2),sixMonth:+(m*6).toFixed(2),annual:+(m*12).toFixed(2)};
+}
+
+let _pieState={};
+function pieHover(i){
+  const s=_pieState;if(!s.id)return;
+  const svg=document.getElementById(s.id);if(!svg)return;
+  const slices=svg.querySelectorAll('[data-slice]');
+  slices.forEach(el=>{
+    const si=parseInt(el.dataset.slice);
+    if(si===i){el.style.transform='scale(1.07)';el.style.filter='brightness(1.3) drop-shadow(0 0 8px '+s.data[si].color+')';}
+    else{el.style.transform='scale(1)';el.style.filter='brightness(0.5)';}
+  });
+  const d=s.data[i];
+  const pct=Math.round(d.totalMonthly/s.total*100);
+  const cv=document.getElementById(s.id+'-center-val');
+  const cl=document.getElementById(s.id+'-center-lbl');
+  if(cv)cv.textContent='$'+d.totalMonthly.toFixed(2);
+  if(cl)cl.textContent=d.label+' · '+pct+'%';
+  document.querySelectorAll('[data-legend]').forEach(el=>{
+    el.style.background=parseInt(el.dataset.legend)===i?'rgba(255,255,255,0.08)':'';
+  });
+}
+function pieUnhover(){
+  const s=_pieState;if(!s.id)return;
+  const svg=document.getElementById(s.id);if(!svg)return;
+  svg.querySelectorAll('[data-slice]').forEach(el=>{el.style.transform='';el.style.filter='';});
+  const cv=document.getElementById(s.id+'-center-val');
+  const cl=document.getElementById(s.id+'-center-lbl');
+  if(cv)cv.textContent='$'+s.total.toFixed(2);
+  if(cl)cl.textContent='/month total';
+  document.querySelectorAll('[data-legend]').forEach(el=>{el.style.background='';});
+}
+function _initPieHover(id,data,total){
+  _pieState={id,data,total};
+  const svg=document.getElementById(id);if(!svg)return;
+  svg.querySelectorAll('[data-slice]').forEach(el=>{
+    const i=parseInt(el.dataset.slice);
+    el.addEventListener('mouseenter',()=>pieHover(i));
+    el.addEventListener('mouseleave',()=>pieUnhover());
+  });
+}
+
+function renderFinances(){
+  const el=document.getElementById('finances-content');if(!el)return;
+
+  const weeklyIncome=_weeklyIncome;
+  const monthlyIncome=weeklyIncome*52/12;
+  const annualIncome=weeklyIncome*52;
+  const activeItems=_costTracking.filter(c=>c.status==='active');
+  const activeDerived=activeItems.map(c=>deriveCosts(c));
+  const totalMonthly=activeDerived.reduce((s,d)=>s+d.monthly,0);
+  const totalWeekly=activeDerived.reduce((s,d)=>s+d.weekly,0);
+  const totalAnnual=activeDerived.reduce((s,d)=>s+d.annual,0);
+  const weeklyLiving=350;
+  const monthlyLiving=weeklyLiving*52/12;
+  const annualLiving=weeklyLiving*52;
+  const weeklyNet=weeklyIncome-totalWeekly-weeklyLiving;
+  const monthlyNet=monthlyIncome-totalMonthly-monthlyLiving;
+  const annualNet=annualIncome-totalAnnual-annualLiving;
+
+
+  let costHtml='<div class="card" style="margin-bottom:20px;padding:20px">';
+  costHtml+='<div class="card-header" style="margin-bottom:14px"><span class="card-title">Cost Tracking</span><span style="font-size:0.6rem;color:var(--text-faint);margin-left:8px">from ClickUp</span></div>';
+
+  costHtml+='<div class="metrics-grid" style="margin-bottom:16px;grid-template-columns:repeat(4,1fr)">';
+  costHtml+='<div class="metric-tile" style="padding:10px;grid-column:span 4"><div style="display:flex;justify-content:center;align-items:baseline;gap:6px"><div class="metric-value" style="font-size:1.3rem;color:var(--teal)">$'+fmt2(weeklyIncome)+'</div><div class="metric-label" style="font-size:0.6rem">/week net income</div></div></div>';
+
+  costHtml+='<div class="metric-tile" style="padding:10px"><div class="metric-value" style="font-size:0.95rem;color:var(--red-soft)">$'+fmt2(totalWeekly)+'</div><div class="metric-label">Weekly Costs</div></div>';
+  costHtml+='<div class="metric-tile" style="padding:10px"><div class="metric-value" style="font-size:0.95rem;color:var(--red-soft)">$'+fmt2(totalMonthly)+'</div><div class="metric-label">Monthly Costs</div></div>';
+  costHtml+='<div class="metric-tile" style="padding:10px"><div class="metric-value" style="font-size:0.95rem;color:var(--amber)">$'+fmt2(totalAnnual)+'</div><div class="metric-label">Annual Costs</div></div>';
+  costHtml+='<div class="metric-tile" style="padding:10px"><div class="metric-value" style="font-size:0.95rem">'+activeItems.length+' <span style="color:var(--text-faint);font-size:0.7rem">/ '+_costTracking.filter(c=>c.status==='paused').length+' paused</span></div><div class="metric-label">Subscriptions</div></div>';
+
+  costHtml+='<div class="metric-tile" style="padding:10px;grid-column:span 4;border-top:1px solid rgba(255,255,255,0.06);margin-top:4px;padding-top:12px"><div style="display:flex;justify-content:center;gap:24px">';
+  costHtml+='<div style="text-align:center"><div style="font-size:0.85rem;font-weight:600;color:var(--amber)">$'+fmt2(weeklyLiving)+'</div><div style="font-size:0.55rem;color:var(--text-faint);margin-top:2px">Living /week</div></div>';
+  costHtml+='<div style="text-align:center"><div style="font-size:0.85rem;font-weight:600;color:var(--amber)">$'+fmt2(monthlyLiving)+'</div><div style="font-size:0.55rem;color:var(--text-faint);margin-top:2px">Living /month</div></div>';
+  costHtml+='<div style="text-align:center"><div style="font-size:0.85rem;font-weight:600;color:var(--amber)">$'+fmt2(annualLiving)+'</div><div style="font-size:0.55rem;color:var(--text-faint);margin-top:2px">Living /year</div></div>';
+  costHtml+='</div><div style="font-size:0.5rem;color:var(--text-faint);text-align:center;margin-top:4px">Food, fuel & essentials estimate</div></div>';
+
+  costHtml+='<div class="metric-tile" style="padding:10px;grid-column:span 4;border-top:1px solid rgba(255,255,255,0.06);margin-top:4px;padding-top:12px"><div style="display:flex;justify-content:center;gap:24px">';
+  costHtml+='<div style="text-align:center"><div style="font-size:0.95rem;font-weight:700;color:'+(weeklyNet>=0?'var(--teal)':'var(--red-soft)')+'">$'+fmt2(weeklyNet)+'</div><div style="font-size:0.55rem;color:var(--text-faint);margin-top:2px">Surplus /week</div></div>';
+  costHtml+='<div style="text-align:center"><div style="font-size:0.95rem;font-weight:700;color:'+(monthlyNet>=0?'var(--teal)':'var(--red-soft)')+'">$'+fmt2(monthlyNet)+'</div><div style="font-size:0.55rem;color:var(--text-faint);margin-top:2px">Surplus /month</div></div>';
+  costHtml+='<div style="text-align:center"><div style="font-size:0.95rem;font-weight:700;color:'+(annualNet>=0?'var(--teal)':'var(--red-soft)')+'">$'+fmt2(annualNet)+'</div><div style="font-size:0.55rem;color:var(--text-faint);margin-top:2px">Surplus /year</div></div>';
+  costHtml+='</div></div>';
+  costHtml+='</div>';
+
+  costHtml+='</div>';
+
+  const catGroups=[
+    {label:'Investments',cats:['Investment'],color:'#e9c162',icon:'📈'},
+    {label:'Health',cats:['Health'],color:'#b6b6ff',icon:'💪'},
+    {label:'Entertainment & Tools',cats:['Entertainment','Organisational'],color:'#96c7f2',icon:'🎬'},
+    {label:'Utilities & Rent',cats:['Utilities','Rent'],color:'#92ceac',icon:'🏠'},
+    {label:'Liabilities',cats:['Car'],color:'#ffaa7d',icon:'🚗'},
+  ];
+
+  const grouped=catGroups.map(g=>{
+    const items=_costTracking.filter(c=>g.cats.includes(c.category));
+    const derived=items.map(c=>({...c,...deriveCosts(c)}));
+    const totalM=derived.reduce((s,d)=>s+d.monthly,0);
+    return{...g,items:derived,totalMonthly:totalM,totalAnnual:totalM*12,totalWeekly:totalM*12/52};
+  });
+  const uncategorized=_costTracking.filter(c=>!c.category);
+  if(uncategorized.length){
+    const derived=uncategorized.map(c=>({...c,...deriveCosts(c)}));
+    const totalM=derived.reduce((s,d)=>s+d.monthly,0);
+    grouped.push({label:'Other',cats:[],color:'#888',icon:'📋',items:derived,totalMonthly:totalM,totalAnnual:totalM*12,totalWeekly:totalM*12/52});
+  }
+
+  // Pie chart
+  const pieData=[...grouped.filter(g=>g.totalMonthly>0),{label:'Living Expenses',color:'#f97316',totalMonthly:monthlyLiving}];
+  const pieTotal=pieData.reduce((s,d)=>s+d.totalMonthly,0);
+  let angle=0;
+  const slices=pieData.map(d=>{
+    const pct=d.totalMonthly/pieTotal;
+    const startAngle=angle;
+    angle+=pct*360;
+    return{...d,pct,startAngle,endAngle:angle};
+  });
+
+  costHtml+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">';
+
+  // Pie chart card - interactive
+  const pieId='pie-'+Date.now();
+  costHtml+='<div class="card" style="padding:20px;grid-row:span 3">';
+  costHtml+='<div class="card-header" style="margin-bottom:12px"><span class="card-title">Cost Breakdown</span></div>';
+  costHtml+='<div style="position:relative;display:flex;justify-content:center">';
+  costHtml+='<svg id="'+pieId+'" viewBox="0 0 300 300" style="width:100%;max-width:400px;height:auto">';
+  slices.forEach((s,i)=>{
+    if(s.pct<=0)return;
+    if(s.pct>=0.999){costHtml+='<circle cx="150" cy="150" r="120" fill="'+s.color+'" data-slice="'+i+'"/>';return;}
+    const r=120;
+    const startRad=(s.startAngle-90)*Math.PI/180;
+    const endRad=(s.endAngle-90)*Math.PI/180;
+    const x1=150+r*Math.cos(startRad),y1=150+r*Math.sin(startRad);
+    const x2=150+r*Math.cos(endRad),y2=150+r*Math.sin(endRad);
+    const large=s.pct>0.5?1:0;
+    const midAngle=((s.startAngle+s.endAngle)/2-90)*Math.PI/180;
+    costHtml+='<path d="M150,150 L'+x1.toFixed(2)+','+y1.toFixed(2)+' A'+r+','+r+' 0 '+large+',1 '+x2.toFixed(2)+','+y2.toFixed(2)+' Z" fill="'+s.color+'" stroke="rgba(0,0,0,0.4)" stroke-width="1" data-slice="'+i+'" data-mid="'+midAngle.toFixed(4)+'" style="cursor:pointer;transition:transform 0.2s,filter 0.2s;transform-origin:150px 150px"/>';
+  });
+  costHtml+='<circle cx="150" cy="150" r="65" fill="var(--card-bg,#1a1a2e)" style="pointer-events:none"/>';
+  costHtml+='<text id="'+pieId+'-center-val" x="150" y="144" text-anchor="middle" fill="#fff" font-size="18" font-weight="700" style="pointer-events:none">$'+fmt2(pieTotal)+'</text>';
+  costHtml+='<text id="'+pieId+'-center-lbl" x="150" y="164" text-anchor="middle" fill="var(--text-faint)" font-size="10" style="pointer-events:none">/month total</text>';
+  costHtml+='</svg>';
+  costHtml+='<div id="'+pieId+'-tip" style="position:absolute;pointer-events:none;display:none;background:rgba(0,0,0,0.85);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px 12px;font-size:0.75rem;color:#fff;white-space:nowrap;z-index:10;box-shadow:0 4px 20px rgba(0,0,0,0.4)"></div>';
+  costHtml+='</div>';
+
+  // Pie legend
+  costHtml+='<div style="display:flex;flex-direction:column;gap:8px;margin-top:16px">';
+  pieData.forEach((d,i)=>{
+    const pct=Math.round(d.totalMonthly/pieTotal*100);
+    costHtml+='<div data-legend="'+i+'" style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;transition:background 0.2s" onmouseenter="pieHover('+i+')" onmouseleave="pieUnhover()">';
+    costHtml+='<div style="width:12px;height:12px;border-radius:3px;background:'+d.color+';flex-shrink:0"></div>';
+    costHtml+='<div style="flex:1;font-size:0.75rem;color:var(--text-secondary)">'+d.label+'</div>';
+    costHtml+='<div style="font-size:0.75rem;font-weight:600;color:#fff">$'+fmt2(d.totalMonthly)+'</div>';
+    costHtml+='<div style="font-size:0.65rem;color:var(--text-faint);width:35px;text-align:right">'+pct+'%</div>';
+    costHtml+='</div>';
+  });
+  costHtml+='</div></div>';
+
+  // Category cards
+  grouped.forEach(g=>{
+    if(!g.items.length)return;
+    costHtml+='<div class="card" style="padding:16px">';
+    costHtml+='<div class="card-header" style="margin-bottom:10px"><span class="card-title">'+g.icon+' '+g.label+'</span><span style="font-size:0.75rem;font-weight:700;color:'+g.color+'">$'+fmt2(g.totalMonthly)+'/mo</span></div>';
+    costHtml+='<div style="display:flex;gap:12px;margin-bottom:10px;font-size:0.6rem;color:var(--text-faint)">';
+    costHtml+='<span>$'+fmt2(g.totalWeekly)+'/wk</span>';
+    costHtml+='<span>$'+fmt2(g.totalAnnual)+'/yr</span>';
+    costHtml+='</div>';
+    costHtml+='<div style="display:flex;flex-direction:column;gap:4px">';
+    g.items.forEach(c=>{
+      const isPaused=c.status==='paused';
+      costHtml+='<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;background:rgba(255,255,255,0.03)'+(isPaused?';opacity:0.5':'')+'">';
+      costHtml+='<div style="flex:1;min-width:0">';
+      costHtml+='<div style="font-size:0.75rem;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+c.name+(isPaused?' <span style="color:var(--text-faint);font-weight:400;font-size:0.55rem">(PAUSED)</span>':'')+'</div>';
+      costHtml+='<div style="font-size:0.55rem;color:var(--text-muted);margin-top:1px">'+c.cycle+' · '+c.payment+(c.renewal?' · '+fmtDate(c.renewal):'')+'</div>';
+      costHtml+='</div>';
+      costHtml+='<div style="text-align:right;flex-shrink:0">';
+      costHtml+='<div style="font-size:0.75rem;font-weight:700;color:#fff">$'+fmt2(c.monthly)+'<span style="font-size:0.5rem;color:var(--text-faint);font-weight:400">/mo</span></div>';
+      costHtml+='<div style="font-size:0.5rem;color:var(--text-faint)">$'+fmt2(c.weekly)+'/wk · $'+fmt2(c.annual)+'/yr</div>';
+      costHtml+='</div>';
+      costHtml+='</div>';
+    });
+    costHtml+='</div></div>';
+  });
+
+  costHtml+='</div>';
+
+  // Full list table
+  costHtml+='<div class="card" style="margin-top:16px;padding:20px">';
+  costHtml+='<div class="card-header" style="margin-bottom:12px"><span class="card-title">All Subscriptions</span><span style="font-size:0.6rem;color:var(--text-faint);margin-left:8px">'+_costTracking.length+' items</span></div>';
+  costHtml+='<div style="overflow-x:auto">';
+  costHtml+='<table class="data-table" style="min-width:900px;width:100%"><thead><tr>';
+  costHtml+='<th>Name</th><th>Category</th><th>Billing Cycle</th><th style="text-align:right">Weekly</th><th style="text-align:right">Monthly</th><th style="text-align:right">6 Monthly</th><th style="text-align:right">Annual</th><th>Renewal</th><th>Payment Method</th><th>Login</th>';
+  costHtml+='</tr></thead><tbody>';
+  _costTracking.forEach(c=>{
+    const d=deriveCosts(c);
+    const isPaused=c.status==='paused';
+    costHtml+='<tr style="'+(isPaused?'opacity:0.5':'')+'">';
+    costHtml+='<td style="color:#fff;font-weight:600;white-space:nowrap">'+c.name+(isPaused?' <span style="color:var(--text-faint);font-weight:400;font-size:0.55rem">(PAUSED)</span>':'')+'</td>';
+    costHtml+='<td>'+(c.category?'<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.65rem;background:'+c.catColor+'22;color:'+c.catColor+';border:1px solid '+c.catColor+'44">'+c.category+'</span>':'–')+'</td>';
+    const cycleColors={Weekly:'#FF4081',Fortnightly:'#92ceac','6 Monthly':'#aec0f5'};
+    const cc=cycleColors[c.cycle]||'#7C4DFF';
+    costHtml+='<td><span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.65rem;background:'+cc+'22;color:'+cc+';border:1px solid '+cc+'44">'+c.cycle+'</span></td>';
+    costHtml+='<td style="text-align:right">$'+fmt2(d.weekly)+'</td>';
+    costHtml+='<td style="text-align:right;font-weight:600">$'+fmt2(d.monthly)+'</td>';
+    costHtml+='<td style="text-align:right">$'+fmt2(d.sixMonth)+'</td>';
+    costHtml+='<td style="text-align:right;font-weight:600">$'+fmt2(d.annual)+'</td>';
+    costHtml+='<td style="white-space:nowrap">'+fmtDate(c.renewal)+'</td>';
+    costHtml+='<td><span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.65rem;background:'+c.payColor+'22;color:'+c.payColor+';border:1px solid '+c.payColor+'44;white-space:nowrap">'+c.payment+'</span></td>';
+    costHtml+='<td>'+(c.url?'<a href="'+c.url+'" target="_blank" style="color:var(--teal);font-size:0.65rem;text-decoration:none" title="'+c.url+'">🔗</a>':'–')+'</td>';
+    costHtml+='</tr>';
+  });
+  costHtml+='</tbody></table></div></div>';
+
+  if(!_finances.length){
+    el.innerHTML=costHtml;
+    _initPieHover(pieId,pieData,pieTotal);
+    return;
+  }
+  const sorted=[..._finances].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const totalIncome=_finances.filter(e=>e.type==='income').reduce((s,e)=>s+e.amount,0);
+  const totalExpense=_finances.filter(e=>e.type==='expense').reduce((s,e)=>s+e.amount,0);
+  const balance=totalIncome-totalExpense;
+
+  // Monthly summary
+  const months={};
+  _finances.forEach(e=>{
+    const m=e.date.substring(0,7);
+    if(!months[m])months[m]={income:0,expense:0};
+    months[m][e.type]+=e.amount;
+  });
+  const monthKeys=Object.keys(months).sort().slice(-6);
+  const maxMonth=Math.max(...monthKeys.map(m=>Math.max(months[m].income,months[m].expense)),1);
+
+  // Category breakdown (expenses)
+  const cats={};
+  _finances.filter(e=>e.type==='expense').forEach(e=>{cats[e.category]=(cats[e.category]||0)+e.amount});
+  const catEntries=Object.entries(cats).sort((a,b)=>b[1]-a[1]);
+
+  let html='<div class="metrics-grid" style="margin-bottom:16px">';
+  html+='<div class="card metric-tile"><div class="metric-value teal">'+$(totalIncome)+'</div><div class="metric-label">Total Income</div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value" style="color:var(--red-soft)">'+$(totalExpense)+'</div><div class="metric-label">Total Expenses</div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value" style="color:'+(balance>=0?'var(--teal)':'var(--red-soft)')+'">'+$(Math.abs(balance))+'</div><div class="metric-label">'+(balance>=0?'Net Positive':'Net Negative')+'</div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value">'+_finances.length+'</div><div class="metric-label">Entries</div></div>';
+  html+='</div>';
+
+  html+='<div class="finance-grid" style="margin-bottom:16px">';
+  // Monthly bar chart
+  html+='<div class="card"><div class="card-header"><span class="card-title">Monthly Summary</span></div>';
+  html+='<div style="display:flex;align-items:flex-end;gap:8px;height:120px;padding-top:10px">';
+  monthKeys.forEach(m=>{
+    const inc=months[m].income;
+    const exp=months[m].expense;
+    const incH=Math.round((inc/maxMonth)*100);
+    const expH=Math.round((exp/maxMonth)*100);
+    const label=m.substring(5);
+    html+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">';
+    html+='<div style="display:flex;gap:2px;align-items:flex-end;height:100px;width:100%">';
+    html+='<div style="flex:1;height:'+incH+'px;background:var(--teal);border-radius:3px 3px 0 0;min-height:2px" title="Income: '+$(inc)+'"></div>';
+    html+='<div style="flex:1;height:'+expH+'px;background:var(--red-soft);border-radius:3px 3px 0 0;min-height:2px" title="Expense: '+$(exp)+'"></div>';
+    html+='</div>';
+    html+='<div style="font-size:0.55rem;color:var(--text-faint)">'+label+'</div>';
+    html+='</div>';
+  });
+  html+='</div>';
+  html+='<div style="display:flex;gap:12px;margin-top:8px;font-size:0.6rem">';
+  html+='<span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:var(--teal)"></span><span style="color:var(--text-muted)">Income</span></span>';
+  html+='<span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:var(--red-soft)"></span><span style="color:var(--text-muted)">Expense</span></span>';
+  html+='</div></div>';
+
+  // Category breakdown
+  html+='<div class="card"><div class="card-header"><span class="card-title">Expense Categories</span></div>';
+  if(catEntries.length){
+    catEntries.forEach(([cat,amt])=>{
+      const pct=Math.round((amt/totalExpense)*100);
+      html+='<div style="margin-bottom:8px">';
+      html+='<div style="display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:3px"><span style="color:var(--text-secondary)">'+cat+'</span><span style="color:#fff;font-weight:600">'+$(amt)+' <span style="color:var(--text-faint);font-weight:400">'+pct+'%</span></span></div>';
+      html+='<div class="progress-bar" style="height:4px"><div class="progress-fill" style="width:'+pct+'%"></div></div>';
+      html+='</div>';
+    });
+  } else {
+    html+='<div style="font-size:0.78rem;color:var(--text-faint)">No expenses recorded</div>';
+  }
+  html+='</div></div>';
+
+  // Transactions table
+  html+='<div class="card" style="margin-top:0"><div class="card-header"><span class="card-title">All Transactions</span></div>';
+  html+='<table class="data-table"><thead><tr><th>Date</th><th>Description</th><th>Category</th><th style="text-align:right">Amount</th><th></th></tr></thead><tbody>';
+  sorted.forEach(entry=>{
+    const isIncome=entry.type==='income';
+    const amtCol=isIncome?'var(--teal)':'var(--red-soft)';
+    const sign=isIncome?'+':'-';
+    html+='<tr>';
+    html+='<td>'+fmtShort(entry.date)+'</td>';
+    html+='<td style="color:#fff">'+entry.description+'</td>';
+    html+='<td><span class="content-tag">'+entry.category+'</span></td>';
+    html+='<td style="text-align:right;color:'+amtCol+';font-weight:600">'+sign+$(entry.amount)+'</td>';
+    html+='<td style="text-align:right"><button onclick="showFinanceModal(\''+entry.id+'\')" style="padding:2px 6px;border-radius:4px;background:none;border:1px solid rgba(255,255,255,0.06);color:var(--text-faint);font-size:0.55rem;cursor:pointer;font-family:var(--font);margin-right:4px">Edit</button><button onclick="deleteFinance(\''+entry.id+'\')" style="padding:2px 6px;border-radius:4px;background:none;border:1px solid rgba(239,68,68,0.15);color:var(--red-soft);font-size:0.55rem;cursor:pointer;font-family:var(--font)">✕</button></td>';
+    html+='</tr>';
+  });
+  html+='</tbody></table></div>';
+  el.innerHTML=costHtml+html;
+  _initPieHover(pieId,pieData,pieTotal);
+}
+
+// ════════════════════════════════════════
+// TRAINING — Workout templates, PB tracking, session logging
+// ════════════════════════════════════════
+const DEFAULT_TEMPLATES=[
+  {id:'back-bis',name:'Back & Biceps',icon:'💪',exercises:[
+    {name:'Dead hang',pb:'30 secs',weight:'',sets:'',reps:''},
+    {name:'Chin ups to failure',pb:'13',weight:'',sets:'','reps':'failure'},
+    {name:'Bar curl',pb:'30kg',weight:'30',sets:'3',reps:'10'},
+    {name:'Cross over pull backs',pb:'17kg',weight:'17',sets:'3',reps:'10'},
+    {name:'Wrist curls',pb:'',weight:'',sets:'',reps:''},
+    {name:'Supported row',pb:'50kg',weight:'50',sets:'3',reps:'10'},
+    {name:'Seated pulldown',pb:'52kg',weight:'52',sets:'3',reps:'10'},
+    {name:'Seated pullback',pb:'45kg',weight:'45',sets:'3',reps:'10'},
+    {name:'Lower back bends',pb:'15kg',weight:'15',sets:'3',reps:'10'},
+    {name:'Reverse wrist curls',pb:'',weight:'',sets:'',reps:''},
+    {name:'Lat pull down',pb:'54kg',weight:'54',sets:'3',reps:'10'},
+    {name:'Single arm curls',pb:'12.5kg',weight:'12.5',sets:'6',reps:'10'},
+    {name:'21s (7 up, 7 down, 7 full)',pb:'22.5kg',weight:'22.5',sets:'1',reps:'21'},
+  ]},
+  {id:'legs',name:'Legs',icon:'🦵',exercises:[
+    {name:'Bike (steep increments)',pb:'10+ mins',weight:'',sets:'',reps:''},
+    {name:'Leg extension',pb:'27kg',weight:'27',sets:'3',reps:'10'},
+    {name:'Leg press single legs',pb:'27kg',weight:'27',sets:'3',reps:'6'},
+    {name:'Leg press both legs',pb:'81kg',weight:'81',sets:'3',reps:'10'},
+    {name:'Calf raises',pb:'',weight:'',sets:'3',reps:'15 x 2'},
+    {name:'Situps',pb:'50',weight:'',sets:'1',reps:'50'},
+    {name:'Plank',pb:'2 min',weight:'',sets:'1',reps:'2 min'},
+    {name:'Bulgarian squats',pb:'',weight:'',sets:'',reps:''},
+    {name:'Squats',pb:'',weight:'',sets:'',reps:''},
+    {name:'Stretching on floor',pb:'',weight:'',sets:'',reps:''},
+  ]},
+  {id:'chest-tris',name:'Chest & Triceps',icon:'🏋️',exercises:[
+    {name:'Dead hangs',pb:'30 secs',weight:'',sets:'1',reps:'30s'},
+    {name:'Pullups to failure',pb:'6 OR 3x10 red strap',weight:'',sets:'',reps:'failure'},
+    {name:'Dumbbell press laying down',pb:'25kg',weight:'25',sets:'3',reps:'10'},
+    {name:'Arms out to side (flys)',pb:'10kg',weight:'10',sets:'3',reps:'10'},
+    {name:'Chest press',pb:'50kg',weight:'50',sets:'3',reps:'10'},
+    {name:'Pec flys',pb:'100kg',weight:'100',sets:'3',reps:'10'},
+    {name:'Pec flys reversed',pb:'66kg',weight:'66',sets:'3',reps:'10'},
+    {name:'Triceps press',pb:'50kg',weight:'50',sets:'3',reps:'10'},
+    {name:'Lower back bends',pb:'15kg',weight:'15',sets:'3',reps:'10'},
+    {name:'Skull crushers',pb:'20kg',weight:'20',sets:'3',reps:'10'},
+    {name:'Dips',pb:'0kg',weight:'0',sets:'3',reps:'10'},
+  ]},
+];
+
+async function loadTraining(){
+  try{
+    const res=await fetch('/api/training?t='+Date.now());
+    if(res.ok){
+      const d=await res.json();
+      _templates=d.templates&&d.templates.length?d.templates:JSON.parse(JSON.stringify(DEFAULT_TEMPLATES));
+      _trainingLogs=d.logs||[];
+      if(!d.templates||!d.templates.length)saveTrainingData();
+      restoreWorkout();
+      renderWhoop();
+    }
+  }catch(e){console.warn('Training load failed',e)}
+}
+async function saveTrainingData(){
+  try{await fetch('/api/training',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'save',templates:_templates,logs:_trainingLogs})})}catch(e){console.warn('Training save failed',e)}
+}
+
+function persistWorkout(){
+  if(_activeWorkout)localStorage.setItem('dom_active_workout',JSON.stringify(_activeWorkout));
+  else localStorage.removeItem('dom_active_workout');
+}
+function restoreWorkout(){
+  try{
+    const saved=localStorage.getItem('dom_active_workout');
+    if(saved){_activeWorkout=JSON.parse(saved);return true;}
+  }catch(e){}
+  return false;
+}
+function resumeWorkout(){
+  if(!_activeWorkout)return;
+  const tpl=_templates.find(t=>t.id===_activeWorkout.templateId);
+  document.getElementById('workout-modal-title').textContent='🏋️ '+(tpl?tpl.name:_activeWorkout.templateName);
+  document.getElementById('workout-modal-time').textContent='Started '+new Date(_activeWorkout.startTime).toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'});
+  renderWorkoutModal();
+  openModal('workout-modal');
+}
+function minimizeWorkout(){
+  persistWorkout();
+  closeModal('workout-modal');
+  renderWhoop();
+}
+function beginWorkout(templateId){
+  if(_activeWorkout){
+    if(!confirm('You have an active workout ('+_activeWorkout.templateName+'). Discard it and start a new one?'))return;
+  }
+  const tpl=_templates.find(t=>t.id===templateId);if(!tpl)return;
+  _activeWorkout={
+    id:Date.now().toString(),
+    templateId:tpl.id,
+    templateName:tpl.name,
+    date:new Date().toISOString().split('T')[0],
+    startTime:new Date().toISOString(),
+    exercises:tpl.exercises.map(e=>({name:e.name,weight:e.weight,sets:e.sets,reps:e.reps,pb:e.pb,done:false})),
+  };
+  persistWorkout();
+  document.getElementById('workout-modal-title').textContent='🏋️ '+tpl.name;
+  document.getElementById('workout-modal-time').textContent='Started '+new Date(_activeWorkout.startTime).toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'});
+  renderWorkoutModal();
+  openModal('workout-modal');
+}
+
+function renderWorkoutModal(){
+  if(!_activeWorkout)return;
+  const el=document.getElementById('workout-exercises');
+  const done=_activeWorkout.exercises.filter(e=>e.done).length;
+  const total=_activeWorkout.exercises.length;
+  let html='<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:0.68rem;color:var(--text-faint);margin-bottom:4px"><span>'+done+'/'+total+' complete</span><span>'+Math.round((done/total)*100||0)+'%</span></div>';
+  html+='<div class="progress-bar"><div class="progress-fill" style="width:'+((done/total)*100||0)+'%"></div></div></div>';
+  html+='<div style="display:flex;flex-direction:column;gap:4px">';
+  _activeWorkout.exercises.forEach((ex,i)=>{
+    const pbText=ex.weight?(ex.weight+'kg'+(ex.sets?' · '+ex.sets+'x'+ex.reps:'')):(ex.pb||'');
+    html+='<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:rgba(255,255,255,'+(ex.done?'0.02':'0.04')+');border:1px solid rgba('+(ex.done?'45,212,168,0.15':'255,255,255,0.06')+');opacity:'+(ex.done?'0.5':'1')+'">';
+    html+='<div onclick="toggleWorkoutExercise('+i+')" style="width:22px;height:22px;border-radius:6px;border:2px solid '+(ex.done?'var(--teal)':'rgba(255,255,255,0.15)')+';background:'+(ex.done?'rgba(45,212,168,0.15)':'transparent')+';cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:var(--teal)">'+(ex.done?'✓':'')+'</div>';
+    html+='<div style="flex:1;min-width:0">';
+    html+='<div onclick="inlineEdit(this,'+i+',\'name\')" style="font-size:0.82rem;font-weight:600;color:'+(ex.done?'var(--text-muted)':'#fff')+';'+(ex.done?'text-decoration:line-through':'')+';cursor:text;padding:1px 0">'+ex.name+'</div>';
+    html+='<div onclick="inlineEdit(this,'+i+',\'pb\')" style="font-size:0.65rem;color:var(--teal);margin-top:1px;cursor:text;padding:1px 0;min-height:16px">'+(pbText?'PB: '+pbText:'tap to set PB')+'</div>';
+    html+='</div>';
+    html+='<button onclick="removeWorkoutExercise('+i+')" style="padding:3px 6px;border-radius:5px;background:none;border:1px solid rgba(255,255,255,0.06);color:var(--text-faint);font-size:0.55rem;cursor:pointer;font-family:var(--font);flex-shrink:0;opacity:0.4">✕</button>';
+    html+='</div>';
+  });
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+function inlineEdit(el,idx,field){
+  if(el.querySelector('input'))return;
+  const ex=_activeWorkout.exercises[idx];
+  let currentVal='';
+  if(field==='name')currentVal=ex.name;
+  else currentVal=ex.weight?(ex.weight+'kg'+(ex.sets?' '+ex.sets+'x'+ex.reps:'')):(ex.pb||'');
+  const input=document.createElement('input');
+  input.type='text';input.value=currentVal;
+  input.style.cssText='width:100%;background:rgba(255,255,255,0.08);border:1px solid rgba(45,212,168,0.3);border-radius:4px;color:#fff;font-size:inherit;font-family:var(--font);padding:3px 6px;outline:none;box-sizing:border-box';
+  el.textContent='';el.appendChild(input);
+  input.focus();input.select();
+  function save(){
+    const val=input.value.trim();
+    if(field==='name'){
+      if(val)ex.name=val;
+      persistWorkout();renderWorkoutModal();
+    } else {
+      const match=val.match(/^([\d.]+)\s*kg?\s*(.*)$/i);
+      if(match){
+        ex.weight=match[1];
+        const sr=match[2].trim();
+        const srMatch=sr.match(/^(\d+)\s*x\s*(.+)$/i);
+        if(srMatch){ex.sets=srMatch[1];ex.reps=srMatch[2];}
+        ex.pb=val;
+      } else if(val){
+        ex.pb=val;ex.weight='';ex.sets='';ex.reps='';
+      }
+      // Sync PB back to template
+      const tpl=_templates.find(t=>t.id===_activeWorkout.templateId);
+      if(tpl&&tpl.exercises[idx]){
+        const tex=tpl.exercises[idx];
+        tex.weight=ex.weight;tex.sets=ex.sets;tex.reps=ex.reps;tex.pb=ex.pb;
+      }
+      saveTrainingData();
+      persistWorkout();renderWorkoutModal();
+    }
+  }
+  input.addEventListener('blur',save);
+  input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();input.blur()}if(e.key==='Escape'){input.value=currentVal;input.blur()}});
+}
+
+function toggleWorkoutExercise(idx){
+  if(!_activeWorkout)return;
+  _activeWorkout.exercises[idx].done=!_activeWorkout.exercises[idx].done;
+  persistWorkout();
+  renderWorkoutModal();
+}
+
+function editWorkoutPB(idx){
+  if(!_activeWorkout)return;
+  const ex=_activeWorkout.exercises[idx];
+  document.getElementById('pb-template-id').value=_activeWorkout.templateId;
+  document.getElementById('pb-exercise-idx').value=idx;
+  document.getElementById('pb-exercise-name').textContent=ex.name;
+  document.getElementById('pb-weight').value=ex.weight||'';
+  document.getElementById('pb-sets').value=ex.sets&&ex.reps?ex.sets+' x '+ex.reps:'';
+  document.getElementById('pb-notes').value='';
+  openModal('pb-modal');
+}
+
+function savePB(){
+  const tplId=document.getElementById('pb-template-id').value;
+  const idx=parseInt(document.getElementById('pb-exercise-idx').value);
+  const weight=document.getElementById('pb-weight').value.trim();
+  const setsReps=document.getElementById('pb-sets').value.trim();
+  const notes=document.getElementById('pb-notes').value.trim();
+  let sets='',reps='';
+  if(setsReps){
+    const parts=setsReps.split(/\s*x\s*/i);
+    sets=parts[0]||'';reps=parts[1]||'';
+  }
+  const pbLabel=(weight?weight+'kg':'')+(setsReps?' '+setsReps:'')+(notes?' '+notes:'');
+  // Update active workout exercise
+  if(_activeWorkout&&_activeWorkout.templateId===tplId){
+    const ex=_activeWorkout.exercises[idx];
+    if(weight)ex.weight=weight;
+    if(sets)ex.sets=sets;if(reps)ex.reps=reps;
+    if(pbLabel)ex.pb=pbLabel.trim();
+    renderWorkoutModal();
+  }
+  // Update template
+  const tpl=_templates.find(t=>t.id===tplId);
+  if(tpl&&tpl.exercises[idx]){
+    const tex=tpl.exercises[idx];
+    if(weight)tex.weight=weight;
+    if(sets)tex.sets=sets;if(reps)tex.reps=reps;
+    if(pbLabel)tex.pb=pbLabel.trim();
+  }
+  saveTrainingData();
+  closeModal('pb-modal');
+}
+
+function addWorkoutExercise(){
+  if(!_activeWorkout)return;
+  const input=document.getElementById('workout-new-exercise');
+  if(!input||!input.value.trim())return;
+  const name=input.value.trim();
+  _activeWorkout.exercises.push({name,weight:'',sets:'',reps:'',pb:'',done:false});
+  const tpl=_templates.find(t=>t.id===_activeWorkout.templateId);
+  if(tpl)tpl.exercises.push({name,pb:'',weight:'',sets:'',reps:''});
+  input.value='';
+  persistWorkout();saveTrainingData();
+  renderWorkoutModal();
+}
+
+function removeWorkoutExercise(idx){
+  if(!_activeWorkout)return;
+  _activeWorkout.exercises.splice(idx,1);
+  persistWorkout();
+  renderWorkoutModal();
+}
+
+function finishWorkout(){
+  if(!_activeWorkout)return;
+  const done=_activeWorkout.exercises.filter(e=>e.done).length;
+  const total=_activeWorkout.exercises.length;
+  if(!confirm('Finish workout? '+done+'/'+total+' exercises completed.'))return;
+  _activeWorkout.endTime=new Date().toISOString();
+  _trainingLogs.unshift(_activeWorkout);
+  _activeWorkout=null;
+  persistWorkout();
+  closeModal('workout-modal');
+  saveTrainingData();renderWhoop();renderOverview();
+}
+
+function cancelWorkout(){
+  if(!confirm('Discard this workout? All progress will be lost.'))return;
+  _activeWorkout=null;
+  persistWorkout();
+  closeModal('workout-modal');
+  renderWhoop();
+}
+
+function deleteTrainingLog(id){
+  if(!confirm('Delete this workout log?'))return;
+  _trainingLogs=_trainingLogs.filter(l=>l.id!==id);
+  saveTrainingData();renderWhoop();renderOverview();
+}
+
+function findWhoopMatch(log){
+  if(!log.startTime||!_whoopData||!_whoopData.workouts)return null;
+  const logStart=new Date(log.startTime).getTime();
+  return _whoopData.workouts.find(w=>w.start&&Math.abs(new Date(w.start).getTime()-logStart)<3*3600000)||null;
+}
+function getWhoopDuration(log){
+  const m=findWhoopMatch(log);
+  if(m&&m.start&&m.end)return Math.round((new Date(m.end)-new Date(m.start))/60000);
+  return null;
+}
+
+function showWorkoutDetail(logId){
+  const log=_trainingLogs.find(l=>l.id===logId);if(!log)return;
+  const tpl=_templates.find(t=>t.id===log.templateId);
+  const icon=tpl?tpl.icon:'🏋️';
+  document.getElementById('workout-detail-title').textContent=icon+' '+log.templateName;
+
+  let h='';
+  h+='<div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;font-size:0.72rem;color:var(--text-muted)">';
+  const wDur=getWhoopDuration(log);
+  h+='<span>'+fmtShort(log.date)+'</span>'+(wDur?'<span>'+wDur+' min</span>':'');
+  const done=log.exercises?log.exercises.filter(e=>e.done).length:0;
+  const total=log.exercises?log.exercises.length:0;
+  h+='<span>'+done+'/'+total+' exercises</span>';
+  h+='</div>';
+
+  // Whoop stats
+  const whoopMatch=findWhoopMatch(log);
+  if(whoopMatch&&whoopMatch.score){
+    const sc=whoopMatch.score;
+    const cals=sc.kilojoule?Math.round(sc.kilojoule*0.239):null;
+    const wDur=whoopMatch.start&&whoopMatch.end?Math.round((new Date(whoopMatch.end)-new Date(whoopMatch.start))/60000):null;
+    const zones=sc.zone_durations;
+    const nsm=normSport(whoopMatch.sport_name);const sportName=nsm?(nsm.charAt(0).toUpperCase()+nsm.slice(1)):'Workout';
+
+    h+='<div style="padding:12px;border-radius:8px;background:rgba(45,212,168,0.04);border:1px solid rgba(45,212,168,0.12);margin-bottom:16px">';
+    h+='<div style="font-size:0.65rem;color:var(--teal);font-weight:600;margin-bottom:10px">♡ WHOOP · '+sportName+(wDur?' · '+wDur+' min':'')+'</div>';
+    h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px">';
+    h+='<div style="text-align:center;padding:8px;border-radius:6px;background:rgba(0,0,0,0.2)"><div style="font-size:1.1rem;font-weight:700;color:var(--teal)">'+(sc.strain?sc.strain.toFixed(1):'—')+'</div><div style="font-size:0.5rem;color:var(--text-faint);margin-top:2px">STRAIN</div></div>';
+    h+='<div style="text-align:center;padding:8px;border-radius:6px;background:rgba(0,0,0,0.2)"><div style="font-size:1.1rem;font-weight:700;color:var(--amber)">'+(cals||'—')+'</div><div style="font-size:0.5rem;color:var(--text-faint);margin-top:2px">CALORIES</div></div>';
+    h+='<div style="text-align:center;padding:8px;border-radius:6px;background:rgba(0,0,0,0.2)"><div style="font-size:1.1rem;font-weight:700;color:var(--red-soft)">'+(sc.average_heart_rate||'—')+'</div><div style="font-size:0.5rem;color:var(--text-faint);margin-top:2px">AVG HR</div></div>';
+    h+='<div style="text-align:center;padding:8px;border-radius:6px;background:rgba(0,0,0,0.2)"><div style="font-size:1.1rem;font-weight:700;color:var(--red-soft)">'+(sc.max_heart_rate||'—')+'</div><div style="font-size:0.5rem;color:var(--text-faint);margin-top:2px">MAX HR</div></div>';
+    h+='</div>';
+    if(zones){
+      const zoneColors=['#4a9eff','#2dd4a8','#34d399','#fbbf24','#f97316','#ef4444'];
+      const zoneLabels=['Rest','Light','Moderate','Hard','Very Hard','Max'];
+      const zoneVals=[zones.zone_zero_milli||0,zones.zone_one_milli||0,zones.zone_two_milli||0,zones.zone_three_milli||0,zones.zone_four_milli||0,zones.zone_five_milli||0];
+      const zt=zoneVals.reduce((a,b)=>a+b,0);
+      if(zt>0){
+        h+='<div style="font-size:0.55rem;color:var(--text-faint);margin-bottom:3px">HR ZONES</div>';
+        h+='<div style="display:flex;height:12px;border-radius:6px;overflow:hidden;gap:1px">';
+        zoneVals.forEach((z,i)=>{if(z>0)h+='<div style="width:'+((z/zt)*100).toFixed(1)+'%;background:'+zoneColors[i]+'"></div>';});
+        h+='</div>';
+        h+='<div style="display:flex;gap:10px;margin-top:5px;flex-wrap:wrap">';
+        zoneVals.forEach((z,i)=>{if(z>0){const mins=Math.round(z/60000);h+='<div style="font-size:0.6rem;display:flex;align-items:center;gap:3px"><div style="width:7px;height:7px;border-radius:50%;background:'+zoneColors[i]+'"></div><span style="color:var(--text-muted)">'+zoneLabels[i]+'</span> <span style="color:#fff;font-weight:600">'+mins+'m</span></div>';}});
+        h+='</div>';
+      }
+    }
+    h+='</div>';
+  }
+
+  // Exercise list
+  if(log.exercises&&log.exercises.length){
+    h+='<div style="font-size:0.75rem;font-weight:700;color:#fff;margin-bottom:8px">Exercises</div>';
+    log.exercises.forEach(ex=>{
+      const check=ex.done?'✅':'⬜';
+      const pbDisplay=ex.weight?(ex.weight+'kg'+(ex.sets?' · '+ex.sets+'x'+ex.reps:'')):(ex.pb||'');
+      h+='<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04)">';
+      h+='<span style="font-size:0.8rem">'+check+'</span>';
+      h+='<span style="flex:1;font-size:0.78rem;color:'+(ex.done?'#fff':'var(--text-muted)')+'">'+ex.name+'</span>';
+      if(pbDisplay)h+='<span style="font-size:0.68rem;color:var(--teal);font-weight:600">'+pbDisplay+'</span>';
+      h+='</div>';
+    });
+  }
+
+  document.getElementById('workout-detail-content').innerHTML=h;
+  openModal('workout-detail-modal');
+}
+
+function editTemplatePB(tplId,exIdx){
+  const tpl=_templates.find(t=>t.id===tplId);if(!tpl)return;
+  const ex=tpl.exercises[exIdx];if(!ex)return;
+  document.getElementById('pb-template-id').value=tplId;
+  document.getElementById('pb-exercise-idx').value=exIdx;
+  document.getElementById('pb-exercise-name').textContent=ex.name;
+  document.getElementById('pb-weight').value=ex.weight||'';
+  document.getElementById('pb-sets').value=ex.sets&&ex.reps?ex.sets+' x '+ex.reps:'';
+  document.getElementById('pb-notes').value='';
+  // Override savePB to just save template (no active workout)
+  openModal('pb-modal');
+}
+
+function deleteTemplateExercise(tplId,exIdx){
+  const tpl=_templates.find(t=>t.id===tplId);if(!tpl)return;
+  tpl.exercises.splice(exIdx,1);
+  saveTrainingData();renderWhoop();
+}
+
+function addTemplateExercise(tplId){
+  const input=document.getElementById('tpl-add-'+tplId);
+  if(!input||!input.value.trim())return;
+  const tpl=_templates.find(t=>t.id===tplId);if(!tpl)return;
+  tpl.exercises.push({name:input.value.trim(),pb:'',weight:'',sets:'',reps:''});
+  input.value='';
+  saveTrainingData();renderWhoop();
+}
+
+function calcStreak(logs){
+  if(!logs.length)return 0;
+  const dates=[...new Set(logs.map(s=>s.date))].sort().reverse();
+  const today=new Date().toISOString().split('T')[0];
+  const yesterday=new Date(Date.now()-86400000).toISOString().split('T')[0];
+  if(dates[0]!==today&&dates[0]!==yesterday)return 0;
+  let streak=1;
+  for(let i=0;i<dates.length-1;i++){
+    const curr=new Date(dates[i]);const prev=new Date(dates[i+1]);
+    if((curr-prev)/86400000===1)streak++;else break;
+  }
+  return streak;
+}
+
+// ════════════════════════════════════════
+// WHOOP / TRAINING & RECOVERY
+// ════════════════════════════════════════
+let _whoopData=null;
+let _whoopHistory=null;
+async function loadWhoop(){
+  try{
+    const [dataRes,histRes]=await Promise.all([
+      fetch('/api/whoop/data?t='+Date.now()),
+      fetch('/api/whoop/history?t='+Date.now()),
+    ]);
+    if(dataRes.ok)_whoopData=await dataRes.json();
+    if(histRes.ok){const h=await histRes.json();_whoopHistory=h.history||{};}
+    renderWhoop();
+    if(_whoopData&&_whoopData.connected)fetch('/api/whoop/sync').catch(()=>{});
+  }catch(e){console.warn('Whoop load failed',e)}
+}
+function normSport(s){if(!s)return'';s=s.toLowerCase();if(s.includes('sauna'))return'sauna';return s;}
+
+function renderWhoop(){
+  const el=document.getElementById('whoop-content');if(!el)return;
+  if(_whoopData?.updated)document.getElementById('whoop-updated').textContent='Synced: '+fmt(_whoopData.updated);
+
+  let html='';
+
+  // ── RESUME ACTIVE WORKOUT BANNER ──
+  if(_activeWorkout){
+    const done=_activeWorkout.exercises.filter(e=>e.done).length;
+    const total=_activeWorkout.exercises.length;
+    html+='<div class="card" onclick="resumeWorkout()" style="cursor:pointer;margin-bottom:18px;border-color:rgba(45,212,168,0.3);background:rgba(45,212,168,0.06)">';
+    html+='<div style="display:flex;align-items:center;gap:14px">';
+    html+='<div style="font-size:2rem;animation:livePulse 2s infinite">🏋️</div>';
+    html+='<div style="flex:1"><div style="font-size:1rem;font-weight:700;color:var(--teal)">Active Workout — '+_activeWorkout.templateName+'</div>';
+    html+='<div style="font-size:0.72rem;color:var(--text-muted);margin-top:3px">'+done+'/'+total+' exercises · Started '+new Date(_activeWorkout.startTime).toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'})+'</div></div>';
+    html+='<div style="padding:10px 20px;border-radius:8px;background:var(--teal);color:#000;font-weight:700;font-size:0.82rem;font-family:var(--font)">Resume</div>';
+    html+='</div></div>';
+  }
+
+  // ── BEGIN WORKOUT (compact row) ──
+  if(_templates.length){
+    html+='<div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">';
+    _templates.forEach(tpl=>{
+      html+='<button onclick="beginWorkout(\''+tpl.id+'\')" class="btn" style="padding:10px 18px;font-size:0.8rem;gap:6px;display:flex;align-items:center"><span>'+tpl.icon+'</span> '+tpl.name+'</button>';
+    });
+    html+='</div>';
+  }
+
+  // ── WHOOP NOT CONNECTED ──
+  if(!_whoopData||!_whoopData.connected){
+    html+='<div class="card" style="text-align:center;padding:30px 20px;margin-bottom:20px">'+
+      '<div style="font-size:2rem;margin-bottom:8px">♡</div>'+
+      '<div style="font-size:0.9rem;font-weight:700;color:#fff;margin-bottom:4px">Connect Your Whoop</div>'+
+      '<div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:14px">Link your Whoop for recovery, strain & sleep data.</div>'+
+      '<a href="/api/whoop/auth" style="display:inline-block;padding:8px 22px;border-radius:8px;background:var(--teal);color:#000;font-weight:700;font-size:0.8rem;text-decoration:none;font-family:var(--font)">Connect Whoop</a>'+
+      (_whoopData&&_whoopData.error?'<div style="font-size:0.65rem;color:var(--red-soft);margin-top:8px">Error: '+_whoopData.error+'</div>':'')+
+      '</div>';
+  }
+
+  const whoopConnected=_whoopData&&_whoopData.connected;
+  const recovery=whoopConnected?(_whoopData.recovery||[]):[];
+  const cycles=whoopConnected?(_whoopData.cycles||[]):[];
+  const sleepData=whoopConnected?(_whoopData.sleep||[]):[];
+  const workouts=whoopConnected?(_whoopData.workouts||[]):[];
+  const profile=whoopConnected?_whoopData.profile:null;
+
+  // Latest values
+  const latestRec=recovery.length?recovery[0]:null;
+  const latestCycle=cycles.length?cycles[0]:null;
+  const latestSleep=sleepData.length?sleepData[0]:null;
+  const recScore=latestRec?.score?.recovery_score;
+  const hrv=latestRec?.score?.hrv_rmssd_milli;
+  const rhr=latestRec?.score?.resting_heart_rate;
+  const strain=latestCycle?.score?.strain;
+  const avgHR=latestCycle?.score?.average_heart_rate;
+  const sleepMs=latestSleep?.score?.stage_summary?.total_in_bed_time_milli;
+  const sleepHrs=sleepMs?(sleepMs/3600000).toFixed(1):null;
+  const sleepScore=latestSleep?.score?.sleep_performance_percentage;
+
+  // Recovery color
+  function recCol(s){if(s==null)return'var(--text-faint)';if(s>=67)return'var(--teal)';if(s>=34)return'var(--amber)';return'var(--red-soft)'}
+
+  if(whoopConnected){
+  // Profile greeting
+  if(profile){
+    html+='<div style="margin-bottom:18px;font-size:0.8rem;color:var(--text-muted)">Connected as <span style="color:#fff;font-weight:600">'+profile.first_name+' '+profile.last_name+'</span></div>';
+  }
+
+  // Body data
+  const bodyData=_whoopData.body||{};
+  const maxHR=bodyData.max_heart_rate;
+
+  // Weekly goals — count workouts by sport this week
+  const weekStart=new Date(Date.now()-((new Date().getDay()||7)-1)*86400000).toISOString().split('T')[0];
+  const weekWorkouts=workouts.filter(w=>w.start&&w.start.split('T')[0]>=weekStart);
+  const sportCount={weightlifting:0,sauna:0,running:0,tennis:0};
+  weekWorkouts.forEach(w=>{const ns=normSport(w.sport_name);if(sportCount.hasOwnProperty(ns))sportCount[ns]++});
+  const goals=[{sport:'Weightlifting',icon:'🏋️',done:sportCount.weightlifting,target:3},{sport:'Sauna',icon:'🧖',done:sportCount.sauna,target:3},{sport:'Running',icon:'🏃',done:sportCount.running,target:2},{sport:'Tennis',icon:'🎾',done:sportCount.tennis,target:2}];
+
+  html+='<div style="margin-bottom:18px"><div style="font-size:0.78rem;font-weight:700;color:#fff;margin-bottom:10px">Goals This Week</div>';
+  html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px">';
+  goals.forEach(g=>{
+    const pct=Math.min(g.done/g.target,1);
+    const col=pct>=1?'var(--teal)':pct>=0.5?'var(--amber)':'var(--text-faint)';
+    html+='<div class="card" style="padding:12px;text-align:center">';
+    html+='<div style="font-size:1.2rem;margin-bottom:4px">'+g.icon+'</div>';
+    html+='<div style="font-size:0.9rem;font-weight:700;color:'+col+'">'+g.done+'/'+g.target+'</div>';
+    html+='<div style="font-size:0.6rem;color:var(--text-muted);margin-top:2px">'+g.sport+'</div>';
+    html+='<div style="margin-top:6px;height:3px;border-radius:2px;background:rgba(255,255,255,0.06);overflow:hidden"><div style="height:100%;width:'+(pct*100)+'%;background:'+col+';border-radius:2px"></div></div>';
+    html+='</div>';
+  });
+  html+='</div></div>';
+
+  // Key metrics — clickable to expand trend charts
+  html+='<div class="metrics-grid" style="margin-bottom:8px">';
+  html+='<div class="card metric-tile" onclick="toggleTrend(\'recovery\')" style="cursor:pointer"><div class="metric-value" style="color:'+recCol(recScore)+'">'+(recScore!=null?recScore+'%':'—')+'</div><div class="metric-label">Recovery</div></div>';
+  html+='<div class="card metric-tile" onclick="toggleTrend(\'hrv\')" style="cursor:pointer"><div class="metric-value">'+(hrv!=null?Math.round(hrv):'—')+'</div><div class="metric-label">HRV (ms)</div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value">'+(rhr!=null?rhr:'—')+'</div><div class="metric-label">Resting HR</div></div>';
+  html+='<div class="card metric-tile" onclick="toggleTrend(\'strain\')" style="cursor:pointer"><div class="metric-value teal">'+(strain!=null?strain.toFixed(1):'—')+'</div><div class="metric-label">Day Strain</div></div>';
+  html+='<div class="card metric-tile" onclick="toggleTrend(\'sleep\')" style="cursor:pointer"><div class="metric-value">'+(sleepHrs||'—')+'h</div><div class="metric-label">Sleep</div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value" style="color:'+(sleepScore>=85?'var(--teal)':sleepScore>=70?'var(--amber)':'var(--red-soft)')+'">'+(sleepScore!=null?sleepScore+'%':'—')+'</div><div class="metric-label">Sleep Score</div></div>';
+  html+='</div>';
+  html+='<div style="font-size:0.5rem;color:var(--text-faint);margin-bottom:16px;text-align:center">Tap a metric to view trend</div>';
+
+  // Expandable trend charts
+  html+='<div id="trend-recovery" style="display:none;margin-bottom:16px">';
+  html+='<div class="card"><div class="card-header"><span class="card-title">Recovery Trend (14 days)</span></div>';
+  const recLast14=recovery.slice(0,14).reverse();
+  if(recLast14.length){
+    html+='<div style="display:flex;align-items:flex-end;gap:4px;height:100px">';
+    recLast14.forEach(r=>{
+      const s=r.score?.recovery_score||0;
+      const h=Math.max(s,3);
+      const day=r.created_at?new Date(r.created_at).toLocaleDateString('en-AU',{weekday:'short'}).substring(0,2):'';
+      html+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">';
+      html+='<div style="font-size:0.5rem;color:'+recCol(s)+';font-weight:600">'+s+'</div>';
+      html+='<div style="width:100%;height:'+h+'px;background:'+recCol(s)+';border-radius:2px 2px 0 0;opacity:0.8"></div>';
+      html+='<div style="font-size:0.45rem;color:var(--text-faint)">'+day+'</div>';
+      html+='</div>';
+    });
+    html+='</div>';
+  } else html+='<div style="font-size:0.75rem;color:var(--text-faint)">No data yet</div>';
+  html+='</div></div>';
+
+  html+='<div id="trend-hrv" style="display:none;margin-bottom:16px">';
+  html+='<div class="card"><div class="card-header"><span class="card-title">HRV Trend (14 days)</span></div>';
+  if(recLast14.length){
+    const maxHRV=Math.max(...recLast14.map(r=>r.score?.hrv_rmssd_milli||0),1);
+    html+='<div style="display:flex;align-items:flex-end;gap:4px;height:100px">';
+    recLast14.forEach(r=>{
+      const v=r.score?.hrv_rmssd_milli||0;
+      const h=Math.round((v/maxHRV)*90)||2;
+      const day=r.created_at?new Date(r.created_at).toLocaleDateString('en-AU',{weekday:'short'}).substring(0,2):'';
+      html+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">';
+      html+='<div style="font-size:0.5rem;color:var(--teal);font-weight:600">'+Math.round(v)+'</div>';
+      html+='<div style="width:100%;height:'+h+'px;background:var(--teal);border-radius:2px 2px 0 0;opacity:0.7"></div>';
+      html+='<div style="font-size:0.45rem;color:var(--text-faint)">'+day+'</div>';
+      html+='</div>';
+    });
+    html+='</div>';
+  } else html+='<div style="font-size:0.75rem;color:var(--text-faint)">No data yet</div>';
+  html+='</div></div>';
+
+  html+='<div id="trend-sleep" style="display:none;margin-bottom:16px">';
+  html+='<div class="card"><div class="card-header"><span class="card-title">Sleep Duration (14 days)</span></div>';
+  const sleepLast14=sleepData.slice(0,14).reverse();
+  if(sleepLast14.length){
+    const maxSleep=Math.max(...sleepLast14.map(s=>s.score?.stage_summary?.total_in_bed_time_milli||0),1);
+    html+='<div style="display:flex;align-items:flex-end;gap:4px;height:100px">';
+    sleepLast14.forEach(s=>{
+      const ms=s.score?.stage_summary?.total_in_bed_time_milli||0;
+      const hrs=(ms/3600000).toFixed(1);
+      const h=Math.round((ms/maxSleep)*90)||2;
+      const col=hrs>=7?'var(--teal)':hrs>=6?'var(--amber)':'var(--red-soft)';
+      html+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">';
+      html+='<div style="font-size:0.5rem;color:'+col+';font-weight:600">'+hrs+'</div>';
+      html+='<div style="width:100%;height:'+h+'px;background:'+col+';border-radius:2px 2px 0 0;opacity:0.7"></div>';
+      html+='</div>';
+    });
+    html+='</div>';
+  } else html+='<div style="font-size:0.75rem;color:var(--text-faint)">No data yet</div>';
+  html+='</div></div>';
+
+  html+='<div id="trend-strain" style="display:none;margin-bottom:16px">';
+  html+='<div class="card"><div class="card-header"><span class="card-title">Strain (14 days)</span></div>';
+  const cycleLast14=cycles.slice(0,14).reverse();
+  if(cycleLast14.length){
+    html+='<div style="display:flex;align-items:flex-end;gap:4px;height:80px">';
+    cycleLast14.forEach(c=>{
+      const s=c.score?.strain||0;
+      const h=Math.round((s/21)*75)||2;
+      const col=s>=14?'var(--red-soft)':s>=8?'var(--amber)':'var(--teal)';
+      html+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">';
+      html+='<div style="font-size:0.5rem;color:'+col+';font-weight:600">'+s.toFixed(1)+'</div>';
+      html+='<div style="width:100%;height:'+h+'px;background:'+col+';border-radius:2px 2px 0 0;opacity:0.7"></div>';
+      html+='</div>';
+    });
+    html+='</div>';
+  } else html+='<div style="font-size:0.75rem;color:var(--text-faint)">No data yet</div>';
+  html+='</div></div>';
+
+  // Recent workouts
+  if(workouts.length){
+    const wView=localStorage.getItem('whoop_workout_view')||'cards';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
+    html+='<div style="font-size:0.9rem;font-weight:700;color:#fff">Recent Workouts</div>';
+    html+='<div style="display:flex;gap:4px">';
+    html+='<button onclick="localStorage.setItem(\'whoop_workout_view\',\'cards\');renderWhoop()" style="padding:4px 10px;border-radius:5px;border:1px solid rgba(255,255,255,'+(wView==='cards'?'0.2':'0.06')+');background:'+(wView==='cards'?'rgba(255,255,255,0.08)':'transparent')+';color:'+(wView==='cards'?'#fff':'var(--text-faint)')+';font-size:0.6rem;cursor:pointer;font-family:var(--font)">Cards</button>';
+    html+='<button onclick="localStorage.setItem(\'whoop_workout_view\',\'list\');renderWhoop()" style="padding:4px 10px;border-radius:5px;border:1px solid rgba(255,255,255,'+(wView==='list'?'0.2':'0.06')+');background:'+(wView==='list'?'rgba(255,255,255,0.08)':'transparent')+';color:'+(wView==='list'?'#fff':'var(--text-faint)')+';font-size:0.6rem;cursor:pointer;font-family:var(--font)">List</button>';
+    html+='</div></div>';
+
+    const sportIcons={running:'🏃',cycling:'🚴',swimming:'🏊',weightlifting:'🏋️',tennis:'🎾',yoga:'🧘',hiking:'🥾',walking:'🚶',rowing:'🚣',sauna:'🧖',crossfit:'⚡'};
+
+    if(wView==='cards'){
+      html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-bottom:16px">';
+      workouts.slice(0,10).forEach(w=>{
+        const sc=w.score;
+        const wStrain=sc?.strain?.toFixed(1)||'—';
+        const dur=w.start&&w.end?Math.round((new Date(w.end)-new Date(w.start))/60000):null;
+        const ns=normSport(w.sport_name);const sport=ns?(ns.charAt(0).toUpperCase()+ns.slice(1)):'Workout';
+        const icon=sportIcons[ns]||'💪';
+        const date=w.start?fmtShort(w.start):'';
+        const cals=sc?.kilojoule?Math.round(sc.kilojoule*0.239):null;
+        const zones=sc?.zone_durations;
+
+        let linkedTraining=null;
+        if(w.start&&_trainingLogs.length){
+          const wStart=new Date(w.start).getTime();
+          linkedTraining=_trainingLogs.find(tl=>tl.startTime&&Math.abs(new Date(tl.startTime).getTime()-wStart)<3*3600000);
+        }
+
+        html+='<div class="card" onclick="showWhoopWorkoutDetail(\''+w.id+'\')" style="cursor:pointer;padding:16px">';
+        html+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">';
+        html+='<div style="font-size:1.5rem">'+icon+'</div>';
+        html+='<div style="flex:1"><div style="font-size:0.9rem;font-weight:700;color:#fff">'+sport+'</div>';
+        html+='<div style="font-size:0.6rem;color:var(--text-muted)">'+date+(dur?' · '+dur+' min':'')+'</div></div>';
+        html+='<div style="text-align:right"><div style="font-size:1.1rem;font-weight:700;color:var(--teal)">'+wStrain+'</div><div style="font-size:0.45rem;color:var(--text-faint)">STRAIN</div></div>';
+        html+='</div>';
+
+        // Compact stats
+        html+='<div style="display:flex;gap:6px;flex-wrap:wrap">';
+        if(dur)html+='<div style="padding:3px 7px;border-radius:4px;background:rgba(255,255,255,0.04);font-size:0.6rem"><span style="color:#fff;font-weight:700">'+dur+'</span> <span style="color:var(--text-faint)">min</span></div>';
+        if(cals)html+='<div style="padding:3px 7px;border-radius:4px;background:rgba(255,255,255,0.04);font-size:0.6rem"><span style="color:var(--amber);font-weight:700">'+cals+'</span> <span style="color:var(--text-faint)">cal</span></div>';
+        if(sc?.average_heart_rate)html+='<div style="padding:3px 7px;border-radius:4px;background:rgba(255,255,255,0.04);font-size:0.6rem"><span style="color:var(--red-soft);font-weight:700">'+sc.average_heart_rate+'</span> <span style="color:var(--text-faint)">avg bpm</span></div>';
+        if(sc?.max_heart_rate)html+='<div style="padding:3px 7px;border-radius:4px;background:rgba(255,255,255,0.04);font-size:0.6rem"><span style="color:var(--red-soft);font-weight:700">'+sc.max_heart_rate+'</span> <span style="color:var(--text-faint)">max bpm</span></div>';
+        if(sc?.distance_meter)html+='<div style="padding:3px 7px;border-radius:4px;background:rgba(255,255,255,0.04);font-size:0.6rem"><span style="color:var(--teal);font-weight:700">'+((sc.distance_meter/1000).toFixed(1))+'km</span></div>';
+        html+='</div>';
+
+        if(zones){
+          const zoneColors=['#4a9eff','#2dd4a8','#34d399','#fbbf24','#f97316','#ef4444'];
+          const zv=[zones.zone_zero_milli||0,zones.zone_one_milli||0,zones.zone_two_milli||0,zones.zone_three_milli||0,zones.zone_four_milli||0,zones.zone_five_milli||0];
+          const zt=zv.reduce((a,b)=>a+b,0);
+          if(zt>0){
+            html+='<div style="display:flex;height:6px;border-radius:3px;overflow:hidden;gap:1px;margin-top:8px">';
+            zv.forEach((z,i)=>{if(z>0)html+='<div style="width:'+((z/zt)*100).toFixed(1)+'%;background:'+zoneColors[i]+'"></div>';});
+            html+='</div>';
+          }
+        }
+
+        if(linkedTraining){
+          html+='<div style="margin-top:8px;padding:4px 8px;border-radius:5px;background:rgba(45,212,168,0.06);border:1px solid rgba(45,212,168,0.15);font-size:0.58rem;color:var(--teal)">🔗 '+linkedTraining.templateName+'</div>';
+        }
+        html+='</div>';
+      });
+      html+='</div>';
+    } else {
+      html+='<div style="display:flex;flex-direction:column;gap:4px;margin-bottom:16px">';
+      workouts.slice(0,15).forEach(w=>{
+        const sc=w.score;
+        const dur=w.start&&w.end?Math.round((new Date(w.end)-new Date(w.start))/60000):null;
+        const ns=normSport(w.sport_name);const sport=ns?(ns.charAt(0).toUpperCase()+ns.slice(1)):'Workout';
+        const icon=sportIcons[ns]||'💪';
+        const cals=sc?.kilojoule?Math.round(sc.kilojoule*0.239):null;
+
+        html+='<div onclick="showWhoopWorkoutDetail(\''+w.id+'\')" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);cursor:pointer">';
+        html+='<div style="font-size:1rem">'+icon+'</div>';
+        html+='<div style="flex:1;min-width:0"><div style="font-size:0.78rem;font-weight:600;color:#fff">'+sport+'</div>';
+        html+='<div style="font-size:0.58rem;color:var(--text-muted)">'+(w.start?fmtShort(w.start):'')+(dur?' · '+dur+' min':'')+(sc?.average_heart_rate?' · '+sc.average_heart_rate+' bpm':'')+'</div></div>';
+        if(sc?.strain)html+='<div style="font-size:0.7rem;font-weight:700;color:var(--teal);min-width:30px;text-align:right">'+sc.strain.toFixed(1)+'</div>';
+        if(cals)html+='<div style="font-size:0.65rem;color:var(--amber);min-width:40px;text-align:right">'+cals+' cal</div>';
+        html+='</div>';
+      });
+      html+='</div>';
+    }
+  }
+
+  // Averages summary
+  if(recovery.length>=3){
+    const avg7rec=recovery.slice(0,7);
+    const avgRecScore=Math.round(avg7rec.reduce((s,r)=>s+(r.score?.recovery_score||0),0)/avg7rec.length);
+    const avgHRV=Math.round(avg7rec.reduce((s,r)=>s+(r.score?.hrv_rmssd_milli||0),0)/avg7rec.length);
+    const avgRHR=Math.round(avg7rec.reduce((s,r)=>s+(r.score?.resting_heart_rate||0),0)/avg7rec.length);
+    const avg7sleep=sleepData.slice(0,7);
+    const avgSleepHrs=avg7sleep.length?(avg7sleep.reduce((s,sl)=>s+((sl.score?.stage_summary?.total_in_bed_time_milli||0)/3600000),0)/avg7sleep.length).toFixed(1):'—';
+
+    html+='<div class="card" style="margin-top:16px"><div class="card-header"><span class="card-title">7-Day Averages</span></div>';
+    html+='<div class="metrics-grid">';
+    html+='<div class="metric-tile" style="padding:10px"><div class="metric-value" style="font-size:1.2rem;color:'+recCol(avgRecScore)+'">'+avgRecScore+'%</div><div class="metric-label">Avg Recovery</div></div>';
+    html+='<div class="metric-tile" style="padding:10px"><div class="metric-value" style="font-size:1.2rem">'+avgHRV+'</div><div class="metric-label">Avg HRV</div></div>';
+    html+='<div class="metric-tile" style="padding:10px"><div class="metric-value" style="font-size:1.2rem">'+avgRHR+'</div><div class="metric-label">Avg RHR</div></div>';
+    html+='<div class="metric-tile" style="padding:10px"><div class="metric-value" style="font-size:1.2rem">'+avgSleepHrs+'h</div><div class="metric-label">Avg Sleep</div></div>';
+    html+='</div></div>';
+  }
+
+  // ── DAILY LOG (from stored history) ──
+  if(_whoopHistory&&Object.keys(_whoopHistory).length){
+    const days=Object.keys(_whoopHistory).sort().reverse();
+    html+='<div class="card" style="margin-top:16px"><div class="card-header"><span class="card-title">Daily Log ('+days.length+' days stored)</span></div>';
+    html+='<div style="display:flex;flex-direction:column;gap:4px">';
+    days.slice(0,30).forEach(date=>{
+      const d=_whoopHistory[date];
+      const rec=d.recovery;const sl=d.sleep;const st=d.strain;const ws=d.workouts||[];
+      const recScore=rec?.score;const hrvVal=rec?.hrv?Math.round(rec.hrv):null;
+      const sleepHrs=sl?.total_hours;const sleepPerf=sl?.performance;
+      const strainVal=st?.score;
+      function rc(s){if(s==null)return'var(--text-faint)';if(s>=67)return'var(--teal)';if(s>=34)return'var(--amber)';return'var(--red-soft)'}
+      html+='<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);font-size:0.72rem">';
+      html+='<div style="min-width:70px;color:var(--text-muted);font-weight:600;font-size:0.65rem">'+fmtShort(date)+'</div>';
+      html+='<div style="min-width:50px;text-align:center"><span style="color:'+rc(recScore)+';font-weight:700">'+(recScore!=null?recScore+'%':'—')+'</span><div style="font-size:0.45rem;color:var(--text-faint)">REC</div></div>';
+      html+='<div style="min-width:40px;text-align:center"><span style="color:#fff;font-weight:600">'+(hrvVal||'—')+'</span><div style="font-size:0.45rem;color:var(--text-faint)">HRV</div></div>';
+      html+='<div style="min-width:45px;text-align:center"><span style="color:#fff">'+(sleepHrs||'—')+'h</span><div style="font-size:0.45rem;color:var(--text-faint)">SLEEP</div></div>';
+      html+='<div style="min-width:40px;text-align:center"><span style="color:var(--teal);font-weight:600">'+(strainVal!=null?strainVal.toFixed(1):'—')+'</span><div style="font-size:0.45rem;color:var(--text-faint)">STRAIN</div></div>';
+      if(ws.length){
+        const wList=ws.map(w=>{const ns=normSport(w.sport);const icon={running:'🏃',tennis:'🎾',weightlifting:'🏋️',sauna:'🧖'}[ns]||'💪';return icon+' '+(w.duration_min||'?')+'m'}).join(' ');
+        html+='<div style="flex:1;font-size:0.6rem;color:var(--text-secondary);text-align:right">'+wList+'</div>';
+      } else {
+        html+='<div style="flex:1"></div>';
+      }
+      html+='</div>';
+    });
+    html+='</div></div>';
+  }
+
+  } // end if(whoopConnected)
+
+  // ── TRAINING STATS ──
+  const streak=calcStreak(_trainingLogs);
+  const thisWeek=_trainingLogs.filter(l=>l.date>=new Date(Date.now()-7*86400000).toISOString().split('T')[0]).length;
+  const totalMins=_trainingLogs.reduce((s,l)=>s+(getWhoopDuration(l)||0),0);
+  const totalHrs=Math.round(totalMins/60*10)/10;
+
+  if(_trainingLogs.length){
+    html+='<div style="font-size:0.9rem;font-weight:700;color:#fff;margin:20px 0 12px">Training</div>';
+    html+='<div class="metrics-grid" style="margin-bottom:16px">';
+    html+='<div class="card metric-tile"><div class="metric-value">'+_trainingLogs.length+'</div><div class="metric-label">Total Sessions</div></div>';
+    html+='<div class="card metric-tile"><div class="metric-value teal">'+thisWeek+'</div><div class="metric-label">This Week</div></div>';
+    html+='<div class="card metric-tile"><div class="metric-value" style="color:'+(streak>=3?'var(--teal)':streak>=1?'var(--amber)':'var(--red-soft)')+'">'+streak+'</div><div class="metric-label">Day Streak 🔥</div></div>';
+    html+='<div class="card metric-tile"><div class="metric-value">'+totalHrs+'h</div><div class="metric-label">Total Hours</div></div>';
+    html+='</div>';
+  }
+
+  // ── WORKOUT HISTORY ──
+  if(_trainingLogs.length){
+    const viewMode=localStorage.getItem('training_view')||'cards';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
+    html+='<div style="font-size:0.9rem;font-weight:700;color:#fff">Workout History</div>';
+    html+='<div style="display:flex;gap:4px">';
+    html+='<button onclick="localStorage.setItem(\'training_view\',\'cards\');renderWhoop()" style="padding:4px 10px;border-radius:5px;border:1px solid rgba(255,255,255,'+(viewMode==='cards'?'0.2':'0.06')+');background:'+(viewMode==='cards'?'rgba(255,255,255,0.08)':'transparent')+';color:'+(viewMode==='cards'?'#fff':'var(--text-faint)')+';font-size:0.6rem;cursor:pointer;font-family:var(--font)">Cards</button>';
+    html+='<button onclick="localStorage.setItem(\'training_view\',\'list\');renderWhoop()" style="padding:4px 10px;border-radius:5px;border:1px solid rgba(255,255,255,'+(viewMode==='list'?'0.2':'0.06')+');background:'+(viewMode==='list'?'rgba(255,255,255,0.08)':'transparent')+';color:'+(viewMode==='list'?'#fff':'var(--text-faint)')+';font-size:0.6rem;cursor:pointer;font-family:var(--font)">List</button>';
+    html+='</div></div>';
+
+    if(viewMode==='cards'){
+      html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px">';
+      _trainingLogs.slice(0,20).forEach(log=>{
+        const tpl=_templates.find(t=>t.id===log.templateId);
+        const icon=tpl?tpl.icon:'🏋️';
+        const done=log.exercises?log.exercises.filter(e=>e.done).length:0;
+        const total=log.exercises?log.exercises.length:0;
+        const pct=total?Math.round((done/total)*100):0;
+        const whoopMatch=findWhoopMatch(log);
+        const sc=whoopMatch?.score;
+        const cals=sc?.kilojoule?Math.round(sc.kilojoule*0.239):null;
+
+        html+='<div class="card" onclick="showWorkoutDetail(\''+log.id+'\')" style="cursor:pointer;padding:16px;position:relative">';
+        html+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">';
+        html+='<div style="font-size:1.5rem">'+icon+'</div>';
+        html+='<div style="flex:1"><div style="font-size:0.9rem;font-weight:700;color:#fff">'+log.templateName+'</div>';
+        const wDurCard=getWhoopDuration(log);
+        html+='<div style="font-size:0.6rem;color:var(--text-muted)">'+fmtShort(log.date)+(wDurCard?' · '+wDurCard+' min':'')+'</div></div>';
+        html+='<button onclick="event.stopPropagation();deleteTrainingLog(\''+log.id+'\')" style="padding:2px 6px;border-radius:4px;background:none;border:1px solid rgba(239,68,68,0.12);color:var(--red-soft);font-size:0.5rem;cursor:pointer;font-family:var(--font);position:absolute;top:10px;right:10px">✕</button>';
+        html+='</div>';
+        html+='<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:0.55rem;color:var(--text-faint);margin-bottom:3px"><span>'+done+'/'+total+' exercises</span><span>'+pct+'%</span></div>';
+        html+='<div class="progress-bar"><div class="progress-fill" style="width:'+pct+'%"></div></div></div>';
+        if(sc){
+          html+='<div style="display:flex;gap:6px;flex-wrap:wrap">';
+          if(sc.strain)html+='<div style="padding:3px 7px;border-radius:4px;background:rgba(45,212,168,0.08);font-size:0.6rem"><span style="color:var(--teal);font-weight:700">'+sc.strain.toFixed(1)+'</span> <span style="color:var(--text-faint)">strain</span></div>';
+          if(cals)html+='<div style="padding:3px 7px;border-radius:4px;background:rgba(255,255,255,0.04);font-size:0.6rem"><span style="color:var(--amber);font-weight:700">'+cals+'</span> <span style="color:var(--text-faint)">cal</span></div>';
+          if(sc.average_heart_rate)html+='<div style="padding:3px 7px;border-radius:4px;background:rgba(255,255,255,0.04);font-size:0.6rem"><span style="color:var(--red-soft);font-weight:700">'+sc.average_heart_rate+'</span> <span style="color:var(--text-faint)">bpm</span></div>';
+          html+='</div>';
+        }
+        html+='</div>';
+      });
+      html+='</div>';
+    } else {
+      html+='<div style="display:flex;flex-direction:column;gap:4px">';
+      _trainingLogs.slice(0,30).forEach(log=>{
+        const tpl=_templates.find(t=>t.id===log.templateId);
+        const icon=tpl?tpl.icon:'🏋️';
+        const done=log.exercises?log.exercises.filter(e=>e.done).length:0;
+        const total=log.exercises?log.exercises.length:0;
+        const whoopMatch=findWhoopMatch(log);
+        const sc=whoopMatch?.score;
+        const cals=sc?.kilojoule?Math.round(sc.kilojoule*0.239):null;
+
+        html+='<div onclick="showWorkoutDetail(\''+log.id+'\')" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);cursor:pointer">';
+        html+='<div style="font-size:1rem">'+icon+'</div>';
+        html+='<div style="flex:1;min-width:0"><div style="font-size:0.78rem;font-weight:600;color:#fff">'+log.templateName+'</div>';
+        const wDurList=getWhoopDuration(log);
+        html+='<div style="font-size:0.58rem;color:var(--text-muted)">'+fmtShort(log.date)+(wDurList?' · '+wDurList+' min':'')+' · '+done+'/'+total+'</div></div>';
+        if(sc){
+          if(sc.strain)html+='<div style="font-size:0.7rem;font-weight:700;color:var(--teal);min-width:30px;text-align:right">'+sc.strain.toFixed(1)+'</div>';
+          if(cals)html+='<div style="font-size:0.65rem;color:var(--amber);min-width:40px;text-align:right">'+cals+' cal</div>';
+        }
+        html+='<button onclick="event.stopPropagation();deleteTrainingLog(\''+log.id+'\')" style="padding:2px 6px;border-radius:4px;background:none;border:1px solid rgba(239,68,68,0.12);color:var(--red-soft);font-size:0.5rem;cursor:pointer;font-family:var(--font)">✕</button>';
+        html+='</div>';
+      });
+      html+='</div>';
+    }
+  }
+
+  el.innerHTML=html;
+}
+
+function toggleTrend(key){
+  const el=document.getElementById('trend-'+key);if(!el)return;
+  const vis=el.style.display!=='none';
+  document.querySelectorAll('[id^="trend-"]').forEach(e=>e.style.display='none');
+  if(!vis)el.style.display='block';
+}
+
+function showWhoopWorkoutDetail(workoutId){
+  const workouts=_whoopData?.workouts||[];
+  const w=workouts.find(x=>String(x.id)===String(workoutId));if(!w)return;
+  const sc=w.score;
+  const sportIcons={running:'🏃',cycling:'🚴',swimming:'🏊',weightlifting:'🏋️',tennis:'🎾',yoga:'🧘',hiking:'🥾',walking:'🚶',rowing:'🚣',sauna:'🧖',crossfit:'⚡'};
+  const ns=normSport(w.sport_name);const sport=ns?(ns.charAt(0).toUpperCase()+ns.slice(1)):'Workout';
+  const icon=sportIcons[ns]||'💪';
+  const dur=w.start&&w.end?Math.round((new Date(w.end)-new Date(w.start))/60000):null;
+  const cals=sc?.kilojoule?Math.round(sc.kilojoule*0.239):null;
+
+  document.getElementById('workout-detail-title').textContent=icon+' '+sport;
+
+  let h='';
+  h+='<div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;font-size:0.72rem;color:var(--text-muted)">';
+  if(w.start)h+='<span>'+fmtShort(w.start)+'</span>';
+  if(dur)h+='<span>'+dur+' min</span>';
+  if(w.start)h+='<span>'+new Date(w.start).toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'})+' — '+(w.end?new Date(w.end).toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}):'')+'</span>';
+  h+='</div>';
+
+  if(sc){
+    h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px">';
+    h+='<div style="text-align:center;padding:10px;border-radius:6px;background:rgba(0,0,0,0.2)"><div style="font-size:1.2rem;font-weight:700;color:var(--teal)">'+(sc.strain?sc.strain.toFixed(1):'—')+'</div><div style="font-size:0.5rem;color:var(--text-faint);margin-top:2px">STRAIN</div></div>';
+    h+='<div style="text-align:center;padding:10px;border-radius:6px;background:rgba(0,0,0,0.2)"><div style="font-size:1.2rem;font-weight:700;color:var(--amber)">'+(cals||'—')+'</div><div style="font-size:0.5rem;color:var(--text-faint);margin-top:2px">CALORIES</div></div>';
+    h+='<div style="text-align:center;padding:10px;border-radius:6px;background:rgba(0,0,0,0.2)"><div style="font-size:1.2rem;font-weight:700;color:var(--red-soft)">'+(sc.average_heart_rate||'—')+'</div><div style="font-size:0.5rem;color:var(--text-faint);margin-top:2px">AVG HR</div></div>';
+    h+='<div style="text-align:center;padding:10px;border-radius:6px;background:rgba(0,0,0,0.2)"><div style="font-size:1.2rem;font-weight:700;color:var(--red-soft)">'+(sc.max_heart_rate||'—')+'</div><div style="font-size:0.5rem;color:var(--text-faint);margin-top:2px">MAX HR</div></div>';
+    h+='</div>';
+
+    if(sc.distance_meter){
+      h+='<div style="margin-bottom:12px;padding:8px 12px;border-radius:6px;background:rgba(255,255,255,0.03);font-size:0.75rem"><span style="color:var(--teal);font-weight:700">'+((sc.distance_meter/1000).toFixed(2))+'</span> <span style="color:var(--text-faint)">km</span></div>';
+    }
+
+    const zones=sc.zone_durations;
+    if(zones){
+      const zoneColors=['#4a9eff','#2dd4a8','#34d399','#fbbf24','#f97316','#ef4444'];
+      const zoneLabels=['Rest','Light','Moderate','Hard','Very Hard','Max'];
+      const zv=[zones.zone_zero_milli||0,zones.zone_one_milli||0,zones.zone_two_milli||0,zones.zone_three_milli||0,zones.zone_four_milli||0,zones.zone_five_milli||0];
+      const zt=zv.reduce((a,b)=>a+b,0);
+      if(zt>0){
+        h+='<div style="font-size:0.65rem;font-weight:600;color:#fff;margin-bottom:6px">Heart Rate Zones</div>';
+        h+='<div style="display:flex;height:14px;border-radius:7px;overflow:hidden;gap:1px;margin-bottom:8px">';
+        zv.forEach((z,i)=>{if(z>0)h+='<div style="width:'+((z/zt)*100).toFixed(1)+'%;background:'+zoneColors[i]+'"></div>';});
+        h+='</div>';
+        zv.forEach((z,i)=>{
+          if(z>0){
+            const mins=Math.round(z/60000);
+            const pct=((z/zt)*100).toFixed(0);
+            h+='<div style="display:flex;align-items:center;gap:8px;padding:4px 0">';
+            h+='<div style="width:8px;height:8px;border-radius:50%;background:'+zoneColors[i]+'"></div>';
+            h+='<div style="flex:1;font-size:0.7rem;color:var(--text-muted)">'+zoneLabels[i]+'</div>';
+            h+='<div style="font-size:0.7rem;color:#fff;font-weight:600;min-width:35px;text-align:right">'+mins+'m</div>';
+            h+='<div style="font-size:0.6rem;color:var(--text-faint);min-width:30px;text-align:right">'+pct+'%</div>';
+            h+='</div>';
+          }
+        });
+      }
+    }
+  }
+
+  // Linked training
+  let linkedTraining=null;
+  if(w.start&&_trainingLogs.length){
+    const wStart=new Date(w.start).getTime();
+    linkedTraining=_trainingLogs.find(tl=>tl.startTime&&Math.abs(new Date(tl.startTime).getTime()-wStart)<3*3600000);
+  }
+  if(linkedTraining){
+    const done=linkedTraining.exercises?linkedTraining.exercises.filter(e=>e.done).length:0;
+    const tot=linkedTraining.exercises?linkedTraining.exercises.length:0;
+    h+='<div style="margin-top:14px;padding:10px 12px;border-radius:8px;background:rgba(45,212,168,0.06);border:1px solid rgba(45,212,168,0.15)">';
+    h+='<div style="font-size:0.65rem;color:var(--teal);font-weight:600;margin-bottom:6px">🔗 Linked Training Session</div>';
+    h+='<div style="font-size:0.8rem;font-weight:600;color:#fff">'+linkedTraining.templateName+'</div>';
+    const ltDur=getWhoopDuration(linkedTraining);
+    h+='<div style="font-size:0.65rem;color:var(--text-muted);margin-top:2px">'+done+'/'+tot+' exercises'+(ltDur?' · '+ltDur+' min':'')+'</div>';
+    if(linkedTraining.exercises){
+      linkedTraining.exercises.forEach(ex=>{
+        h+='<div style="display:flex;align-items:center;gap:6px;padding:3px 0;font-size:0.68rem">';
+        h+='<span>'+(ex.done?'✅':'⬜')+'</span><span style="color:'+(ex.done?'#fff':'var(--text-muted)')+'">'+ex.name+'</span>';
+        h+='</div>';
+      });
+    }
+    h+='</div>';
+  }
+
+  document.getElementById('workout-detail-content').innerHTML=h;
+  openModal('workout-detail-modal');
+}
+
+// Check for whoop connection redirect
+(function(){
+  const params=new URLSearchParams(window.location.search);
+  if(params.get('whoop')==='connected'){
+    history.replaceState(null,'','/');
+    setTimeout(()=>switchTab('whoop'),300);
+  }
+})();
+
+// ════════════════════════════════════════
+// OVERVIEW
+// ════════════════════════════════════════
+// ════════════════════════════════════════
+// INVESTMENT PROPERTIES
+// ════════════════════════════════════════
+let _properties=[];
+async function loadProperties(){
+  try{
+    const res=await fetch('/api/properties?t='+Date.now());
+    if(res.ok){const d=await res.json();_properties=d.properties||[];if(d.updated)document.getElementById('properties-updated').textContent='Saved: '+fmt(d.updated);renderProperties()}
+  }catch(e){console.warn('Properties load failed',e)}
+}
+async function saveProperties(){
+  try{await fetch('/api/properties',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'save',properties:_properties})});document.getElementById('properties-updated').textContent='Saved: '+fmt(new Date().toISOString())}catch(e){console.warn('Properties save failed',e)}
+}
+
+let _editingPropertyId=null;
+function showPropertyModal(id){
+  _editingPropertyId=id||null;
+  const m=document.getElementById('property-modal');
+  m.style.display='flex';
+  document.getElementById('property-modal-title').textContent=id?'Edit Property':'Add Property';
+  const p=id?_properties.find(x=>x.id===id):{};
+  document.getElementById('prop-name').value=p.name||'';
+  document.getElementById('prop-status').value=p.status||'researching';
+  document.getElementById('prop-type').value=p.type||'house';
+  document.getElementById('prop-price').value=p.price||'';
+  document.getElementById('prop-rent').value=p.rent||'';
+  document.getElementById('prop-deposit').value=p.deposit||'';
+  document.getElementById('prop-rate').value=p.rate||'';
+  document.getElementById('prop-beds').value=p.beds||'';
+  document.getElementById('prop-baths').value=p.baths||'';
+  document.getElementById('prop-cars').value=p.cars||'';
+  document.getElementById('prop-suburb').value=p.suburb||'';
+  document.getElementById('prop-url').value=p.url||'';
+  document.getElementById('prop-notes').value=p.notes||'';
+}
+function closePropertyModal(){document.getElementById('property-modal').style.display='none';_editingPropertyId=null}
+function saveProperty(){
+  const data={
+    name:document.getElementById('prop-name').value.trim(),
+    status:document.getElementById('prop-status').value,
+    type:document.getElementById('prop-type').value,
+    price:parseFloat(document.getElementById('prop-price').value)||0,
+    rent:parseFloat(document.getElementById('prop-rent').value)||0,
+    deposit:parseFloat(document.getElementById('prop-deposit').value)||0,
+    rate:parseFloat(document.getElementById('prop-rate').value)||0,
+    beds:parseInt(document.getElementById('prop-beds').value)||0,
+    baths:parseInt(document.getElementById('prop-baths').value)||0,
+    cars:parseInt(document.getElementById('prop-cars').value)||0,
+    suburb:document.getElementById('prop-suburb').value.trim(),
+    url:document.getElementById('prop-url').value.trim(),
+    notes:document.getElementById('prop-notes').value.trim(),
+  };
+  if(!data.name)return;
+  if(_editingPropertyId){
+    const p=_properties.find(x=>x.id===_editingPropertyId);
+    if(p)Object.assign(p,data,{modified:new Date().toISOString()});
+  } else {
+    _properties.unshift({id:Date.now().toString(),created:new Date().toISOString(),modified:new Date().toISOString(),...data});
+  }
+  closePropertyModal();
+  saveProperties();renderProperties();renderOverview();
+}
+function deleteProperty(id){
+  if(!confirm('Delete this property?'))return;
+  _properties=_properties.filter(p=>p.id!==id);
+  saveProperties();renderProperties();renderOverview();
+}
+
+function renderProperties(){
+  const el=document.getElementById('properties-content');
+  if(!_properties.length){
+    el.innerHTML='<div class="empty-state"><div class="icon">🏠</div><h3>No properties yet</h3><p>Add your first investment property to start tracking</p></div>';
+    return;
+  }
+
+  const statusColors={researching:'#96c7f2',watching:'#e9c162',offer:'#f97316',owned:'#2dd4a8',passed:'#8b8b8b'};
+  const statusLabels={researching:'Researching',watching:'Watching',offer:'Offer Made',owned:'Owned',passed:'Passed'};
+  const typeLabels={house:'House',unit:'Unit/Apartment',townhouse:'Townhouse',land:'Land',duplex:'Duplex'};
+
+  // Summary tiles
+  const owned=_properties.filter(p=>p.status==='owned');
+  const totalValue=owned.reduce((s,p)=>s+p.price,0);
+  const totalRentWk=owned.reduce((s,p)=>s+p.rent,0);
+  const totalRentYr=totalRentWk*52;
+  const avgYield=totalValue?((totalRentYr/totalValue)*100):0;
+
+  let html='<div class="metrics-grid" style="margin-bottom:16px">';
+  html+='<div class="card metric-tile"><div class="metric-value">'+_properties.length+'</div><div class="metric-label">Total Properties</div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value teal">'+owned.length+'</div><div class="metric-label">Owned</div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value">$'+(totalValue>=1e6?(totalValue/1e6).toFixed(2)+'M':totalValue.toLocaleString())+'</div><div class="metric-label">Portfolio Value</div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value teal">$'+fmt2(totalRentWk)+'</div><div class="metric-label">Rent /wk</div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value" style="color:var(--amber)">'+avgYield.toFixed(1)+'%</div><div class="metric-label">Avg Yield</div></div>';
+  html+='</div>';
+
+  // Property cards
+  html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px">';
+  _properties.forEach(p=>{
+    const sc=statusColors[p.status]||'#96c7f2';
+    const mortgage=p.price&&p.deposit?(p.price-p.deposit):0;
+    const weeklyMortgage=mortgage&&p.rate?((mortgage*(p.rate/100/12))/(1-Math.pow(1+p.rate/100/12,-360)))*12/52:0;
+    const cashflow=p.rent-weeklyMortgage;
+    const yieldPct=p.price?((p.rent*52/p.price)*100):0;
+
+    html+='<div class="card" style="padding:16px;border-left:3px solid '+sc+'">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">';
+    html+='<div><div style="font-size:0.85rem;font-weight:700;color:#fff">'+p.name+'</div>';
+    if(p.suburb)html+='<div style="font-size:0.65rem;color:var(--text-faint);margin-top:2px">📍 '+p.suburb+'</div>';
+    html+='</div>';
+    html+='<div style="display:flex;gap:6px;align-items:center">';
+    html+='<span style="padding:2px 8px;border-radius:4px;font-size:0.6rem;background:'+sc+'22;color:'+sc+';border:1px solid '+sc+'44">'+statusLabels[p.status]+'</span>';
+    html+='<span style="padding:2px 8px;border-radius:4px;font-size:0.6rem;background:rgba(255,255,255,0.06);color:var(--text-muted);border:1px solid rgba(255,255,255,0.08)">'+typeLabels[p.type]+'</span>';
+    html+='</div></div>';
+
+    // Specs
+    if(p.beds||p.baths||p.cars){
+      html+='<div style="display:flex;gap:12px;font-size:0.7rem;color:var(--text-secondary);margin-bottom:10px">';
+      if(p.beds)html+='<span>🛏 '+p.beds+'</span>';
+      if(p.baths)html+='<span>🚿 '+p.baths+'</span>';
+      if(p.cars)html+='<span>🚗 '+p.cars+'</span>';
+      html+='</div>';
+    }
+
+    // Financials
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:10px;border-radius:8px;background:rgba(255,255,255,0.03);margin-bottom:8px">';
+    html+='<div style="text-align:center"><div style="font-size:0.55rem;color:var(--text-faint)">Price</div><div style="font-size:0.78rem;font-weight:700;color:#fff">$'+(p.price>=1e6?(p.price/1e6).toFixed(2)+'M':p.price?p.price.toLocaleString():'—')+'</div></div>';
+    html+='<div style="text-align:center"><div style="font-size:0.55rem;color:var(--text-faint)">Rent /wk</div><div style="font-size:0.78rem;font-weight:700;color:var(--teal)">$'+fmt2(p.rent)+'</div></div>';
+    html+='<div style="text-align:center"><div style="font-size:0.55rem;color:var(--text-faint)">Yield</div><div style="font-size:0.78rem;font-weight:700;color:var(--amber)">'+yieldPct.toFixed(1)+'%</div></div>';
+    html+='</div>';
+
+    if(mortgage>0&&p.rate){
+      html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:10px;border-radius:8px;background:rgba(255,255,255,0.03);margin-bottom:8px">';
+      html+='<div style="text-align:center"><div style="font-size:0.55rem;color:var(--text-faint)">Mortgage</div><div style="font-size:0.78rem;font-weight:600;color:var(--text-secondary)">$'+mortgage.toLocaleString()+'</div></div>';
+      html+='<div style="text-align:center"><div style="font-size:0.55rem;color:var(--text-faint)">Repayment /wk</div><div style="font-size:0.78rem;font-weight:600;color:var(--red-soft)">$'+fmt2(weeklyMortgage)+'</div></div>';
+      html+='<div style="text-align:center"><div style="font-size:0.55rem;color:var(--text-faint)">Cashflow /wk</div><div style="font-size:0.78rem;font-weight:700;color:'+(cashflow>=0?'var(--teal)':'var(--red-soft)')+'">$'+fmt2(cashflow)+'</div></div>';
+      html+='</div>';
+    }
+
+    if(p.notes){
+      html+='<div style="font-size:0.68rem;color:var(--text-muted);padding:6px 0;border-top:1px solid rgba(255,255,255,0.04)">'+p.notes+'</div>';
+    }
+
+    html+='<div style="display:flex;gap:8px;margin-top:8px">';
+    html+='<button class="btn btn-ghost" onclick="showPropertyModal(\''+p.id+'\')" style="font-size:0.65rem;flex:1">Edit</button>';
+    if(p.url)html+='<a href="'+p.url+'" target="_blank" class="btn btn-ghost" style="font-size:0.65rem;text-decoration:none;text-align:center">🔗 Listing</a>';
+    html+='<button class="btn btn-ghost" onclick="deleteProperty(\''+p.id+'\')" style="font-size:0.65rem;color:var(--red-soft)">Delete</button>';
+    html+='</div>';
+    html+='</div>';
+  });
+  html+='</div>';
+
+  el.innerHTML=html;
+}
+
+function renderOverview(){
+  const totalChecklistItems=_checklists.reduce((s,l)=>s+l.items.length,0);
+  const doneChecklistItems=_checklists.reduce((s,l)=>s+l.items.filter(i=>i.done).length,0);
+  const checklistPct=totalChecklistItems?Math.round(doneChecklistItems/totalChecklistItems*100):0;
+  const activeGoals=_goals.filter(g=>g.status!=='Complete').length;
+  const completedGoals=_goals.filter(g=>g.status==='Complete').length;
+  const avgGoalProgress=_goals.length?Math.round(_goals.reduce((s,g)=>s+g.progress,0)/_goals.length):0;
+
+  // Finance data
+  const activeItems=_costTracking.filter(c=>c.status==='active');
+  const totalMonthly=activeItems.reduce((s,c)=>s+deriveCosts(c).monthly,0);
+  const monthlyLiving=350*52/12;
+  const monthlyIncome=_weeklyIncome*52/12;
+  const surplus=monthlyIncome-totalMonthly-monthlyLiving;
+
+  // Whoop data
+  const todayStr=new Date().toISOString().split('T')[0];
+  const yesterdayStr=new Date(Date.now()-86400000).toISOString().split('T')[0];
+  let latestWhoop=null;
+  if(_whoopHistory){
+    latestWhoop=_whoopHistory[todayStr]||_whoopHistory[yesterdayStr]||null;
+  }
+  const recScore=latestWhoop?.recovery?.score;
+  const hrvVal=latestWhoop?.recovery?.hrv?Math.round(latestWhoop.recovery.hrv):null;
+  const sleepHrs=latestWhoop?.sleep?.total_hours;
+  const strainVal=latestWhoop?.strain?.score;
+  function rc(s){if(s==null)return'var(--text-faint)';if(s>=67)return'var(--teal)';if(s>=34)return'var(--amber)';return'var(--red-soft)'}
+
+  // Training
+  const streak=calcStreak(_trainingLogs);
+  const thisWeek=_trainingLogs.filter(l=>l.date>=new Date(Date.now()-7*86400000).toISOString().split('T')[0]).length;
+
+  document.getElementById('overview-updated').textContent='Last loaded: '+fmt(new Date().toISOString());
+
+  // Build metrics
+  const tc=s=>'onclick="switchTab(\''+s+'\')" style="cursor:pointer"';
+  document.getElementById('overview-metrics').innerHTML=
+    '<div class="card metric-tile" '+tc('finances')+'><div class="metric-value teal">$'+fmt2(surplus)+'</div><div class="metric-label">Surplus /mo</div></div>'+
+    '<div class="card metric-tile" '+tc('finances')+'><div class="metric-value" style="color:var(--red-soft)">$'+fmt2(totalMonthly)+'</div><div class="metric-label">Costs /mo</div></div>'+
+    '<div class="card metric-tile" '+tc('whoop')+'><div class="metric-value" style="color:'+rc(recScore)+'">'+(recScore!=null?recScore+'%':'—')+'</div><div class="metric-label">Recovery</div></div>'+
+    '<div class="card metric-tile" '+tc('whoop')+'><div class="metric-value" style="color:'+(streak>=3?'var(--teal)':'var(--amber)')+'">'+streak+'🔥</div><div class="metric-label">Streak</div></div>'+
+    '<div class="card metric-tile" '+tc('goals')+'><div class="metric-value" style="color:var(--amber)">'+activeGoals+'</div><div class="metric-label">Active Goals</div></div>'+
+    '<div class="card metric-tile" '+tc('checklists')+'><div class="metric-value teal">'+checklistPct+'%</div><div class="metric-label">Tasks Done</div></div>'+
+    '<div class="card metric-tile" '+tc('notes')+'><div class="metric-value">'+_notes.length+'</div><div class="metric-label">Notes</div></div>';
+
+  // Build panels
+  let panels='';
+
+  // Finance snapshot
+  panels+='<div class="card" style="cursor:pointer" onclick="switchTab(\'finances\')">';
+  panels+='<div class="card-header"><span class="card-title">💰 Finances</span><span style="font-size:0.65rem;color:var(--text-faint)">'+activeItems.length+' subscriptions</span></div>';
+  panels+='<div style="display:flex;gap:12px;margin:10px 0">';
+  panels+='<div style="flex:1;text-align:center"><div style="font-size:0.65rem;color:var(--text-faint)">Income</div><div style="font-weight:700;color:var(--teal)">$'+fmt2(monthlyIncome)+'</div></div>';
+  panels+='<div style="flex:1;text-align:center"><div style="font-size:0.65rem;color:var(--text-faint)">Costs</div><div style="font-weight:700;color:var(--red-soft)">$'+fmt2(totalMonthly)+'</div></div>';
+  panels+='<div style="flex:1;text-align:center"><div style="font-size:0.65rem;color:var(--text-faint)">Living</div><div style="font-weight:700;color:var(--amber)">$'+fmt2(monthlyLiving)+'</div></div>';
+  panels+='<div style="flex:1;text-align:center"><div style="font-size:0.65rem;color:var(--text-faint)">Surplus</div><div style="font-weight:700;color:'+(surplus>=0?'var(--teal)':'var(--red-soft)')+'">$'+fmt2(surplus)+'</div></div>';
+  panels+='</div>';
+  // mini bar of top 3 costs
+  const topCosts=[...activeItems].sort((a,b)=>deriveCosts(b).monthly-deriveCosts(a).monthly).slice(0,3);
+  topCosts.forEach(c=>{
+    const d=deriveCosts(c);
+    panels+='<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.7rem;border-top:1px solid rgba(255,255,255,0.04)">';
+    panels+='<span style="color:var(--text-secondary)">'+c.name+'</span><span style="color:#fff;font-weight:600">$'+fmt2(d.monthly)+'/mo</span></div>';
+  });
+  panels+='</div>';
+
+  // Whoop / Training snapshot
+  panels+='<div class="card" style="cursor:pointer" onclick="switchTab(\'whoop\')">';
+  panels+='<div class="card-header"><span class="card-title">💪 Health & Training</span><span style="font-size:0.65rem;color:var(--text-faint)">'+thisWeek+' sessions this week</span></div>';
+  if(latestWhoop){
+    panels+='<div style="display:flex;gap:12px;margin:10px 0">';
+    panels+='<div style="flex:1;text-align:center"><div style="font-size:0.65rem;color:var(--text-faint)">Recovery</div><div style="font-weight:700;color:'+rc(recScore)+'">'+(recScore!=null?recScore+'%':'—')+'</div></div>';
+    panels+='<div style="flex:1;text-align:center"><div style="font-size:0.65rem;color:var(--text-faint)">HRV</div><div style="font-weight:700;color:#fff">'+(hrvVal||'—')+'</div></div>';
+    panels+='<div style="flex:1;text-align:center"><div style="font-size:0.65rem;color:var(--text-faint)">Sleep</div><div style="font-weight:700;color:#fff">'+(sleepHrs?sleepHrs+'h':'—')+'</div></div>';
+    panels+='<div style="flex:1;text-align:center"><div style="font-size:0.65rem;color:var(--text-faint)">Strain</div><div style="font-weight:700;color:var(--teal)">'+(strainVal!=null?strainVal.toFixed(1):'—')+'</div></div>';
+    panels+='</div>';
+  }
+  // recent training
+  const recentTraining=_trainingLogs.slice(0,3);
+  recentTraining.forEach(t=>{
+    const dur=getWhoopDuration(t);
+    panels+='<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.7rem;border-top:1px solid rgba(255,255,255,0.04)">';
+    panels+='<span style="color:var(--text-secondary)">'+t.templateName+(dur?' — '+dur+'m':'')+'</span><span style="color:var(--text-faint)">'+fmtShort(t.date)+'</span></div>';
+  });
+  panels+='</div>';
+
+  // Goals snapshot
+  panels+='<div class="card" style="cursor:pointer" onclick="switchTab(\'goals\')">';
+  panels+='<div class="card-header"><span class="card-title">🎯 Goals</span><span style="font-size:0.65rem;color:var(--text-faint)">'+completedGoals+'/'+_goals.length+' complete</span></div>';
+  if(_goals.length){
+    panels+='<div style="margin:8px 0"><div style="height:6px;border-radius:3px;background:rgba(255,255,255,0.08);overflow:hidden"><div style="height:100%;width:'+avgGoalProgress+'%;background:var(--teal);border-radius:3px;transition:width 0.3s"></div></div>';
+    panels+='<div style="text-align:right;font-size:0.6rem;color:var(--text-faint);margin-top:3px">Avg progress: '+avgGoalProgress+'%</div></div>';
+    _goals.filter(g=>g.status!=='Complete').slice(0,3).forEach(g=>{
+      panels+='<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:0.7rem;border-top:1px solid rgba(255,255,255,0.04)">';
+      panels+='<span style="color:var(--text-secondary)">'+g.title+'</span>';
+      panels+='<div style="display:flex;align-items:center;gap:6px"><div style="width:40px;height:4px;border-radius:2px;background:rgba(255,255,255,0.08);overflow:hidden"><div style="height:100%;width:'+g.progress+'%;background:var(--teal);border-radius:2px"></div></div><span style="color:var(--text-faint);font-size:0.6rem">'+g.progress+'%</span></div>';
+      panels+='</div>';
+    });
+  } else {
+    panels+='<div style="color:var(--text-faint);font-size:0.75rem;padding:8px 0">No goals yet</div>';
+  }
+  panels+='</div>';
+
+  // Properties snapshot
+  const ownedProps=_properties.filter(p=>p.status==='owned');
+  const propValue=ownedProps.reduce((s,p)=>s+p.price,0);
+  const propRentWk=ownedProps.reduce((s,p)=>s+p.rent,0);
+  panels+='<div class="card" style="cursor:pointer" onclick="switchTab(\'properties\')">';
+  panels+='<div class="card-header"><span class="card-title">🏠 Properties</span><span style="font-size:0.65rem;color:var(--text-faint)">'+_properties.length+' tracked</span></div>';
+  if(_properties.length){
+    panels+='<div style="display:flex;gap:12px;margin:10px 0">';
+    panels+='<div style="flex:1;text-align:center"><div style="font-size:0.65rem;color:var(--text-faint)">Owned</div><div style="font-weight:700;color:var(--teal)">'+ownedProps.length+'</div></div>';
+    panels+='<div style="flex:1;text-align:center"><div style="font-size:0.65rem;color:var(--text-faint)">Value</div><div style="font-weight:700;color:#fff">$'+(propValue>=1e6?(propValue/1e6).toFixed(2)+'M':propValue.toLocaleString())+'</div></div>';
+    panels+='<div style="flex:1;text-align:center"><div style="font-size:0.65rem;color:var(--text-faint)">Rent /wk</div><div style="font-weight:700;color:var(--teal)">$'+fmt2(propRentWk)+'</div></div>';
+    panels+='</div>';
+    _properties.slice(0,3).forEach(p=>{
+      const sc={researching:'#96c7f2',watching:'#e9c162',offer:'#f97316',owned:'#2dd4a8',passed:'#8b8b8b'}[p.status]||'#96c7f2';
+      panels+='<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:0.7rem;border-top:1px solid rgba(255,255,255,0.04)">';
+      panels+='<span style="color:var(--text-secondary)">'+p.name+'</span><span style="padding:1px 6px;border-radius:3px;font-size:0.55rem;background:'+sc+'22;color:'+sc+'">'+p.status+'</span></div>';
+    });
+  } else {
+    panels+='<div style="color:var(--text-faint);font-size:0.75rem;padding:8px 0">No properties yet</div>';
+  }
+  panels+='</div>';
+
+  // Recent Activity
+  panels+='<div class="card">';
+  panels+='<div class="card-header"><span class="card-title">📋 Recent Activity</span></div>';
+  const activities=[];
+  _notes.forEach(n=>activities.push({text:'✎ '+n.title,date:n.modified,tab:'notes'}));
+  _goals.forEach(g=>activities.push({text:'🎯 '+g.title+' ('+g.progress+'%)',date:g.modified,tab:'goals'}));
+  _finances.slice(-5).forEach(e=>activities.push({text:(e.type==='income'?'💚 +':'🔴 -')+$(e.amount)+' '+e.description,date:e.date,tab:'finances'}));
+  _trainingLogs.slice(0,5).forEach(t=>{const d=getWhoopDuration(t);activities.push({text:'💪 '+t.templateName+(d?' — '+d+'m':''),date:t.date,tab:'whoop'})});
+  activities.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  if(activities.length){
+    panels+=activities.slice(0,6).map(a=>'<div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.03);display:flex;justify-content:space-between;cursor:pointer;font-size:0.72rem" onclick="switchTab(\''+a.tab+'\')"><span style="color:var(--text-secondary)">'+a.text+'</span><span style="color:var(--text-faint);font-size:0.6rem">'+fmtShort(a.date)+'</span></div>').join('');
+  } else {
+    panels+='<div style="color:var(--text-faint);font-size:0.75rem">No activity yet</div>';
+  }
+  panels+='</div>';
+
+  document.getElementById('overview-panels').innerHTML=panels;
+}
+
+// ─── Init ───
+loadAll();
+</script>
+</body>
+</html>
