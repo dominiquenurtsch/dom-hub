@@ -1141,7 +1141,7 @@ function renderFinances(){
   const totalMonthly=activeDerived.reduce((s,d)=>s+d.monthly,0);
   const totalWeekly=activeDerived.reduce((s,d)=>s+d.weekly,0);
   const totalAnnual=activeDerived.reduce((s,d)=>s+d.annual,0);
-  const weeklyLiving=350;
+  const weeklyLiving=0;
   const monthlyLiving=weeklyLiving*52/12;
   const annualLiving=weeklyLiving*52;
   const weeklyNet=weeklyIncome-totalWeekly-weeklyLiving;
@@ -1197,7 +1197,8 @@ function renderFinances(){
   }
 
   // Pie chart
-  const pieData=[...grouped.filter(g=>g.totalMonthly>0),{label:'Living Expenses',color:'#f97316',totalMonthly:monthlyLiving}];
+  const pieData=[...grouped.filter(g=>g.totalMonthly>0)];
+  if(monthlyLiving>0)pieData.push({label:'Living Expenses',color:'#f97316',totalMonthly:monthlyLiving});
   const pieTotal=pieData.reduce((s,d)=>s+d.totalMonthly,0);
   let angle=0;
   const slices=pieData.map(d=>{
@@ -2474,7 +2475,7 @@ function renderOverview(){
   // Finance data
   const activeItems=_costTracking.filter(c=>c.status==='active');
   const totalMonthly=activeItems.reduce((s,c)=>s+deriveCosts(c).monthly,0);
-  const monthlyLiving=350*52/12;
+  const monthlyLiving=0;
   const monthlyIncome=_weeklyIncome*52/12;
   const surplus=monthlyIncome-totalMonthly-monthlyLiving;
 
