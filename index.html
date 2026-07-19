@@ -7,36 +7,38 @@
 <link rel="icon" href="/favicon.ico">
 <link rel="apple-touch-icon" href="/icon-180.png">
 <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#000000">
+<meta name="theme-color" content="#f9f8f3">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Dom Hub">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <style>
 :root {
-  --black: #fff;
-  --text: #e8e8e8;
-  --text-secondary: #ccc;
-  --text-muted: #999;
-  --text-faint: #777;
-  --white: #fff;
-  --teal: #2dd4a8;
-  --teal-bright: #34eabd;
-  --teal-glow: rgba(45,212,168,0.15);
-  --teal-subtle: rgba(45,212,168,0.07);
+  --black: #1c1b1b;
+  --text: #1c1b1b;
+  --text-secondary: #4a4844;
+  --text-muted: #6b6862;
+  --text-faint: #928f88;
+  --white: #1c1b1b;
+  --on-accent: #f9f8f3;
+  --teal: #1a1a1a;
+  --teal-bright: #000000;
+  --teal-glow: rgba(26,26,26,0.15);
+  --teal-subtle: rgba(26,26,26,0.07);
   --red-soft: #ef6b6b;
   --amber: #f0a840;
   --green: #34d399;
-  --glass-bg: rgba(255,255,255,0.08);
-  --glass-bg-heavy: rgba(255,255,255,0.12);
-  --glass-border: rgba(255,255,255,0.12);
-  --glass-border-subtle: rgba(255,255,255,0.08);
-  --glass-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  --glass-bg: rgba(255,255,255,0.66);
+  --glass-bg-heavy: rgba(255,255,255,0.85);
+  --glass-border: rgba(28,27,27,0.10);
+  --glass-border-subtle: rgba(28,27,27,0.06);
+  --glass-shadow: 0 6px 24px rgba(28,27,27,0.08);
   --glass-blur: 30px;
-  --sidebar-bg: rgba(255,255,255,0.06);
-  --font: 'Inter', -apple-system, sans-serif;
+  --sidebar-bg: rgba(28,27,27,0.06);
+  --font: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
   --sidebar-w: 256px;
   --radius: 16px;
   --radius-sm: 10px;
@@ -44,44 +46,44 @@
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:15px;overflow-x:hidden}
-body{font-family:var(--font);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;background:#0a0a0a;max-width:100vw}
-.bg-layer{position:fixed;inset:0;z-index:0;background:url('wallpaper.jpg') center center/cover no-repeat}
-.bg-layer::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,0.5)}
+body{font-family:var(--font);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;background:#f9f8f3;max-width:100vw}
+.bg-layer{position:fixed;inset:0;z-index:0;background:#f9f8f3}
+.bg-layer::after{content:'';position:absolute;inset:0;background:radial-gradient(1200px 800px at 70% -10%,rgba(240,237,230,0.9),transparent 60%),radial-gradient(900px 700px at 0% 100%,rgba(240,237,230,0.7),transparent 55%)}
 .app{display:flex;min-height:100vh;position:relative;z-index:2}
-.sidebar{width:var(--sidebar-w);min-height:100vh;position:fixed;left:0;top:0;background:rgba(0,0,0,0.4);backdrop-filter:blur(40px) saturate(1.4);-webkit-backdrop-filter:blur(40px) saturate(1.4);border-right:1px solid var(--glass-border);display:flex;flex-direction:column;z-index:100;transition:transform var(--transition);box-shadow:4px 0 30px rgba(0,0,0,0.15)}
-.sidebar-brand{padding:28px 22px 22px;border-bottom:1px solid rgba(255,255,255,0.06)}
-.sidebar-brand h1{font-family:var(--font);font-size:1.3rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#fff;line-height:1.2}
-.sidebar-brand .subtitle{font-size:0.62rem;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-top:5px;font-weight:500}
+.sidebar{width:var(--sidebar-w);min-height:100vh;position:fixed;left:0;top:0;background:rgba(240,237,230,0.82);backdrop-filter:blur(40px) saturate(1.4);-webkit-backdrop-filter:blur(40px) saturate(1.4);border-right:1px solid var(--glass-border);display:flex;flex-direction:column;z-index:100;transition:transform var(--transition);box-shadow:4px 0 30px rgba(0,0,0,0.15)}
+.sidebar-brand{padding:28px 22px 22px;border-bottom:1px solid rgba(28,27,27,0.06)}
+.sidebar-brand h1{font-family:var(--serif);font-size:1.4rem;font-weight:600;letter-spacing:0.02em;text-transform:none;color:#1c1b1b;line-height:1.15}
+.sidebar-brand .subtitle{font-size:0.62rem;letter-spacing:0.18em;text-transform:uppercase;color:rgba(28,27,27,0.35);margin-top:5px;font-weight:500}
 .sidebar-nav{flex:1;padding:14px 10px;display:flex;flex-direction:column;gap:2px}
-.nav-item{display:flex;align-items:center;gap:11px;padding:10px 14px;border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition);font-size:0.84rem;font-weight:400;color:rgba(255,255,255,0.55);border:1px solid transparent;user-select:none}
-.nav-item:hover{background:rgba(45,212,168,0.06);color:var(--white)}
-.nav-item.active{background:rgba(45,212,168,0.1);color:var(--teal);border-color:rgba(45,212,168,0.18);font-weight:600}
+.nav-item{display:flex;align-items:center;gap:11px;padding:10px 14px;border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition);font-size:0.84rem;font-weight:400;color:rgba(28,27,27,0.55);border:1px solid transparent;user-select:none}
+.nav-item:hover{background:rgba(26,26,26,0.06);color:var(--white)}
+.nav-item.active{background:rgba(26,26,26,0.1);color:var(--teal);border-color:rgba(26,26,26,0.18);font-weight:600}
 .nav-item .nav-icon{width:20px;text-align:center;font-size:0.85rem;opacity:0.6}
 .nav-item.active .nav-icon{opacity:1}
-.sidebar-links{padding:0 10px 14px;border-top:1px solid rgba(255,255,255,0.06);padding-top:14px}
-.sidebar-links-title{font-size:0.6rem;text-transform:uppercase;letter-spacing:0.14em;color:rgba(255,255,255,0.3);margin-bottom:8px;padding-left:14px;font-weight:500}
-.sidebar-link{display:flex;align-items:center;gap:9px;padding:7px 14px;font-size:0.76rem;color:rgba(255,255,255,0.5);text-decoration:none;border-radius:var(--radius-sm);transition:all var(--transition)}
-.sidebar-link:hover{background:rgba(255,255,255,0.06);color:var(--white)}
-.sidebar-footer{padding:16px 20px;border-top:1px solid rgba(255,255,255,0.06);font-size:0.68rem;color:rgba(255,255,255,0.4);letter-spacing:0.04em}
+.sidebar-links{padding:0 10px 14px;border-top:1px solid rgba(28,27,27,0.06);padding-top:14px}
+.sidebar-links-title{font-size:0.6rem;text-transform:uppercase;letter-spacing:0.14em;color:rgba(28,27,27,0.3);margin-bottom:8px;padding-left:14px;font-weight:500}
+.sidebar-link{display:flex;align-items:center;gap:9px;padding:7px 14px;font-size:0.76rem;color:rgba(28,27,27,0.5);text-decoration:none;border-radius:var(--radius-sm);transition:all var(--transition)}
+.sidebar-link:hover{background:rgba(28,27,27,0.06);color:var(--white)}
+.sidebar-footer{padding:16px 20px;border-top:1px solid rgba(28,27,27,0.06);font-size:0.68rem;color:rgba(28,27,27,0.4);letter-spacing:0.04em}
 .sidebar-footer .domain{color:var(--teal);font-weight:600;letter-spacing:0.06em}
-.mobile-toggle{display:none;position:fixed;top:14px;left:14px;z-index:200;width:42px;height:42px;border-radius:var(--radius-sm);background:rgba(0,0,0,0.4);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);color:#fff;font-size:1.1rem;cursor:pointer;align-items:center;justify-content:center;box-shadow:var(--glass-shadow)}
+.mobile-toggle{display:none;position:fixed;top:14px;left:14px;z-index:200;width:42px;height:42px;border-radius:var(--radius-sm);background:rgba(240,237,230,0.82);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(28,27,27,0.1);color:#1c1b1b;font-size:1.1rem;cursor:pointer;align-items:center;justify-content:center;box-shadow:var(--glass-shadow)}
 .main{margin-left:var(--sidebar-w);flex:1;padding:30px 34px;min-height:100vh;max-width:100%;overflow-x:hidden}
 .card{background:var(--glass-bg);backdrop-filter:blur(var(--glass-blur)) saturate(1.3);-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(1.3);border:1px solid var(--glass-border);border-radius:var(--radius);padding:22px;position:relative;overflow:hidden;transition:all var(--transition);box-shadow:var(--glass-shadow)}
-.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.1) 50%,transparent 100%)}
-.card:hover{border-color:rgba(255,255,255,0.18);box-shadow:0 8px 40px rgba(0,0,0,0.25)}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 0%,rgba(28,27,27,0.1) 50%,transparent 100%)}
+.card:hover{border-color:rgba(28,27,27,0.18);box-shadow:0 8px 40px rgba(0,0,0,0.25)}
 .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
 .card-title{font-family:var(--font);font-size:0.95rem;font-weight:600;color:var(--black);letter-spacing:0}
 .card-badge{font-size:0.6rem;padding:3px 10px;border-radius:20px;letter-spacing:0.08em;text-transform:uppercase;font-weight:600}
-.badge-teal{background:rgba(45,212,168,0.12);color:var(--teal);border:1px solid rgba(45,212,168,0.25)}
+.badge-teal{background:rgba(26,26,26,0.12);color:var(--teal);border:1px solid rgba(26,26,26,0.25)}
 .badge-amber{background:rgba(240,168,64,0.12);color:var(--amber);border:1px solid rgba(240,168,64,0.2)}
 .badge-red{background:rgba(239,107,107,0.12);color:var(--red-soft);border:1px solid rgba(239,107,107,0.2)}
-.badge-silver{background:rgba(255,255,255,0.06);color:var(--text-muted);border:1px solid rgba(255,255,255,0.1)}
+.badge-silver{background:rgba(28,27,27,0.06);color:var(--text-muted);border:1px solid rgba(28,27,27,0.1)}
 .tab-panel{display:none;animation:fadeUp 0.4s ease}
 .tab-panel.active{display:block}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .section-header{margin-bottom:24px}
-.section-header h2{font-family:var(--font);font-size:1.6rem;font-weight:600;color:var(--white);letter-spacing:-0.01em;text-shadow:0 2px 12px rgba(0,0,0,0.4)}
-.section-header .updated{font-size:0.7rem;color:rgba(255,255,255,0.8);margin-top:4px;letter-spacing:0.02em;text-shadow:0 1px 4px rgba(0,0,0,0.4)}
+.section-header h2{font-family:var(--serif);font-size:2rem;font-weight:600;color:var(--black);letter-spacing:-0.01em}
+.section-header .updated{font-size:0.7rem;color:var(--text-muted);margin-top:4px;letter-spacing:0.02em}
 .metrics-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px}
 @media(min-width:768px){.metrics-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:24px}}
 .metric-tile{text-align:center;padding:20px 14px}
@@ -90,61 +92,61 @@ body{font-family:var(--font);color:var(--text);min-height:100vh;overflow-x:hidde
 .metric-value.teal{color:var(--teal)}
 .metric-label{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--text-muted);margin-top:7px;font-weight:500}
 .data-table{width:100%;border-collapse:collapse}
-.data-table th{font-size:0.62rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--text-faint);padding:9px 13px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.06);font-weight:600}
-.data-table td{padding:11px 13px;font-size:0.8rem;border-bottom:1px solid rgba(255,255,255,0.03);color:var(--text-secondary)}
-.data-table tr:hover td{background:rgba(255,255,255,0.04)}
+.data-table th{font-size:0.62rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--text-faint);padding:9px 13px;text-align:left;border-bottom:1px solid rgba(28,27,27,0.06);font-weight:600}
+.data-table td{padding:11px 13px;font-size:0.8rem;border-bottom:1px solid rgba(28,27,27,0.03);color:var(--text-secondary)}
+.data-table tr:hover td{background:rgba(28,27,27,0.04)}
 .content-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
-.content-card{padding:18px;border-radius:var(--radius-sm);background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08)}
+.content-card{padding:18px;border-radius:var(--radius-sm);background:rgba(28,27,27,0.05);border:1px solid rgba(28,27,27,0.08)}
 .content-card h4{font-family:var(--font);font-size:0.98rem;color:var(--black);margin-bottom:6px;font-weight:500}
 .content-card p{font-size:0.76rem;color:var(--text-muted);line-height:1.5}
-.content-tag{font-size:0.58rem;padding:2px 8px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--text-muted);letter-spacing:0.04em;font-weight:500}
+.content-tag{font-size:0.58rem;padding:2px 8px;border-radius:10px;background:rgba(28,27,27,0.06);border:1px solid rgba(28,27,27,0.1);color:var(--text-muted);letter-spacing:0.04em;font-weight:500}
 .empty-state{text-align:center;padding:50px 20px;color:var(--text-muted)}
 .empty-state .icon{font-size:2.2rem;margin-bottom:14px;opacity:0.35}
 .empty-state h3{font-family:var(--font);font-size:1.15rem;color:var(--text);font-weight:400;margin-bottom:6px}
 .empty-state p{font-size:0.78rem;line-height:1.6;max-width:380px;margin:0 auto}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .quick-links{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
-.quick-link{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:18px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--text-muted);font-size:0.7rem;text-decoration:none;transition:all var(--transition);letter-spacing:0.03em;font-weight:500;cursor:pointer}
-.quick-link:hover{border-color:rgba(45,212,168,0.3);color:var(--teal);background:var(--teal-subtle)}
-.shimmer{background:linear-gradient(90deg,rgba(255,255,255,0.03) 25%,rgba(255,255,255,0.08) 50%,rgba(255,255,255,0.03) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--radius-sm);height:20px}
+.quick-link{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:18px;background:rgba(28,27,27,0.06);border:1px solid rgba(28,27,27,0.1);color:var(--text-muted);font-size:0.7rem;text-decoration:none;transition:all var(--transition);letter-spacing:0.03em;font-weight:500;cursor:pointer}
+.quick-link:hover{border-color:rgba(26,26,26,0.3);color:var(--teal);background:var(--teal-subtle)}
+.shimmer{background:linear-gradient(90deg,rgba(28,27,27,0.03) 25%,rgba(28,27,27,0.08) 50%,rgba(28,27,27,0.03) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--radius-sm);height:20px}
 @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
 .finance-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
-.finance-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.8rem}
+.finance-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(28,27,27,0.04);font-size:0.8rem}
 .finance-row:last-child{border-bottom:none}
 .finance-row .label{color:var(--text-muted)}
 .finance-row .value{color:var(--white);font-weight:600}
-.btn{padding:6px 14px;border-radius:8px;background:var(--teal);border:none;color:#000;font-weight:700;font-size:0.75rem;cursor:pointer;font-family:var(--font);transition:all 0.2s}
+.btn{padding:6px 14px;border-radius:8px;background:var(--teal);border:none;color:var(--on-accent);font-weight:600;font-size:0.75rem;cursor:pointer;font-family:var(--font);transition:all 0.2s}
 .btn:hover{filter:brightness(1.1)}
-.btn-ghost{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--text-muted);font-weight:500}
-.btn-ghost:hover{border-color:rgba(255,255,255,0.2);color:#fff}
+.btn-ghost{background:rgba(28,27,27,0.06);border:1px solid rgba(28,27,27,0.1);color:var(--text-muted);font-weight:500}
+.btn-ghost:hover{border-color:rgba(28,27,27,0.2);color:#1c1b1b}
 .btn-danger{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.15);color:var(--red-soft)}
 .modal-overlay{display:none;position:fixed;inset:0;z-index:500;align-items:center;justify-content:center}
 .modal-overlay.open{display:flex}
-.modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-.modal-card{position:relative;z-index:1;width:500px;max-width:92vw;max-height:85vh;overflow-y:auto;background:#1a1a2e;border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:24px;box-shadow:0 24px 80px rgba(0,0,0,0.4)}
-.modal-title{font-size:1rem;font-weight:700;color:#fff;margin-bottom:16px}
+.modal-backdrop{position:absolute;inset:0;background:rgba(28,27,27,0.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.modal-card{position:relative;z-index:1;width:500px;max-width:92vw;max-height:85vh;overflow-y:auto;background:#ffffff;border:1px solid rgba(28,27,27,0.08);border-radius:20px;padding:24px;box-shadow:0 24px 80px rgba(28,27,27,0.18)}
+.modal-title{font-size:1rem;font-weight:700;color:#1c1b1b;margin-bottom:16px}
 .form-group{margin-bottom:12px}
 .form-label{font-size:0.65rem;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.1em;display:block;margin-bottom:4px}
-.form-input{width:100%;padding:10px 12px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:#fff;font-size:0.82rem;font-family:var(--font);outline:none;box-sizing:border-box;transition:border-color 0.2s}
-.form-input:focus{border-color:rgba(45,212,168,0.4)}
+.form-input{width:100%;padding:10px 12px;border-radius:8px;background:rgba(28,27,27,0.04);border:1px solid rgba(28,27,27,0.1);color:#1c1b1b;font-size:0.82rem;font-family:var(--font);outline:none;box-sizing:border-box;transition:border-color 0.2s}
+.form-input:focus{border-color:rgba(26,26,26,0.4)}
 textarea.form-input{min-height:100px;resize:vertical}
 select.form-input{cursor:pointer;background:#1a1a1a}
-.progress-bar{height:6px;border-radius:3px;background:rgba(255,255,255,0.06);overflow:hidden}
+.progress-bar{height:6px;border-radius:3px;background:rgba(28,27,27,0.06);overflow:hidden}
 .progress-fill{height:100%;border-radius:3px;background:var(--teal);transition:width 0.3s}
 
 /* ─── PIN Screen ─── */
 .pin-screen{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;transition:opacity 0.5s ease,visibility 0.5s ease}
 .pin-screen.hidden{opacity:0;visibility:hidden;pointer-events:none}
-.pin-bg{position:absolute;inset:0;background:url('wallpaper.jpg') center center/cover no-repeat}
-.pin-bg::after{content:'';position:absolute;inset:0;backdrop-filter:blur(30px) saturate(1.2);-webkit-backdrop-filter:blur(30px) saturate(1.2);background:rgba(0,0,0,0.3)}
-.pin-card{position:relative;z-index:1;background:rgba(255,255,255,0.12);backdrop-filter:blur(40px) saturate(1.5);-webkit-backdrop-filter:blur(40px) saturate(1.5);border:1px solid rgba(255,255,255,0.15);border-radius:24px;padding:48px 40px;text-align:center;width:340px;max-width:90vw;box-shadow:0 24px 80px rgba(0,0,0,0.3)}
-.pin-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);border-radius:24px 24px 0 0}
-.pin-title{font-family:var(--font);font-size:1.1rem;font-weight:700;color:#fff;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px}
-.pin-sub{font-family:var(--font);font-size:0.65rem;color:rgba(255,255,255,0.45);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:28px}
-.pin-divider{width:40px;height:1px;background:rgba(255,255,255,0.15);margin:0 auto 24px}
-.pin-label{font-size:0.6rem;color:rgba(255,255,255,0.5);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:12px}
+.pin-bg{position:absolute;inset:0;background:#f9f8f3}
+.pin-bg::after{content:'';position:absolute;inset:0;background:radial-gradient(1000px 700px at 50% 30%,rgba(240,237,230,0.9),transparent 60%)}
+.pin-card{position:relative;z-index:1;background:#ffffff;border:1px solid rgba(28,27,27,0.10);border-radius:24px;padding:48px 40px;text-align:center;width:340px;max-width:90vw;box-shadow:0 24px 80px rgba(28,27,27,0.10)}
+.pin-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(28,27,27,0.2),transparent);border-radius:24px 24px 0 0}
+.pin-title{font-family:var(--serif);font-size:1.5rem;font-weight:600;color:#1c1b1b;letter-spacing:0.02em;text-transform:none;margin-bottom:4px}
+.pin-sub{font-family:var(--font);font-size:0.65rem;color:rgba(28,27,27,0.45);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:28px}
+.pin-divider{width:40px;height:1px;background:rgba(28,27,27,0.15);margin:0 auto 24px}
+.pin-label{font-size:0.6rem;color:rgba(28,27,27,0.5);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:12px}
 .pin-inputs{display:flex;gap:10px;justify-content:center;margin-bottom:20px}
-.pin-input{width:48px;height:56px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:#fff;font-family:var(--font);font-size:1.4rem;font-weight:600;text-align:center;outline:none;transition:all 0.2s ease;-webkit-appearance:none;-moz-appearance:textfield}
+.pin-input{width:48px;height:56px;border-radius:12px;border:1px solid rgba(28,27,27,0.15);background:rgba(28,27,27,0.06);color:#1c1b1b;font-family:var(--font);font-size:1.4rem;font-weight:600;text-align:center;outline:none;transition:all 0.2s ease;-webkit-appearance:none;-moz-appearance:textfield}
 .pin-input::-webkit-inner-spin-button,.pin-input::-webkit-outer-spin-button{-webkit-appearance:none}
 .pin-input:focus{border-color:rgba(16,185,129,0.5);background:rgba(16,185,129,0.08);box-shadow:0 0 20px rgba(16,185,129,0.1)}
 .pin-input.error{border-color:rgba(220,74,74,0.6);background:rgba(220,74,74,0.08);animation:pinShake 0.4s ease}
@@ -154,7 +156,7 @@ select.form-input{cursor:pointer;background:#1a1a1a}
 
 /* ─── Tablet (≤900px) ─── */
 @media(max-width:900px){
-.sidebar{transform:translateX(-100%);width:280px;background:rgba(10,10,10,0.92);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px)}
+.sidebar{transform:translateX(-100%);width:280px;background:rgba(249,248,243,0.97);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px)}
 .sidebar.open{transform:translateX(0)}
 .mobile-toggle{display:flex}
 .main{margin-left:0;padding:16px 14px;padding-top:60px;max-width:100vw;overflow-x:hidden}
@@ -208,7 +210,7 @@ select.form-input{cursor:pointer;background:#1a1a1a}
 .sidebar-footer{padding:12px 16px;font-size:0.6rem}
 .modal-card{padding:18px;border-radius:16px}
 }
-::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.12);border-radius:3px}::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.2)}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(28,27,27,0.12);border-radius:3px}::-webkit-scrollbar-thumb:hover{background:rgba(28,27,27,0.2)}
 </style>
 </head>
 <body>
@@ -361,10 +363,10 @@ select.form-input{cursor:pointer;background:#1a1a1a}
 </div>
 
 <!-- ═══ PROPERTY MODAL ═══ -->
-<div id="property-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:none;align-items:center;justify-content:center">
+<div id="property-modal" style="display:none;position:fixed;inset:0;background:rgba(28,27,27,0.45);z-index:1000;display:none;align-items:center;justify-content:center">
   <div style="background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:24px;width:90%;max-width:520px;max-height:85vh;overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-      <h3 style="margin:0;font-size:1rem;color:#fff" id="property-modal-title">Add Property</h3>
+      <h3 style="margin:0;font-size:1rem;color:#1c1b1b" id="property-modal-title">Add Property</h3>
       <button onclick="closePropertyModal()" style="background:none;border:none;color:var(--text-faint);font-size:1.2rem;cursor:pointer">&times;</button>
     </div>
     <div style="display:flex;flex-direction:column;gap:10px">
@@ -424,7 +426,7 @@ select.form-input{cursor:pointer;background:#1a1a1a}
     <div class="modal-title">Update PB</div>
     <input type="hidden" id="pb-template-id">
     <input type="hidden" id="pb-exercise-idx">
-    <div id="pb-exercise-name" style="font-size:0.9rem;font-weight:600;color:#fff;margin-bottom:12px"></div>
+    <div id="pb-exercise-name" style="font-size:0.9rem;font-weight:600;color:#1c1b1b;margin-bottom:12px"></div>
     <div class="form-group"><label class="form-label">Weight (kg)</label><input type="text" id="pb-weight" class="form-input" placeholder="e.g. 50"></div>
     <div class="form-group"><label class="form-label">Sets x Reps</label><input type="text" id="pb-sets" class="form-input" placeholder="e.g. 3 x 10"></div>
     <div class="form-group"><label class="form-label">Notes</label><input type="text" id="pb-notes" class="form-input" placeholder="e.g. failure, red strap..."></div>
@@ -693,13 +695,13 @@ function renderChecklists(){
     const pct=total?Math.round((done/total)*100):0;
     const barCol=pct===100?'var(--teal)':pct>=50?'var(--amber)':'var(--red-soft)';
     html+='<div class="card" style="padding:0;overflow:hidden">';
-    html+='<div style="padding:14px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.04)" onclick="toggleCollapseChecklist(\''+list.id+'\')">';
+    html+='<div style="padding:14px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:1px solid rgba(28,27,27,0.04)" onclick="toggleCollapseChecklist(\''+list.id+'\')">';
     html+='<span style="font-size:0.7rem;color:var(--text-faint);transition:transform 0.2s;transform:rotate('+(list.collapsed?'0':'90')+'deg)">▶</span>';
-    html+='<div style="flex:1"><div style="font-size:0.88rem;font-weight:700;color:#fff">'+list.name+'</div>';
+    html+='<div style="flex:1"><div style="font-size:0.88rem;font-weight:700;color:#1c1b1b">'+list.name+'</div>';
     html+='<div style="font-size:0.6rem;color:var(--text-faint);margin-top:2px">'+done+'/'+total+' complete'+(total?' · '+pct+'%':'')+'</div></div>';
-    if(total>0){html+='<div style="width:60px;height:4px;border-radius:2px;background:rgba(255,255,255,0.06);overflow:hidden"><div style="width:'+pct+'%;height:100%;border-radius:2px;background:'+barCol+';transition:width 0.3s"></div></div>';}
+    if(total>0){html+='<div style="width:60px;height:4px;border-radius:2px;background:rgba(28,27,27,0.06);overflow:hidden"><div style="width:'+pct+'%;height:100%;border-radius:2px;background:'+barCol+';transition:width 0.3s"></div></div>';}
     html+='<div style="display:flex;gap:4px">';
-    if(done>0)html+='<button onclick="event.stopPropagation();clearCompleted(\''+list.id+'\')" style="padding:3px 8px;border-radius:5px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:var(--text-faint);font-size:0.55rem;cursor:pointer;font-family:var(--font)">Clear done</button>';
+    if(done>0)html+='<button onclick="event.stopPropagation();clearCompleted(\''+list.id+'\')" style="padding:3px 8px;border-radius:5px;background:rgba(28,27,27,0.05);border:1px solid rgba(28,27,27,0.08);color:var(--text-faint);font-size:0.55rem;cursor:pointer;font-family:var(--font)">Clear done</button>';
     html+='<button onclick="event.stopPropagation();deleteChecklist(\''+list.id+'\')" style="padding:3px 8px;border-radius:5px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.15);color:var(--red-soft);font-size:0.55rem;cursor:pointer;font-family:var(--font)">Delete</button>';
     html+='</div></div>';
     if(!list.collapsed){
@@ -707,17 +709,17 @@ function renderChecklists(){
       const pending=list.items.filter(i=>!i.done);
       const completed=list.items.filter(i=>i.done);
       pending.forEach(item=>{
-        html+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.03)">';
-        html+='<div onclick="toggleCheckItem(\''+list.id+'\',\''+item.id+'\')" style="width:20px;height:20px;border-radius:5px;border:2px solid rgba(255,255,255,0.15);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.2s"></div>';
-        html+='<div style="flex:1;font-size:0.8rem;color:#fff">'+item.text+'</div>';
-        html+='<button onclick="deleteCheckItem(\''+list.id+'\',\''+item.id+'\')" style="padding:2px 6px;border-radius:4px;background:none;border:1px solid rgba(255,255,255,0.06);color:var(--text-faint);font-size:0.6rem;cursor:pointer;opacity:0.4;font-family:var(--font)" onmouseover="this.style.opacity=1;this.style.borderColor=\'rgba(239,68,68,0.3)\';this.style.color=\'var(--red-soft)\'" onmouseout="this.style.opacity=0.4;this.style.borderColor=\'rgba(255,255,255,0.06)\';this.style.color=\'var(--text-faint)\'">✕</button>';
+        html+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(28,27,27,0.03)">';
+        html+='<div onclick="toggleCheckItem(\''+list.id+'\',\''+item.id+'\')" style="width:20px;height:20px;border-radius:5px;border:2px solid rgba(28,27,27,0.15);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.2s"></div>';
+        html+='<div style="flex:1;font-size:0.8rem;color:#1c1b1b">'+item.text+'</div>';
+        html+='<button onclick="deleteCheckItem(\''+list.id+'\',\''+item.id+'\')" style="padding:2px 6px;border-radius:4px;background:none;border:1px solid rgba(28,27,27,0.06);color:var(--text-faint);font-size:0.6rem;cursor:pointer;opacity:0.4;font-family:var(--font)" onmouseover="this.style.opacity=1;this.style.borderColor=\'rgba(239,68,68,0.3)\';this.style.color=\'var(--red-soft)\'" onmouseout="this.style.opacity=0.4;this.style.borderColor=\'rgba(28,27,27,0.06)\';this.style.color=\'var(--text-faint)\'">✕</button>';
         html+='</div>';
       });
       completed.forEach(item=>{
-        html+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.03);opacity:0.45">';
-        html+='<div onclick="toggleCheckItem(\''+list.id+'\',\''+item.id+'\')" style="width:20px;height:20px;border-radius:5px;border:2px solid var(--teal);background:rgba(45,212,168,0.15);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.65rem;color:var(--teal)">✓</div>';
+        html+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(28,27,27,0.03);opacity:0.45">';
+        html+='<div onclick="toggleCheckItem(\''+list.id+'\',\''+item.id+'\')" style="width:20px;height:20px;border-radius:5px;border:2px solid var(--teal);background:rgba(26,26,26,0.15);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.65rem;color:var(--teal)">✓</div>';
         html+='<div style="flex:1;font-size:0.8rem;color:var(--text-muted);text-decoration:line-through">'+item.text+'</div>';
-        html+='<button onclick="deleteCheckItem(\''+list.id+'\',\''+item.id+'\')" style="padding:2px 6px;border-radius:4px;background:none;border:1px solid rgba(255,255,255,0.06);color:var(--text-faint);font-size:0.6rem;cursor:pointer;opacity:0.4;font-family:var(--font)">✕</button>';
+        html+='<button onclick="deleteCheckItem(\''+list.id+'\',\''+item.id+'\')" style="padding:2px 6px;border-radius:4px;background:none;border:1px solid rgba(28,27,27,0.06);color:var(--text-faint);font-size:0.6rem;cursor:pointer;opacity:0.4;font-family:var(--font)">✕</button>';
         html+='</div>';
       });
       html+='<div style="display:flex;gap:6px;margin-top:10px">';
@@ -959,14 +961,14 @@ function renderGoals(){
     html+='<div style="font-size:1rem;font-weight:700;color:'+(catPct>=100?'var(--teal)':catPct>0?'var(--amber)':'var(--text-faint)')+'">'+catPct+'%</div>';
     html+='</div>';
 
-    html+='<div style="height:3px;border-radius:2px;background:rgba(255,255,255,0.06);margin-bottom:14px;overflow:hidden"><div style="height:100%;width:'+catPct+'%;background:'+cat.color+';border-radius:2px;transition:width 0.3s"></div></div>';
+    html+='<div style="height:3px;border-radius:2px;background:rgba(28,27,27,0.06);margin-bottom:14px;overflow:hidden"><div style="height:100%;width:'+catPct+'%;background:'+cat.color+';border-radius:2px;transition:width 0.3s"></div></div>';
 
     cat.items.forEach((item,ii)=>{
       const isDone=item.status==='complete';
       const isInProg=item.status==='in progress';
-      html+='<div onclick="toggleGoalDone('+ci+','+ii+')" style="display:flex;align-items:flex-start;gap:10px;padding:8px 6px;border-radius:6px;cursor:pointer;transition:background 0.15s'+(isDone?';opacity:0.5':'')+'" onmouseenter="this.style.background=\'rgba(255,255,255,0.04)\'" onmouseleave="this.style.background=\'transparent\'">';
-      html+='<div style="width:18px;height:18px;border-radius:5px;border:2px solid '+(isDone?'var(--teal)':isInProg?'var(--amber)':'rgba(255,255,255,0.15)')+';flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px;background:'+(isDone?'rgba(45,212,168,0.15)':'transparent')+'">'+(isDone?'<span style="color:var(--teal);font-size:0.6rem;font-weight:700">✓</span>':'')+'</div>';
-      html+='<div style="flex:1;font-size:0.78rem;color:'+(isDone?'var(--text-faint)':'#fff')+';'+(isDone?'text-decoration:line-through;':'')+'">'+item.name+'</div>';
+      html+='<div onclick="toggleGoalDone('+ci+','+ii+')" style="display:flex;align-items:flex-start;gap:10px;padding:8px 6px;border-radius:6px;cursor:pointer;transition:background 0.15s'+(isDone?';opacity:0.5':'')+'" onmouseenter="this.style.background=\'rgba(28,27,27,0.04)\'" onmouseleave="this.style.background=\'transparent\'">';
+      html+='<div style="width:18px;height:18px;border-radius:5px;border:2px solid '+(isDone?'var(--teal)':isInProg?'var(--amber)':'rgba(28,27,27,0.15)')+';flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px;background:'+(isDone?'rgba(26,26,26,0.15)':'transparent')+'">'+(isDone?'<span style="color:var(--teal);font-size:0.6rem;font-weight:700">✓</span>':'')+'</div>';
+      html+='<div style="flex:1;font-size:0.78rem;color:'+(isDone?'var(--text-faint)':'#1c1b1b')+';'+(isDone?'text-decoration:line-through;':'')+'">'+item.name+'</div>';
       if(isInProg)html+='<span style="padding:1px 6px;border-radius:3px;background:rgba(240,168,64,0.1);color:var(--amber);font-size:0.5rem;font-weight:600;flex-shrink:0">IN PROGRESS</span>';
       html+='</div>';
     });
@@ -977,7 +979,7 @@ function renderGoals(){
 
   // Custom goals below
   if(_goals.length){
-    html+='<div style="margin-top:24px;font-size:0.9rem;font-weight:700;color:#fff;margin-bottom:12px">Custom Goals</div>';
+    html+='<div style="margin-top:24px;font-size:0.9rem;font-weight:700;color:#1c1b1b;margin-bottom:12px">Custom Goals</div>';
     html+='<div style="display:flex;flex-direction:column;gap:12px">';
     _goals.forEach(goal=>{
       const statusCol=goal.status==='Complete'?'var(--teal)':goal.status==='In Progress'?'var(--amber)':'var(--text-faint)';
@@ -985,11 +987,11 @@ function renderGoals(){
       const catCol=catCols[goal.category]||'var(--text-muted)';
       html+='<div class="card" style="cursor:pointer" onclick="showGoalModal(\''+goal.id+'\')">';
       html+='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px">';
-      html+='<div style="flex:1"><div style="font-size:0.92rem;font-weight:700;color:#fff">'+goal.title+'</div>';
+      html+='<div style="flex:1"><div style="font-size:0.92rem;font-weight:700;color:#1c1b1b">'+goal.title+'</div>';
       html+='<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">';
-      html+='<span style="padding:2px 8px;border-radius:4px;background:rgba(255,255,255,0.06);color:'+catCol+';font-size:0.58rem;font-weight:600">'+goal.category+'</span>';
-      html+='<span style="padding:2px 8px;border-radius:4px;background:rgba(255,255,255,0.06);color:'+statusCol+';font-size:0.58rem;font-weight:600">'+goal.status+'</span>';
-      if(goal.targetDate)html+='<span style="padding:2px 8px;border-radius:4px;background:rgba(255,255,255,0.06);color:var(--text-faint);font-size:0.58rem">Due: '+fmtShort(goal.targetDate)+'</span>';
+      html+='<span style="padding:2px 8px;border-radius:4px;background:rgba(28,27,27,0.06);color:'+catCol+';font-size:0.58rem;font-weight:600">'+goal.category+'</span>';
+      html+='<span style="padding:2px 8px;border-radius:4px;background:rgba(28,27,27,0.06);color:'+statusCol+';font-size:0.58rem;font-weight:600">'+goal.status+'</span>';
+      if(goal.targetDate)html+='<span style="padding:2px 8px;border-radius:4px;background:rgba(28,27,27,0.06);color:var(--text-faint);font-size:0.58rem">Due: '+fmtShort(goal.targetDate)+'</span>';
       html+='</div></div>';
       html+='<button onclick="event.stopPropagation();deleteGoal(\''+goal.id+'\')" style="padding:3px 8px;border-radius:5px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.15);color:var(--red-soft);font-size:0.55rem;cursor:pointer;font-family:var(--font);flex-shrink:0">Delete</button>';
       html+='</div>';
@@ -1107,7 +1109,7 @@ function pieHover(i){
   if(cv)cv.textContent='$'+d.totalMonthly.toFixed(2);
   if(cl)cl.textContent=d.label+' · '+pct+'%';
   document.querySelectorAll('[data-legend]').forEach(el=>{
-    el.style.background=parseInt(el.dataset.legend)===i?'rgba(255,255,255,0.08)':'';
+    el.style.background=parseInt(el.dataset.legend)===i?'rgba(28,27,27,0.08)':'';
   });
 }
 function pieUnhover(){
@@ -1160,13 +1162,13 @@ function renderFinances(){
   costHtml+='<div class="metric-tile" style="padding:10px"><div class="metric-value" style="font-size:0.95rem;color:var(--amber)">$'+fmt2(totalAnnual)+'</div><div class="metric-label">Annual Costs</div></div>';
   costHtml+='<div class="metric-tile" style="padding:10px"><div class="metric-value" style="font-size:0.95rem">'+activeItems.length+' <span style="color:var(--text-faint);font-size:0.7rem">/ '+_costTracking.filter(c=>c.status==='paused').length+' paused</span></div><div class="metric-label">Subscriptions</div></div>';
 
-  costHtml+='<div class="metric-tile" style="padding:10px;grid-column:span 4;border-top:1px solid rgba(255,255,255,0.06);margin-top:4px;padding-top:12px"><div style="display:flex;justify-content:center;gap:24px">';
+  costHtml+='<div class="metric-tile" style="padding:10px;grid-column:span 4;border-top:1px solid rgba(28,27,27,0.06);margin-top:4px;padding-top:12px"><div style="display:flex;justify-content:center;gap:24px">';
   costHtml+='<div style="text-align:center"><div style="font-size:0.85rem;font-weight:600;color:var(--amber)">$'+fmt2(weeklyLiving)+'</div><div style="font-size:0.55rem;color:var(--text-faint);margin-top:2px">Living /week</div></div>';
   costHtml+='<div style="text-align:center"><div style="font-size:0.85rem;font-weight:600;color:var(--amber)">$'+fmt2(monthlyLiving)+'</div><div style="font-size:0.55rem;color:var(--text-faint);margin-top:2px">Living /month</div></div>';
   costHtml+='<div style="text-align:center"><div style="font-size:0.85rem;font-weight:600;color:var(--amber)">$'+fmt2(annualLiving)+'</div><div style="font-size:0.55rem;color:var(--text-faint);margin-top:2px">Living /year</div></div>';
   costHtml+='</div><div style="font-size:0.5rem;color:var(--text-faint);text-align:center;margin-top:4px">Food, fuel & essentials estimate</div></div>';
 
-  costHtml+='<div class="metric-tile" style="padding:10px;grid-column:span 4;border-top:1px solid rgba(255,255,255,0.06);margin-top:4px;padding-top:12px"><div style="display:flex;justify-content:center;gap:24px">';
+  costHtml+='<div class="metric-tile" style="padding:10px;grid-column:span 4;border-top:1px solid rgba(28,27,27,0.06);margin-top:4px;padding-top:12px"><div style="display:flex;justify-content:center;gap:24px">';
   costHtml+='<div style="text-align:center"><div style="font-size:0.95rem;font-weight:700;color:'+(weeklyNet>=0?'var(--teal)':'var(--red-soft)')+'">$'+fmt2(weeklyNet)+'</div><div style="font-size:0.55rem;color:var(--text-faint);margin-top:2px">Surplus /week</div></div>';
   costHtml+='<div style="text-align:center"><div style="font-size:0.95rem;font-weight:700;color:'+(monthlyNet>=0?'var(--teal)':'var(--red-soft)')+'">$'+fmt2(monthlyNet)+'</div><div style="font-size:0.55rem;color:var(--text-faint);margin-top:2px">Surplus /month</div></div>';
   costHtml+='<div style="text-align:center"><div style="font-size:0.95rem;font-weight:700;color:'+(annualNet>=0?'var(--teal)':'var(--red-soft)')+'">$'+fmt2(annualNet)+'</div><div style="font-size:0.55rem;color:var(--text-faint);margin-top:2px">Surplus /year</div></div>';
@@ -1226,13 +1228,13 @@ function renderFinances(){
     const x2=150+r*Math.cos(endRad),y2=150+r*Math.sin(endRad);
     const large=s.pct>0.5?1:0;
     const midAngle=((s.startAngle+s.endAngle)/2-90)*Math.PI/180;
-    costHtml+='<path d="M150,150 L'+x1.toFixed(2)+','+y1.toFixed(2)+' A'+r+','+r+' 0 '+large+',1 '+x2.toFixed(2)+','+y2.toFixed(2)+' Z" fill="'+s.color+'" stroke="rgba(0,0,0,0.4)" stroke-width="1" data-slice="'+i+'" data-mid="'+midAngle.toFixed(4)+'" style="cursor:pointer;transition:transform 0.2s,filter 0.2s;transform-origin:150px 150px"/>';
+    costHtml+='<path d="M150,150 L'+x1.toFixed(2)+','+y1.toFixed(2)+' A'+r+','+r+' 0 '+large+',1 '+x2.toFixed(2)+','+y2.toFixed(2)+' Z" fill="'+s.color+'" stroke="rgba(240,237,230,0.82)" stroke-width="1" data-slice="'+i+'" data-mid="'+midAngle.toFixed(4)+'" style="cursor:pointer;transition:transform 0.2s,filter 0.2s;transform-origin:150px 150px"/>';
   });
-  costHtml+='<circle cx="150" cy="150" r="65" fill="var(--card-bg,#1a1a2e)" style="pointer-events:none"/>';
-  costHtml+='<text id="'+pieId+'-center-val" x="150" y="144" text-anchor="middle" fill="#fff" font-size="18" font-weight="700" style="pointer-events:none">$'+fmt2(pieTotal)+'</text>';
+  costHtml+='<circle cx="150" cy="150" r="65" fill="var(--card-bg,#ffffff)" style="pointer-events:none"/>';
+  costHtml+='<text id="'+pieId+'-center-val" x="150" y="144" text-anchor="middle" fill="#1c1b1b" font-size="18" font-weight="700" style="pointer-events:none">$'+fmt2(pieTotal)+'</text>';
   costHtml+='<text id="'+pieId+'-center-lbl" x="150" y="164" text-anchor="middle" fill="var(--text-faint)" font-size="10" style="pointer-events:none">/month total</text>';
   costHtml+='</svg>';
-  costHtml+='<div id="'+pieId+'-tip" style="position:absolute;pointer-events:none;display:none;background:rgba(0,0,0,0.85);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px 12px;font-size:0.75rem;color:#fff;white-space:nowrap;z-index:10;box-shadow:0 4px 20px rgba(0,0,0,0.4)"></div>';
+  costHtml+='<div id="'+pieId+'-tip" style="position:absolute;pointer-events:none;display:none;background:rgba(255,255,255,0.97);backdrop-filter:blur(10px);border:1px solid rgba(28,27,27,0.12);border-radius:8px;padding:8px 12px;font-size:0.75rem;color:#1c1b1b;white-space:nowrap;z-index:10;box-shadow:0 4px 20px rgba(28,27,27,0.12)"></div>';
   costHtml+='</div>';
 
   // Pie legend
@@ -1242,7 +1244,7 @@ function renderFinances(){
     costHtml+='<div data-legend="'+i+'" style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;transition:background 0.2s" onmouseenter="pieHover('+i+')" onmouseleave="pieUnhover()">';
     costHtml+='<div style="width:12px;height:12px;border-radius:3px;background:'+d.color+';flex-shrink:0"></div>';
     costHtml+='<div style="flex:1;font-size:0.75rem;color:var(--text-secondary)">'+d.label+'</div>';
-    costHtml+='<div style="font-size:0.75rem;font-weight:600;color:#fff">$'+fmt2(d.totalMonthly)+'</div>';
+    costHtml+='<div style="font-size:0.75rem;font-weight:600;color:#1c1b1b">$'+fmt2(d.totalMonthly)+'</div>';
     costHtml+='<div style="font-size:0.65rem;color:var(--text-faint);width:35px;text-align:right">'+pct+'%</div>';
     costHtml+='</div>';
   });
@@ -1260,13 +1262,13 @@ function renderFinances(){
     costHtml+='<div style="display:flex;flex-direction:column;gap:4px">';
     g.items.forEach(c=>{
       const isPaused=c.status==='paused';
-      costHtml+='<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;background:rgba(255,255,255,0.03)'+(isPaused?';opacity:0.5':'')+'">';
+      costHtml+='<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;background:rgba(28,27,27,0.03)'+(isPaused?';opacity:0.5':'')+'">';
       costHtml+='<div style="flex:1;min-width:0">';
-      costHtml+='<div style="font-size:0.75rem;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+c.name+(isPaused?' <span style="color:var(--text-faint);font-weight:400;font-size:0.55rem">(PAUSED)</span>':'')+'</div>';
+      costHtml+='<div style="font-size:0.75rem;font-weight:600;color:#1c1b1b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+c.name+(isPaused?' <span style="color:var(--text-faint);font-weight:400;font-size:0.55rem">(PAUSED)</span>':'')+'</div>';
       costHtml+='<div style="font-size:0.55rem;color:var(--text-muted);margin-top:1px">'+c.cycle+' · '+c.payment+(c.renewal?' · '+fmtDate(c.renewal):'')+'</div>';
       costHtml+='</div>';
       costHtml+='<div style="text-align:right;flex-shrink:0">';
-      costHtml+='<div style="font-size:0.75rem;font-weight:700;color:#fff">$'+fmt2(c.monthly)+'<span style="font-size:0.5rem;color:var(--text-faint);font-weight:400">/mo</span></div>';
+      costHtml+='<div style="font-size:0.75rem;font-weight:700;color:#1c1b1b">$'+fmt2(c.monthly)+'<span style="font-size:0.5rem;color:var(--text-faint);font-weight:400">/mo</span></div>';
       costHtml+='<div style="font-size:0.5rem;color:var(--text-faint)">$'+fmt2(c.weekly)+'/wk · $'+fmt2(c.annual)+'/yr</div>';
       costHtml+='</div>';
       costHtml+='</div>';
@@ -1287,7 +1289,7 @@ function renderFinances(){
     const d=deriveCosts(c);
     const isPaused=c.status==='paused';
     costHtml+='<tr style="'+(isPaused?'opacity:0.5':'')+'">';
-    costHtml+='<td style="color:#fff;font-weight:600;white-space:nowrap">'+c.name+(isPaused?' <span style="color:var(--text-faint);font-weight:400;font-size:0.55rem">(PAUSED)</span>':'')+'</td>';
+    costHtml+='<td style="color:#1c1b1b;font-weight:600;white-space:nowrap">'+c.name+(isPaused?' <span style="color:var(--text-faint);font-weight:400;font-size:0.55rem">(PAUSED)</span>':'')+'</td>';
     costHtml+='<td>'+(c.category?'<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.65rem;background:'+c.catColor+'22;color:'+c.catColor+';border:1px solid '+c.catColor+'44">'+c.category+'</span>':'–')+'</td>';
     const cycleColors={Weekly:'#FF4081',Fortnightly:'#92ceac','6 Monthly':'#aec0f5'};
     const cc=cycleColors[c.cycle]||'#7C4DFF';
@@ -1365,7 +1367,7 @@ function renderFinances(){
     catEntries.forEach(([cat,amt])=>{
       const pct=Math.round((amt/totalExpense)*100);
       html+='<div style="margin-bottom:8px">';
-      html+='<div style="display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:3px"><span style="color:var(--text-secondary)">'+cat+'</span><span style="color:#fff;font-weight:600">'+$(amt)+' <span style="color:var(--text-faint);font-weight:400">'+pct+'%</span></span></div>';
+      html+='<div style="display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:3px"><span style="color:var(--text-secondary)">'+cat+'</span><span style="color:#1c1b1b;font-weight:600">'+$(amt)+' <span style="color:var(--text-faint);font-weight:400">'+pct+'%</span></span></div>';
       html+='<div class="progress-bar" style="height:4px"><div class="progress-fill" style="width:'+pct+'%"></div></div>';
       html+='</div>';
     });
@@ -1383,10 +1385,10 @@ function renderFinances(){
     const sign=isIncome?'+':'-';
     html+='<tr>';
     html+='<td>'+fmtShort(entry.date)+'</td>';
-    html+='<td style="color:#fff">'+entry.description+'</td>';
+    html+='<td style="color:#1c1b1b">'+entry.description+'</td>';
     html+='<td><span class="content-tag">'+entry.category+'</span></td>';
     html+='<td style="text-align:right;color:'+amtCol+';font-weight:600">'+sign+$(entry.amount)+'</td>';
-    html+='<td style="text-align:right"><button onclick="showFinanceModal(\''+entry.id+'\')" style="padding:2px 6px;border-radius:4px;background:none;border:1px solid rgba(255,255,255,0.06);color:var(--text-faint);font-size:0.55rem;cursor:pointer;font-family:var(--font);margin-right:4px">Edit</button><button onclick="deleteFinance(\''+entry.id+'\')" style="padding:2px 6px;border-radius:4px;background:none;border:1px solid rgba(239,68,68,0.15);color:var(--red-soft);font-size:0.55rem;cursor:pointer;font-family:var(--font)">✕</button></td>';
+    html+='<td style="text-align:right"><button onclick="showFinanceModal(\''+entry.id+'\')" style="padding:2px 6px;border-radius:4px;background:none;border:1px solid rgba(28,27,27,0.06);color:var(--text-faint);font-size:0.55rem;cursor:pointer;font-family:var(--font);margin-right:4px">Edit</button><button onclick="deleteFinance(\''+entry.id+'\')" style="padding:2px 6px;border-radius:4px;background:none;border:1px solid rgba(239,68,68,0.15);color:var(--red-soft);font-size:0.55rem;cursor:pointer;font-family:var(--font)">✕</button></td>';
     html+='</tr>';
   });
   html+='</tbody></table></div>';
@@ -1511,13 +1513,13 @@ function renderWorkoutModal(){
   html+='<div style="display:flex;flex-direction:column;gap:4px">';
   _activeWorkout.exercises.forEach((ex,i)=>{
     const pbText=ex.weight?(ex.weight+'kg'+(ex.sets?' · '+ex.sets+'x'+ex.reps:'')):(ex.pb||'');
-    html+='<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:rgba(255,255,255,'+(ex.done?'0.02':'0.04')+');border:1px solid rgba('+(ex.done?'45,212,168,0.15':'255,255,255,0.06')+');opacity:'+(ex.done?'0.5':'1')+'">';
-    html+='<div onclick="toggleWorkoutExercise('+i+')" style="width:22px;height:22px;border-radius:6px;border:2px solid '+(ex.done?'var(--teal)':'rgba(255,255,255,0.15)')+';background:'+(ex.done?'rgba(45,212,168,0.15)':'transparent')+';cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:var(--teal)">'+(ex.done?'✓':'')+'</div>';
+    html+='<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:rgba(28,27,27,'+(ex.done?'0.02':'0.04')+');border:1px solid rgba('+(ex.done?'26,26,26,0.15':'255,255,255,0.06')+');opacity:'+(ex.done?'0.5':'1')+'">';
+    html+='<div onclick="toggleWorkoutExercise('+i+')" style="width:22px;height:22px;border-radius:6px;border:2px solid '+(ex.done?'var(--teal)':'rgba(28,27,27,0.15)')+';background:'+(ex.done?'rgba(26,26,26,0.15)':'transparent')+';cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:var(--teal)">'+(ex.done?'✓':'')+'</div>';
     html+='<div style="flex:1;min-width:0">';
-    html+='<div onclick="inlineEdit(this,'+i+',\'name\')" style="font-size:0.82rem;font-weight:600;color:'+(ex.done?'var(--text-muted)':'#fff')+';'+(ex.done?'text-decoration:line-through':'')+';cursor:text;padding:1px 0">'+ex.name+'</div>';
+    html+='<div onclick="inlineEdit(this,'+i+',\'name\')" style="font-size:0.82rem;font-weight:600;color:'+(ex.done?'var(--text-muted)':'#1c1b1b')+';'+(ex.done?'text-decoration:line-through':'')+';cursor:text;padding:1px 0">'+ex.name+'</div>';
     html+='<div onclick="inlineEdit(this,'+i+',\'pb\')" style="font-size:0.65rem;color:var(--teal);margin-top:1px;cursor:text;padding:1px 0;min-height:16px">'+(pbText?'PB: '+pbText:'tap to set PB')+'</div>';
     html+='</div>';
-    html+='<button onclick="removeWorkoutExercise('+i+')" style="padding:3px 6px;border-radius:5px;background:none;border:1px solid rgba(255,255,255,0.06);color:var(--text-faint);font-size:0.55rem;cursor:pointer;font-family:var(--font);flex-shrink:0;opacity:0.4">✕</button>';
+    html+='<button onclick="removeWorkoutExercise('+i+')" style="padding:3px 6px;border-radius:5px;background:none;border:1px solid rgba(28,27,27,0.06);color:var(--text-faint);font-size:0.55rem;cursor:pointer;font-family:var(--font);flex-shrink:0;opacity:0.4">✕</button>';
     html+='</div>';
   });
   html+='</div>';
@@ -1532,7 +1534,7 @@ function inlineEdit(el,idx,field){
   else currentVal=ex.weight?(ex.weight+'kg'+(ex.sets?' '+ex.sets+'x'+ex.reps:'')):(ex.pb||'');
   const input=document.createElement('input');
   input.type='text';input.value=currentVal;
-  input.style.cssText='width:100%;background:rgba(255,255,255,0.08);border:1px solid rgba(45,212,168,0.3);border-radius:4px;color:#fff;font-size:inherit;font-family:var(--font);padding:3px 6px;outline:none;box-sizing:border-box';
+  input.style.cssText='width:100%;background:rgba(28,27,27,0.08);border:1px solid rgba(26,26,26,0.3);border-radius:4px;color:#1c1b1b;font-size:inherit;font-family:var(--font);padding:3px 6px;outline:none;box-sizing:border-box';
   el.textContent='';el.appendChild(input);
   input.focus();input.select();
   function save(){
@@ -1698,16 +1700,16 @@ function showWorkoutDetail(logId){
     const zones=sc.zone_durations;
     const nsm=normSport(whoopMatch.sport_name);const sportName=nsm?(nsm.charAt(0).toUpperCase()+nsm.slice(1)):'Workout';
 
-    h+='<div style="padding:12px;border-radius:8px;background:rgba(45,212,168,0.04);border:1px solid rgba(45,212,168,0.12);margin-bottom:16px">';
+    h+='<div style="padding:12px;border-radius:8px;background:rgba(26,26,26,0.04);border:1px solid rgba(26,26,26,0.12);margin-bottom:16px">';
     h+='<div style="font-size:0.65rem;color:var(--teal);font-weight:600;margin-bottom:10px">♡ WHOOP · '+sportName+(wDur?' · '+wDur+' min':'')+'</div>';
     h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px">';
-    h+='<div style="text-align:center;padding:8px;border-radius:6px;background:rgba(0,0,0,0.2)"><div style="font-size:1.1rem;font-weight:700;color:var(--teal)">'+(sc.strain?sc.strain.toFixed(1):'—')+'</div><div style="font-size:0.5rem;color:var(--text-faint);margin-top:2px">STRAIN</div></div>';
-    h+='<div style="text-align:center;padding:8px;border-radius:6px;background:rgba(0,0,0,0.2)"><div style="font-size:1.1rem;font-weight:700;color:var(--amber)">'+(cals||'—')+'</div><div style="font-size:0.5rem;color:var(--text-faint);margin-top:2px">CALORIES</div></div>';
-    h+='<div style="text-align:center;padding:8px;border-radius:6px;background:rgba(0,0,0,0.2)"><div style="font-size:1.1rem;font-weight:700;color:var(--red-soft)">'+(sc.average_heart_rate||'—')+'</div><div style="font-size:0.5rem;color:var(--text-faint);margin-top:2px">AVG HR</div></div>';
-    h+='<div style="text-align:center;padding:8px;border-radius:6px;background:rgba(0,0,0,0.2)"><div style="font-size:1.1rem;font-weight:700;color:var(--red-soft)">'+(sc.max_heart_rate||'—')+'</div><div style="font-size:0.5rem;color:var(--text-faint);margin-top:2px">MAX HR</div></div>';
+    h+='<div style="text-align:center;padding:8px;border-radius:6px;background:rgba(28,27,27,0.05)"><div style="font-size:1.1rem;font-weight:700;color:var(--teal)">'+(sc.strain?sc.strain.toFixed(1):'—')+'</div><div style="font-size:0.5rem;color:var(--text-faint);margin-top:2px">STRAIN</div></div>';
+    h+='<div style="text-align:center;padding:8px;border-radius:6px;background:rgba(28,27,27,0.05)"><div style="font-size:1.1rem;font-weight:700;color:var(--amber)">'+(cals||'—')+'</div><div style="font-size:0.5rem;color:var(--text-faint);margin-top:2px">CALORIES</div></div>';
+    h+='<div style="text-align:center;padding:8px;border-radius:6px;background:rgba(28,27,27,0.05)"><div style="font-size:1.1rem;font-weight:700;color:var(--red-soft)">'+(sc.average_heart_rate||'—')+'</div><div style="font-size:0.5rem;color:var(--text-faint);margin-top:2px">AVG HR</div></div>';
+    h+='<div style="text-align:center;padding:8px;border-radius:6px;background:rgba(28,27,27,0.05)"><div style="font-size:1.1rem;font-weight:700;color:var(--red-soft)">'+(sc.max_heart_rate||'—')+'</div><div style="font-size:0.5rem;color:var(--text-faint);margin-top:2px">MAX HR</div></div>';
     h+='</div>';
     if(zones){
-      const zoneColors=['#4a9eff','#2dd4a8','#34d399','#fbbf24','#f97316','#ef4444'];
+      const zoneColors=['#4a9eff','#1a1a1a','#34d399','#fbbf24','#f97316','#ef4444'];
       const zoneLabels=['Rest','Light','Moderate','Hard','Very Hard','Max'];
       const zoneVals=[zones.zone_zero_milli||0,zones.zone_one_milli||0,zones.zone_two_milli||0,zones.zone_three_milli||0,zones.zone_four_milli||0,zones.zone_five_milli||0];
       const zt=zoneVals.reduce((a,b)=>a+b,0);
@@ -1717,7 +1719,7 @@ function showWorkoutDetail(logId){
         zoneVals.forEach((z,i)=>{if(z>0)h+='<div style="width:'+((z/zt)*100).toFixed(1)+'%;background:'+zoneColors[i]+'"></div>';});
         h+='</div>';
         h+='<div style="display:flex;gap:10px;margin-top:5px;flex-wrap:wrap">';
-        zoneVals.forEach((z,i)=>{if(z>0){const mins=Math.round(z/60000);h+='<div style="font-size:0.6rem;display:flex;align-items:center;gap:3px"><div style="width:7px;height:7px;border-radius:50%;background:'+zoneColors[i]+'"></div><span style="color:var(--text-muted)">'+zoneLabels[i]+'</span> <span style="color:#fff;font-weight:600">'+mins+'m</span></div>';}});
+        zoneVals.forEach((z,i)=>{if(z>0){const mins=Math.round(z/60000);h+='<div style="font-size:0.6rem;display:flex;align-items:center;gap:3px"><div style="width:7px;height:7px;border-radius:50%;background:'+zoneColors[i]+'"></div><span style="color:var(--text-muted)">'+zoneLabels[i]+'</span> <span style="color:#1c1b1b;font-weight:600">'+mins+'m</span></div>';}});
         h+='</div>';
       }
     }
@@ -1726,13 +1728,13 @@ function showWorkoutDetail(logId){
 
   // Exercise list
   if(log.exercises&&log.exercises.length){
-    h+='<div style="font-size:0.75rem;font-weight:700;color:#fff;margin-bottom:8px">Exercises</div>';
+    h+='<div style="font-size:0.75rem;font-weight:700;color:#1c1b1b;margin-bottom:8px">Exercises</div>';
     log.exercises.forEach(ex=>{
       const check=ex.done?'✅':'⬜';
       const pbDisplay=ex.weight?(ex.weight+'kg'+(ex.sets?' · '+ex.sets+'x'+ex.reps:'')):(ex.pb||'');
-      h+='<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04)">';
+      h+='<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(28,27,27,0.04)">';
       h+='<span style="font-size:0.8rem">'+check+'</span>';
-      h+='<span style="flex:1;font-size:0.78rem;color:'+(ex.done?'#fff':'var(--text-muted)')+'">'+ex.name+'</span>';
+      h+='<span style="flex:1;font-size:0.78rem;color:'+(ex.done?'#1c1b1b':'var(--text-muted)')+'">'+ex.name+'</span>';
       if(pbDisplay)h+='<span style="font-size:0.68rem;color:var(--teal);font-weight:600">'+pbDisplay+'</span>';
       h+='</div>';
     });
@@ -1813,7 +1815,7 @@ function renderWhoop(){
   if(_activeWorkout){
     const done=_activeWorkout.exercises.filter(e=>e.done).length;
     const total=_activeWorkout.exercises.length;
-    html+='<div class="card" onclick="resumeWorkout()" style="cursor:pointer;margin-bottom:18px;border-color:rgba(45,212,168,0.3);background:rgba(45,212,168,0.06)">';
+    html+='<div class="card" onclick="resumeWorkout()" style="cursor:pointer;margin-bottom:18px;border-color:rgba(26,26,26,0.3);background:rgba(26,26,26,0.06)">';
     html+='<div style="display:flex;align-items:center;gap:14px">';
     html+='<div style="font-size:2rem;animation:livePulse 2s infinite">🏋️</div>';
     html+='<div style="flex:1"><div style="font-size:1rem;font-weight:700;color:var(--teal)">Active Workout — '+_activeWorkout.templateName+'</div>';
@@ -1835,7 +1837,7 @@ function renderWhoop(){
   if(!_whoopData||!_whoopData.connected){
     html+='<div class="card" style="text-align:center;padding:30px 20px;margin-bottom:20px">'+
       '<div style="font-size:2rem;margin-bottom:8px">♡</div>'+
-      '<div style="font-size:0.9rem;font-weight:700;color:#fff;margin-bottom:4px">Connect Your Whoop</div>'+
+      '<div style="font-size:0.9rem;font-weight:700;color:#1c1b1b;margin-bottom:4px">Connect Your Whoop</div>'+
       '<div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:14px">Link your Whoop for recovery, strain & sleep data.</div>'+
       '<a href="/api/whoop/auth" style="display:inline-block;padding:8px 22px;border-radius:8px;background:var(--teal);color:#000;font-weight:700;font-size:0.8rem;text-decoration:none;font-family:var(--font)">Connect Whoop</a>'+
       (_whoopData&&_whoopData.error?'<div style="font-size:0.65rem;color:var(--red-soft);margin-top:8px">Error: '+_whoopData.error+'</div>':'')+
@@ -1868,7 +1870,7 @@ function renderWhoop(){
   if(whoopConnected){
   // Profile greeting
   if(profile){
-    html+='<div style="margin-bottom:18px;font-size:0.8rem;color:var(--text-muted)">Connected as <span style="color:#fff;font-weight:600">'+profile.first_name+' '+profile.last_name+'</span></div>';
+    html+='<div style="margin-bottom:18px;font-size:0.8rem;color:var(--text-muted)">Connected as <span style="color:#1c1b1b;font-weight:600">'+profile.first_name+' '+profile.last_name+'</span></div>';
   }
 
   // Body data
@@ -1882,7 +1884,7 @@ function renderWhoop(){
   weekWorkouts.forEach(w=>{const ns=normSport(w.sport_name);if(sportCount.hasOwnProperty(ns))sportCount[ns]++});
   const goals=[{sport:'Weightlifting',icon:'🏋️',done:sportCount.weightlifting,target:3},{sport:'Sauna',icon:'🧖',done:sportCount.sauna,target:3},{sport:'Running',icon:'🏃',done:sportCount.running,target:2},{sport:'Tennis',icon:'🎾',done:sportCount.tennis,target:2}];
 
-  html+='<div style="margin-bottom:18px"><div style="font-size:0.78rem;font-weight:700;color:#fff;margin-bottom:10px">Goals This Week</div>';
+  html+='<div style="margin-bottom:18px"><div style="font-size:0.78rem;font-weight:700;color:#1c1b1b;margin-bottom:10px">Goals This Week</div>';
   html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px">';
   goals.forEach(g=>{
     const pct=Math.min(g.done/g.target,1);
@@ -1891,7 +1893,7 @@ function renderWhoop(){
     html+='<div style="font-size:1.2rem;margin-bottom:4px">'+g.icon+'</div>';
     html+='<div style="font-size:0.9rem;font-weight:700;color:'+col+'">'+g.done+'/'+g.target+'</div>';
     html+='<div style="font-size:0.6rem;color:var(--text-muted);margin-top:2px">'+g.sport+'</div>';
-    html+='<div style="margin-top:6px;height:3px;border-radius:2px;background:rgba(255,255,255,0.06);overflow:hidden"><div style="height:100%;width:'+(pct*100)+'%;background:'+col+';border-radius:2px"></div></div>';
+    html+='<div style="margin-top:6px;height:3px;border-radius:2px;background:rgba(28,27,27,0.06);overflow:hidden"><div style="height:100%;width:'+(pct*100)+'%;background:'+col+';border-radius:2px"></div></div>';
     html+='</div>';
   });
   html+='</div></div>';
@@ -1988,10 +1990,10 @@ function renderWhoop(){
   if(workouts.length){
     const wView=localStorage.getItem('whoop_workout_view')||'cards';
     html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
-    html+='<div style="font-size:0.9rem;font-weight:700;color:#fff">Recent Workouts</div>';
+    html+='<div style="font-size:0.9rem;font-weight:700;color:#1c1b1b">Recent Workouts</div>';
     html+='<div style="display:flex;gap:4px">';
-    html+='<button onclick="localStorage.setItem(\'whoop_workout_view\',\'cards\');renderWhoop()" style="padding:4px 10px;border-radius:5px;border:1px solid rgba(255,255,255,'+(wView==='cards'?'0.2':'0.06')+');background:'+(wView==='cards'?'rgba(255,255,255,0.08)':'transparent')+';color:'+(wView==='cards'?'#fff':'var(--text-faint)')+';font-size:0.6rem;cursor:pointer;font-family:var(--font)">Cards</button>';
-    html+='<button onclick="localStorage.setItem(\'whoop_workout_view\',\'list\');renderWhoop()" style="padding:4px 10px;border-radius:5px;border:1px solid rgba(255,255,255,'+(wView==='list'?'0.2':'0.06')+');background:'+(wView==='list'?'rgba(255,255,255,0.08)':'transparent')+';color:'+(wView==='list'?'#fff':'var(--text-faint)')+';font-size:0.6rem;cursor:pointer;font-family:var(--font)">List</button>';
+    html+='<button onclick="localStorage.setItem(\'whoop_workout_view\',\'cards\');renderWhoop()" style="padding:4px 10px;border-radius:5px;border:1px solid rgba(28,27,27,'+(wView==='cards'?'0.2':'0.06')+');background:'+(wView==='cards'?'rgba(28,27,27,0.08)':'transparent')+';color:'+(wView==='cards'?'#1c1b1b':'var(--text-faint)')+';font-size:0.6rem;cursor:pointer;font-family:var(--font)">Cards</button>';
+    html+='<button onclick="localStorage.setItem(\'whoop_workout_view\',\'list\');renderWhoop()" style="padding:4px 10px;border-radius:5px;border:1px solid rgba(28,27,27,'+(wView==='list'?'0.2':'0.06')+');background:'+(wView==='list'?'rgba(28,27,27,0.08)':'transparent')+';color:'+(wView==='list'?'#1c1b1b':'var(--text-faint)')+';font-size:0.6rem;cursor:pointer;font-family:var(--font)">List</button>';
     html+='</div></div>';
 
     const sportIcons={running:'🏃',cycling:'🚴',swimming:'🏊',weightlifting:'🏋️',tennis:'🎾',yoga:'🧘',hiking:'🥾',walking:'🚶',rowing:'🚣',sauna:'🧖',crossfit:'⚡'};
@@ -2017,22 +2019,22 @@ function renderWhoop(){
         html+='<div class="card" onclick="showWhoopWorkoutDetail(\''+w.id+'\')" style="cursor:pointer;padding:16px">';
         html+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">';
         html+='<div style="font-size:1.5rem">'+icon+'</div>';
-        html+='<div style="flex:1"><div style="font-size:0.9rem;font-weight:700;color:#fff">'+sport+'</div>';
+        html+='<div style="flex:1"><div style="font-size:0.9rem;font-weight:700;color:#1c1b1b">'+sport+'</div>';
         html+='<div style="font-size:0.6rem;color:var(--text-muted)">'+date+(dur?' · '+dur+' min':'')+'</div></div>';
         html+='<div style="text-align:right"><div style="font-size:1.1rem;font-weight:700;color:var(--teal)">'+wStrain+'</div><div style="font-size:0.45rem;color:var(--text-faint)">STRAIN</div></div>';
         html+='</div>';
 
         // Compact stats
         html+='<div style="display:flex;gap:6px;flex-wrap:wrap">';
-        if(dur)html+='<div style="padding:3px 7px;border-radius:4px;background:rgba(255,255,255,0.04);font-size:0.6rem"><span style="color:#fff;font-weight:700">'+dur+'</span> <span style="color:var(--text-faint)">min</span></div>';
-        if(cals)html+='<div style="padding:3px 7px;border-radius:4px;background:rgba(255,255,255,0.04);font-size:0.6rem"><span style="color:var(--amber);font-weight:700">'+cals+'</span> <span style="color:var(--text-faint)">cal</span></div>';
-        if(sc?.average_heart_rate)html+='<div style="padding:3px 7px;border-radius:4px;background:rgba(255,255,255,0.04);font-size:0.6rem"><span style="color:var(--red-soft);font-weight:700">'+sc.average_heart_rate+'</span> <span style="color:var(--text-faint)">avg bpm</span></div>';
-        if(sc?.max_heart_rate)html+='<div style="padding:3px 7px;border-radius:4px;background:rgba(255,255,255,0.04);font-size:0.6rem"><span style="color:var(--red-soft);font-weight:700">'+sc.max_heart_rate+'</span> <span style="color:var(--text-faint)">max bpm</span></div>';
-        if(sc?.distance_meter)html+='<div style="padding:3px 7px;border-radius:4px;background:rgba(255,255,255,0.04);font-size:0.6rem"><span style="color:var(--teal);font-weight:700">'+((sc.distance_meter/1000).toFixed(1))+'km</span></div>';
+        if(dur)html+='<div style="padding:3px 7px;border-radius:4px;background:rgba(28,27,27,0.04);font-size:0.6rem"><span style="color:#1c1b1b;font-weight:700">'+dur+'</span> <span style="color:var(--text-faint)">min</span></div>';
+        if(cals)html+='<div style="padding:3px 7px;border-radius:4px;background:rgba(28,27,27,0.04);font-size:0.6rem"><span style="color:var(--amber);font-weight:700">'+cals+'</span> <span style="color:var(--text-faint)">cal</span></div>';
+        if(sc?.average_heart_rate)html+='<div style="padding:3px 7px;border-radius:4px;background:rgba(28,27,27,0.04);font-size:0.6rem"><span style="color:var(--red-soft);font-weight:700">'+sc.average_heart_rate+'</span> <span style="color:var(--text-faint)">avg bpm</span></div>';
+        if(sc?.max_heart_rate)html+='<div style="padding:3px 7px;border-radius:4px;background:rgba(28,27,27,0.04);font-size:0.6rem"><span style="color:var(--red-soft);font-weight:700">'+sc.max_heart_rate+'</span> <span style="color:var(--text-faint)">max bpm</span></div>';
+        if(sc?.distance_meter)html+='<div style="padding:3px 7px;border-radius:4px;background:rgba(28,27,27,0.04);font-size:0.6rem"><span style="color:var(--teal);font-weight:700">'+((sc.distance_meter/1000).toFixed(1))+'km</span></div>';
         html+='</div>';
 
         if(zones){
-          const zoneColors=['#4a9eff','#2dd4a8','#34d399','#fbbf24','#f97316','#ef4444'];
+          const zoneColors=['#4a9eff','#1a1a1a','#34d399','#fbbf24','#f97316','#ef4444'];
           const zv=[zones.zone_zero_milli||0,zones.zone_one_milli||0,zones.zone_two_milli||0,zones.zone_three_milli||0,zones.zone_four_milli||0,zones.zone_five_milli||0];
           const zt=zv.reduce((a,b)=>a+b,0);
           if(zt>0){
@@ -2043,7 +2045,7 @@ function renderWhoop(){
         }
 
         if(linkedTraining){
-          html+='<div style="margin-top:8px;padding:4px 8px;border-radius:5px;background:rgba(45,212,168,0.06);border:1px solid rgba(45,212,168,0.15);font-size:0.58rem;color:var(--teal)">🔗 '+linkedTraining.templateName+'</div>';
+          html+='<div style="margin-top:8px;padding:4px 8px;border-radius:5px;background:rgba(26,26,26,0.06);border:1px solid rgba(26,26,26,0.15);font-size:0.58rem;color:var(--teal)">🔗 '+linkedTraining.templateName+'</div>';
         }
         html+='</div>';
       });
@@ -2057,9 +2059,9 @@ function renderWhoop(){
         const icon=sportIcons[ns]||'💪';
         const cals=sc?.kilojoule?Math.round(sc.kilojoule*0.239):null;
 
-        html+='<div onclick="showWhoopWorkoutDetail(\''+w.id+'\')" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);cursor:pointer">';
+        html+='<div onclick="showWhoopWorkoutDetail(\''+w.id+'\')" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;background:rgba(28,27,27,0.03);border:1px solid rgba(28,27,27,0.04);cursor:pointer">';
         html+='<div style="font-size:1rem">'+icon+'</div>';
-        html+='<div style="flex:1;min-width:0"><div style="font-size:0.78rem;font-weight:600;color:#fff">'+sport+'</div>';
+        html+='<div style="flex:1;min-width:0"><div style="font-size:0.78rem;font-weight:600;color:#1c1b1b">'+sport+'</div>';
         html+='<div style="font-size:0.58rem;color:var(--text-muted)">'+(w.start?fmtShort(w.start):'')+(dur?' · '+dur+' min':'')+(sc?.average_heart_rate?' · '+sc.average_heart_rate+' bpm':'')+'</div></div>';
         if(sc?.strain)html+='<div style="font-size:0.7rem;font-weight:700;color:var(--teal);min-width:30px;text-align:right">'+sc.strain.toFixed(1)+'</div>';
         if(cals)html+='<div style="font-size:0.65rem;color:var(--amber);min-width:40px;text-align:right">'+cals+' cal</div>';
@@ -2099,11 +2101,11 @@ function renderWhoop(){
       const sleepHrs=sl?.total_hours;const sleepPerf=sl?.performance;
       const strainVal=st?.score;
       function rc(s){if(s==null)return'var(--text-faint)';if(s>=67)return'var(--teal)';if(s>=34)return'var(--amber)';return'var(--red-soft)'}
-      html+='<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);font-size:0.72rem">';
+      html+='<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;background:rgba(28,27,27,0.03);border:1px solid rgba(28,27,27,0.04);font-size:0.72rem">';
       html+='<div style="min-width:70px;color:var(--text-muted);font-weight:600;font-size:0.65rem">'+fmtShort(date)+'</div>';
       html+='<div style="min-width:50px;text-align:center"><span style="color:'+rc(recScore)+';font-weight:700">'+(recScore!=null?recScore+'%':'—')+'</span><div style="font-size:0.45rem;color:var(--text-faint)">REC</div></div>';
-      html+='<div style="min-width:40px;text-align:center"><span style="color:#fff;font-weight:600">'+(hrvVal||'—')+'</span><div style="font-size:0.45rem;color:var(--text-faint)">HRV</div></div>';
-      html+='<div style="min-width:45px;text-align:center"><span style="color:#fff">'+(sleepHrs||'—')+'h</span><div style="font-size:0.45rem;color:var(--text-faint)">SLEEP</div></div>';
+      html+='<div style="min-width:40px;text-align:center"><span style="color:#1c1b1b;font-weight:600">'+(hrvVal||'—')+'</span><div style="font-size:0.45rem;color:var(--text-faint)">HRV</div></div>';
+      html+='<div style="min-width:45px;text-align:center"><span style="color:#1c1b1b">'+(sleepHrs||'—')+'h</span><div style="font-size:0.45rem;color:var(--text-faint)">SLEEP</div></div>';
       html+='<div style="min-width:40px;text-align:center"><span style="color:var(--teal);font-weight:600">'+(strainVal!=null?strainVal.toFixed(1):'—')+'</span><div style="font-size:0.45rem;color:var(--text-faint)">STRAIN</div></div>';
       if(ws.length){
         const wList=ws.map(w=>{const ns=normSport(w.sport);const icon={running:'🏃',tennis:'🎾',weightlifting:'🏋️',sauna:'🧖'}[ns]||'💪';return icon+' '+(w.duration_min||'?')+'m'}).join(' ');
@@ -2125,7 +2127,7 @@ function renderWhoop(){
   const totalHrs=Math.round(totalMins/60*10)/10;
 
   if(_trainingLogs.length){
-    html+='<div style="font-size:0.9rem;font-weight:700;color:#fff;margin:20px 0 12px">Training</div>';
+    html+='<div style="font-size:0.9rem;font-weight:700;color:#1c1b1b;margin:20px 0 12px">Training</div>';
     html+='<div class="metrics-grid" style="margin-bottom:16px">';
     html+='<div class="card metric-tile"><div class="metric-value">'+_trainingLogs.length+'</div><div class="metric-label">Total Sessions</div></div>';
     html+='<div class="card metric-tile"><div class="metric-value teal">'+thisWeek+'</div><div class="metric-label">This Week</div></div>';
@@ -2138,10 +2140,10 @@ function renderWhoop(){
   if(_trainingLogs.length){
     const viewMode=localStorage.getItem('training_view')||'cards';
     html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
-    html+='<div style="font-size:0.9rem;font-weight:700;color:#fff">Workout History</div>';
+    html+='<div style="font-size:0.9rem;font-weight:700;color:#1c1b1b">Workout History</div>';
     html+='<div style="display:flex;gap:4px">';
-    html+='<button onclick="localStorage.setItem(\'training_view\',\'cards\');renderWhoop()" style="padding:4px 10px;border-radius:5px;border:1px solid rgba(255,255,255,'+(viewMode==='cards'?'0.2':'0.06')+');background:'+(viewMode==='cards'?'rgba(255,255,255,0.08)':'transparent')+';color:'+(viewMode==='cards'?'#fff':'var(--text-faint)')+';font-size:0.6rem;cursor:pointer;font-family:var(--font)">Cards</button>';
-    html+='<button onclick="localStorage.setItem(\'training_view\',\'list\');renderWhoop()" style="padding:4px 10px;border-radius:5px;border:1px solid rgba(255,255,255,'+(viewMode==='list'?'0.2':'0.06')+');background:'+(viewMode==='list'?'rgba(255,255,255,0.08)':'transparent')+';color:'+(viewMode==='list'?'#fff':'var(--text-faint)')+';font-size:0.6rem;cursor:pointer;font-family:var(--font)">List</button>';
+    html+='<button onclick="localStorage.setItem(\'training_view\',\'cards\');renderWhoop()" style="padding:4px 10px;border-radius:5px;border:1px solid rgba(28,27,27,'+(viewMode==='cards'?'0.2':'0.06')+');background:'+(viewMode==='cards'?'rgba(28,27,27,0.08)':'transparent')+';color:'+(viewMode==='cards'?'#1c1b1b':'var(--text-faint)')+';font-size:0.6rem;cursor:pointer;font-family:var(--font)">Cards</button>';
+    html+='<button onclick="localStorage.setItem(\'training_view\',\'list\');renderWhoop()" style="padding:4px 10px;border-radius:5px;border:1px solid rgba(28,27,27,'+(viewMode==='list'?'0.2':'0.06')+');background:'+(viewMode==='list'?'rgba(28,27,27,0.08)':'transparent')+';color:'+(viewMode==='list'?'#1c1b1b':'var(--text-faint)')+';font-size:0.6rem;cursor:pointer;font-family:var(--font)">List</button>';
     html+='</div></div>';
 
     if(viewMode==='cards'){
@@ -2159,7 +2161,7 @@ function renderWhoop(){
         html+='<div class="card" onclick="showWorkoutDetail(\''+log.id+'\')" style="cursor:pointer;padding:16px;position:relative">';
         html+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">';
         html+='<div style="font-size:1.5rem">'+icon+'</div>';
-        html+='<div style="flex:1"><div style="font-size:0.9rem;font-weight:700;color:#fff">'+log.templateName+'</div>';
+        html+='<div style="flex:1"><div style="font-size:0.9rem;font-weight:700;color:#1c1b1b">'+log.templateName+'</div>';
         const wDurCard=getWhoopDuration(log);
         html+='<div style="font-size:0.6rem;color:var(--text-muted)">'+fmtShort(log.date)+(wDurCard?' · '+wDurCard+' min':'')+'</div></div>';
         html+='<button onclick="event.stopPropagation();deleteTrainingLog(\''+log.id+'\')" style="padding:2px 6px;border-radius:4px;background:none;border:1px solid rgba(239,68,68,0.12);color:var(--red-soft);font-size:0.5rem;cursor:pointer;font-family:var(--font);position:absolute;top:10px;right:10px">✕</button>';
@@ -2168,9 +2170,9 @@ function renderWhoop(){
         html+='<div class="progress-bar"><div class="progress-fill" style="width:'+pct+'%"></div></div></div>';
         if(sc){
           html+='<div style="display:flex;gap:6px;flex-wrap:wrap">';
-          if(sc.strain)html+='<div style="padding:3px 7px;border-radius:4px;background:rgba(45,212,168,0.08);font-size:0.6rem"><span style="color:var(--teal);font-weight:700">'+sc.strain.toFixed(1)+'</span> <span style="color:var(--text-faint)">strain</span></div>';
-          if(cals)html+='<div style="padding:3px 7px;border-radius:4px;background:rgba(255,255,255,0.04);font-size:0.6rem"><span style="color:var(--amber);font-weight:700">'+cals+'</span> <span style="color:var(--text-faint)">cal</span></div>';
-          if(sc.average_heart_rate)html+='<div style="padding:3px 7px;border-radius:4px;background:rgba(255,255,255,0.04);font-size:0.6rem"><span style="color:var(--red-soft);font-weight:700">'+sc.average_heart_rate+'</span> <span style="color:var(--text-faint)">bpm</span></div>';
+          if(sc.strain)html+='<div style="padding:3px 7px;border-radius:4px;background:rgba(26,26,26,0.08);font-size:0.6rem"><span style="color:var(--teal);font-weight:700">'+sc.strain.toFixed(1)+'</span> <span style="color:var(--text-faint)">strain</span></div>';
+          if(cals)html+='<div style="padding:3px 7px;border-radius:4px;background:rgba(28,27,27,0.04);font-size:0.6rem"><span style="color:var(--amber);font-weight:700">'+cals+'</span> <span style="color:var(--text-faint)">cal</span></div>';
+          if(sc.average_heart_rate)html+='<div style="padding:3px 7px;border-radius:4px;background:rgba(28,27,27,0.04);font-size:0.6rem"><span style="color:var(--red-soft);font-weight:700">'+sc.average_heart_rate+'</span> <span style="color:var(--text-faint)">bpm</span></div>';
           html+='</div>';
         }
         html+='</div>';
@@ -2187,9 +2189,9 @@ function renderWhoop(){
         const sc=whoopMatch?.score;
         const cals=sc?.kilojoule?Math.round(sc.kilojoule*0.239):null;
 
-        html+='<div onclick="showWorkoutDetail(\''+log.id+'\')" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);cursor:pointer">';
+        html+='<div onclick="showWorkoutDetail(\''+log.id+'\')" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;background:rgba(28,27,27,0.03);border:1px solid rgba(28,27,27,0.04);cursor:pointer">';
         html+='<div style="font-size:1rem">'+icon+'</div>';
-        html+='<div style="flex:1;min-width:0"><div style="font-size:0.78rem;font-weight:600;color:#fff">'+log.templateName+'</div>';
+        html+='<div style="flex:1;min-width:0"><div style="font-size:0.78rem;font-weight:600;color:#1c1b1b">'+log.templateName+'</div>';
         const wDurList=getWhoopDuration(log);
         html+='<div style="font-size:0.58rem;color:var(--text-muted)">'+fmtShort(log.date)+(wDurList?' · '+wDurList+' min':'')+' · '+done+'/'+total+'</div></div>';
         if(sc){
@@ -2234,24 +2236,24 @@ function showWhoopWorkoutDetail(workoutId){
 
   if(sc){
     h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px">';
-    h+='<div style="text-align:center;padding:10px;border-radius:6px;background:rgba(0,0,0,0.2)"><div style="font-size:1.2rem;font-weight:700;color:var(--teal)">'+(sc.strain?sc.strain.toFixed(1):'—')+'</div><div style="font-size:0.5rem;color:var(--text-faint);margin-top:2px">STRAIN</div></div>';
-    h+='<div style="text-align:center;padding:10px;border-radius:6px;background:rgba(0,0,0,0.2)"><div style="font-size:1.2rem;font-weight:700;color:var(--amber)">'+(cals||'—')+'</div><div style="font-size:0.5rem;color:var(--text-faint);margin-top:2px">CALORIES</div></div>';
-    h+='<div style="text-align:center;padding:10px;border-radius:6px;background:rgba(0,0,0,0.2)"><div style="font-size:1.2rem;font-weight:700;color:var(--red-soft)">'+(sc.average_heart_rate||'—')+'</div><div style="font-size:0.5rem;color:var(--text-faint);margin-top:2px">AVG HR</div></div>';
-    h+='<div style="text-align:center;padding:10px;border-radius:6px;background:rgba(0,0,0,0.2)"><div style="font-size:1.2rem;font-weight:700;color:var(--red-soft)">'+(sc.max_heart_rate||'—')+'</div><div style="font-size:0.5rem;color:var(--text-faint);margin-top:2px">MAX HR</div></div>';
+    h+='<div style="text-align:center;padding:10px;border-radius:6px;background:rgba(28,27,27,0.05)"><div style="font-size:1.2rem;font-weight:700;color:var(--teal)">'+(sc.strain?sc.strain.toFixed(1):'—')+'</div><div style="font-size:0.5rem;color:var(--text-faint);margin-top:2px">STRAIN</div></div>';
+    h+='<div style="text-align:center;padding:10px;border-radius:6px;background:rgba(28,27,27,0.05)"><div style="font-size:1.2rem;font-weight:700;color:var(--amber)">'+(cals||'—')+'</div><div style="font-size:0.5rem;color:var(--text-faint);margin-top:2px">CALORIES</div></div>';
+    h+='<div style="text-align:center;padding:10px;border-radius:6px;background:rgba(28,27,27,0.05)"><div style="font-size:1.2rem;font-weight:700;color:var(--red-soft)">'+(sc.average_heart_rate||'—')+'</div><div style="font-size:0.5rem;color:var(--text-faint);margin-top:2px">AVG HR</div></div>';
+    h+='<div style="text-align:center;padding:10px;border-radius:6px;background:rgba(28,27,27,0.05)"><div style="font-size:1.2rem;font-weight:700;color:var(--red-soft)">'+(sc.max_heart_rate||'—')+'</div><div style="font-size:0.5rem;color:var(--text-faint);margin-top:2px">MAX HR</div></div>';
     h+='</div>';
 
     if(sc.distance_meter){
-      h+='<div style="margin-bottom:12px;padding:8px 12px;border-radius:6px;background:rgba(255,255,255,0.03);font-size:0.75rem"><span style="color:var(--teal);font-weight:700">'+((sc.distance_meter/1000).toFixed(2))+'</span> <span style="color:var(--text-faint)">km</span></div>';
+      h+='<div style="margin-bottom:12px;padding:8px 12px;border-radius:6px;background:rgba(28,27,27,0.03);font-size:0.75rem"><span style="color:var(--teal);font-weight:700">'+((sc.distance_meter/1000).toFixed(2))+'</span> <span style="color:var(--text-faint)">km</span></div>';
     }
 
     const zones=sc.zone_durations;
     if(zones){
-      const zoneColors=['#4a9eff','#2dd4a8','#34d399','#fbbf24','#f97316','#ef4444'];
+      const zoneColors=['#4a9eff','#1a1a1a','#34d399','#fbbf24','#f97316','#ef4444'];
       const zoneLabels=['Rest','Light','Moderate','Hard','Very Hard','Max'];
       const zv=[zones.zone_zero_milli||0,zones.zone_one_milli||0,zones.zone_two_milli||0,zones.zone_three_milli||0,zones.zone_four_milli||0,zones.zone_five_milli||0];
       const zt=zv.reduce((a,b)=>a+b,0);
       if(zt>0){
-        h+='<div style="font-size:0.65rem;font-weight:600;color:#fff;margin-bottom:6px">Heart Rate Zones</div>';
+        h+='<div style="font-size:0.65rem;font-weight:600;color:#1c1b1b;margin-bottom:6px">Heart Rate Zones</div>';
         h+='<div style="display:flex;height:14px;border-radius:7px;overflow:hidden;gap:1px;margin-bottom:8px">';
         zv.forEach((z,i)=>{if(z>0)h+='<div style="width:'+((z/zt)*100).toFixed(1)+'%;background:'+zoneColors[i]+'"></div>';});
         h+='</div>';
@@ -2262,7 +2264,7 @@ function showWhoopWorkoutDetail(workoutId){
             h+='<div style="display:flex;align-items:center;gap:8px;padding:4px 0">';
             h+='<div style="width:8px;height:8px;border-radius:50%;background:'+zoneColors[i]+'"></div>';
             h+='<div style="flex:1;font-size:0.7rem;color:var(--text-muted)">'+zoneLabels[i]+'</div>';
-            h+='<div style="font-size:0.7rem;color:#fff;font-weight:600;min-width:35px;text-align:right">'+mins+'m</div>';
+            h+='<div style="font-size:0.7rem;color:#1c1b1b;font-weight:600;min-width:35px;text-align:right">'+mins+'m</div>';
             h+='<div style="font-size:0.6rem;color:var(--text-faint);min-width:30px;text-align:right">'+pct+'%</div>';
             h+='</div>';
           }
@@ -2280,15 +2282,15 @@ function showWhoopWorkoutDetail(workoutId){
   if(linkedTraining){
     const done=linkedTraining.exercises?linkedTraining.exercises.filter(e=>e.done).length:0;
     const tot=linkedTraining.exercises?linkedTraining.exercises.length:0;
-    h+='<div style="margin-top:14px;padding:10px 12px;border-radius:8px;background:rgba(45,212,168,0.06);border:1px solid rgba(45,212,168,0.15)">';
+    h+='<div style="margin-top:14px;padding:10px 12px;border-radius:8px;background:rgba(26,26,26,0.06);border:1px solid rgba(26,26,26,0.15)">';
     h+='<div style="font-size:0.65rem;color:var(--teal);font-weight:600;margin-bottom:6px">🔗 Linked Training Session</div>';
-    h+='<div style="font-size:0.8rem;font-weight:600;color:#fff">'+linkedTraining.templateName+'</div>';
+    h+='<div style="font-size:0.8rem;font-weight:600;color:#1c1b1b">'+linkedTraining.templateName+'</div>';
     const ltDur=getWhoopDuration(linkedTraining);
     h+='<div style="font-size:0.65rem;color:var(--text-muted);margin-top:2px">'+done+'/'+tot+' exercises'+(ltDur?' · '+ltDur+' min':'')+'</div>';
     if(linkedTraining.exercises){
       linkedTraining.exercises.forEach(ex=>{
         h+='<div style="display:flex;align-items:center;gap:6px;padding:3px 0;font-size:0.68rem">';
-        h+='<span>'+(ex.done?'✅':'⬜')+'</span><span style="color:'+(ex.done?'#fff':'var(--text-muted)')+'">'+ex.name+'</span>';
+        h+='<span>'+(ex.done?'✅':'⬜')+'</span><span style="color:'+(ex.done?'#1c1b1b':'var(--text-muted)')+'">'+ex.name+'</span>';
         h+='</div>';
       });
     }
@@ -2386,7 +2388,7 @@ function renderProperties(){
     return;
   }
 
-  const statusColors={researching:'#96c7f2',watching:'#e9c162',offer:'#f97316',owned:'#2dd4a8',passed:'#8b8b8b'};
+  const statusColors={researching:'#96c7f2',watching:'#e9c162',offer:'#f97316',owned:'#1a1a1a',passed:'#8b8b8b'};
   const statusLabels={researching:'Researching',watching:'Watching',offer:'Offer Made',owned:'Owned',passed:'Passed'};
   const typeLabels={house:'House',unit:'Unit/Apartment',townhouse:'Townhouse',land:'Land',duplex:'Duplex'};
 
@@ -2416,12 +2418,12 @@ function renderProperties(){
 
     html+='<div class="card" style="padding:16px;border-left:3px solid '+sc+'">';
     html+='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">';
-    html+='<div><div style="font-size:0.85rem;font-weight:700;color:#fff">'+p.name+'</div>';
+    html+='<div><div style="font-size:0.85rem;font-weight:700;color:#1c1b1b">'+p.name+'</div>';
     if(p.suburb)html+='<div style="font-size:0.65rem;color:var(--text-faint);margin-top:2px">📍 '+p.suburb+'</div>';
     html+='</div>';
     html+='<div style="display:flex;gap:6px;align-items:center">';
     html+='<span style="padding:2px 8px;border-radius:4px;font-size:0.6rem;background:'+sc+'22;color:'+sc+';border:1px solid '+sc+'44">'+statusLabels[p.status]+'</span>';
-    html+='<span style="padding:2px 8px;border-radius:4px;font-size:0.6rem;background:rgba(255,255,255,0.06);color:var(--text-muted);border:1px solid rgba(255,255,255,0.08)">'+typeLabels[p.type]+'</span>';
+    html+='<span style="padding:2px 8px;border-radius:4px;font-size:0.6rem;background:rgba(28,27,27,0.06);color:var(--text-muted);border:1px solid rgba(28,27,27,0.08)">'+typeLabels[p.type]+'</span>';
     html+='</div></div>';
 
     // Specs
@@ -2434,14 +2436,14 @@ function renderProperties(){
     }
 
     // Financials
-    html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:10px;border-radius:8px;background:rgba(255,255,255,0.03);margin-bottom:8px">';
-    html+='<div style="text-align:center"><div style="font-size:0.55rem;color:var(--text-faint)">Price</div><div style="font-size:0.78rem;font-weight:700;color:#fff">$'+(p.price>=1e6?(p.price/1e6).toFixed(2)+'M':p.price?p.price.toLocaleString():'—')+'</div></div>';
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:10px;border-radius:8px;background:rgba(28,27,27,0.03);margin-bottom:8px">';
+    html+='<div style="text-align:center"><div style="font-size:0.55rem;color:var(--text-faint)">Price</div><div style="font-size:0.78rem;font-weight:700;color:#1c1b1b">$'+(p.price>=1e6?(p.price/1e6).toFixed(2)+'M':p.price?p.price.toLocaleString():'—')+'</div></div>';
     html+='<div style="text-align:center"><div style="font-size:0.55rem;color:var(--text-faint)">Rent /wk</div><div style="font-size:0.78rem;font-weight:700;color:var(--teal)">$'+fmt2(p.rent)+'</div></div>';
     html+='<div style="text-align:center"><div style="font-size:0.55rem;color:var(--text-faint)">Yield</div><div style="font-size:0.78rem;font-weight:700;color:var(--amber)">'+yieldPct.toFixed(1)+'%</div></div>';
     html+='</div>';
 
     if(mortgage>0&&p.rate){
-      html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:10px;border-radius:8px;background:rgba(255,255,255,0.03);margin-bottom:8px">';
+      html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:10px;border-radius:8px;background:rgba(28,27,27,0.03);margin-bottom:8px">';
       html+='<div style="text-align:center"><div style="font-size:0.55rem;color:var(--text-faint)">Mortgage</div><div style="font-size:0.78rem;font-weight:600;color:var(--text-secondary)">$'+mortgage.toLocaleString()+'</div></div>';
       html+='<div style="text-align:center"><div style="font-size:0.55rem;color:var(--text-faint)">Repayment /wk</div><div style="font-size:0.78rem;font-weight:600;color:var(--red-soft)">$'+fmt2(weeklyMortgage)+'</div></div>';
       html+='<div style="text-align:center"><div style="font-size:0.55rem;color:var(--text-faint)">Cashflow /wk</div><div style="font-size:0.78rem;font-weight:700;color:'+(cashflow>=0?'var(--teal)':'var(--red-soft)')+'">$'+fmt2(cashflow)+'</div></div>';
@@ -2449,7 +2451,7 @@ function renderProperties(){
     }
 
     if(p.notes){
-      html+='<div style="font-size:0.68rem;color:var(--text-muted);padding:6px 0;border-top:1px solid rgba(255,255,255,0.04)">'+p.notes+'</div>';
+      html+='<div style="font-size:0.68rem;color:var(--text-muted);padding:6px 0;border-top:1px solid rgba(28,27,27,0.04)">'+p.notes+'</div>';
     }
 
     html+='<div style="display:flex;gap:8px;margin-top:8px">';
@@ -2525,8 +2527,8 @@ function renderOverview(){
   const topCosts=[...activeItems].sort((a,b)=>deriveCosts(b).monthly-deriveCosts(a).monthly).slice(0,3);
   topCosts.forEach(c=>{
     const d=deriveCosts(c);
-    panels+='<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.7rem;border-top:1px solid rgba(255,255,255,0.04)">';
-    panels+='<span style="color:var(--text-secondary)">'+c.name+'</span><span style="color:#fff;font-weight:600">$'+fmt2(d.monthly)+'/mo</span></div>';
+    panels+='<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.7rem;border-top:1px solid rgba(28,27,27,0.04)">';
+    panels+='<span style="color:var(--text-secondary)">'+c.name+'</span><span style="color:#1c1b1b;font-weight:600">$'+fmt2(d.monthly)+'/mo</span></div>';
   });
   panels+='</div>';
 
@@ -2536,8 +2538,8 @@ function renderOverview(){
   if(latestWhoop){
     panels+='<div style="display:flex;gap:12px;margin:10px 0">';
     panels+='<div style="flex:1;text-align:center"><div style="font-size:0.65rem;color:var(--text-faint)">Recovery</div><div style="font-weight:700;color:'+rc(recScore)+'">'+(recScore!=null?recScore+'%':'—')+'</div></div>';
-    panels+='<div style="flex:1;text-align:center"><div style="font-size:0.65rem;color:var(--text-faint)">HRV</div><div style="font-weight:700;color:#fff">'+(hrvVal||'—')+'</div></div>';
-    panels+='<div style="flex:1;text-align:center"><div style="font-size:0.65rem;color:var(--text-faint)">Sleep</div><div style="font-weight:700;color:#fff">'+(sleepHrs?sleepHrs+'h':'—')+'</div></div>';
+    panels+='<div style="flex:1;text-align:center"><div style="font-size:0.65rem;color:var(--text-faint)">HRV</div><div style="font-weight:700;color:#1c1b1b">'+(hrvVal||'—')+'</div></div>';
+    panels+='<div style="flex:1;text-align:center"><div style="font-size:0.65rem;color:var(--text-faint)">Sleep</div><div style="font-weight:700;color:#1c1b1b">'+(sleepHrs?sleepHrs+'h':'—')+'</div></div>';
     panels+='<div style="flex:1;text-align:center"><div style="font-size:0.65rem;color:var(--text-faint)">Strain</div><div style="font-weight:700;color:var(--teal)">'+(strainVal!=null?strainVal.toFixed(1):'—')+'</div></div>';
     panels+='</div>';
   }
@@ -2545,7 +2547,7 @@ function renderOverview(){
   const recentTraining=_trainingLogs.slice(0,3);
   recentTraining.forEach(t=>{
     const dur=getWhoopDuration(t);
-    panels+='<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.7rem;border-top:1px solid rgba(255,255,255,0.04)">';
+    panels+='<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.7rem;border-top:1px solid rgba(28,27,27,0.04)">';
     panels+='<span style="color:var(--text-secondary)">'+t.templateName+(dur?' — '+dur+'m':'')+'</span><span style="color:var(--text-faint)">'+fmtShort(t.date)+'</span></div>';
   });
   panels+='</div>';
@@ -2554,12 +2556,12 @@ function renderOverview(){
   panels+='<div class="card" style="cursor:pointer" onclick="switchTab(\'goals\')">';
   panels+='<div class="card-header"><span class="card-title">🎯 Goals</span><span style="font-size:0.65rem;color:var(--text-faint)">'+completedGoals+'/'+_goals.length+' complete</span></div>';
   if(_goals.length){
-    panels+='<div style="margin:8px 0"><div style="height:6px;border-radius:3px;background:rgba(255,255,255,0.08);overflow:hidden"><div style="height:100%;width:'+avgGoalProgress+'%;background:var(--teal);border-radius:3px;transition:width 0.3s"></div></div>';
+    panels+='<div style="margin:8px 0"><div style="height:6px;border-radius:3px;background:rgba(28,27,27,0.08);overflow:hidden"><div style="height:100%;width:'+avgGoalProgress+'%;background:var(--teal);border-radius:3px;transition:width 0.3s"></div></div>';
     panels+='<div style="text-align:right;font-size:0.6rem;color:var(--text-faint);margin-top:3px">Avg progress: '+avgGoalProgress+'%</div></div>';
     _goals.filter(g=>g.status!=='Complete').slice(0,3).forEach(g=>{
-      panels+='<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:0.7rem;border-top:1px solid rgba(255,255,255,0.04)">';
+      panels+='<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:0.7rem;border-top:1px solid rgba(28,27,27,0.04)">';
       panels+='<span style="color:var(--text-secondary)">'+g.title+'</span>';
-      panels+='<div style="display:flex;align-items:center;gap:6px"><div style="width:40px;height:4px;border-radius:2px;background:rgba(255,255,255,0.08);overflow:hidden"><div style="height:100%;width:'+g.progress+'%;background:var(--teal);border-radius:2px"></div></div><span style="color:var(--text-faint);font-size:0.6rem">'+g.progress+'%</span></div>';
+      panels+='<div style="display:flex;align-items:center;gap:6px"><div style="width:40px;height:4px;border-radius:2px;background:rgba(28,27,27,0.08);overflow:hidden"><div style="height:100%;width:'+g.progress+'%;background:var(--teal);border-radius:2px"></div></div><span style="color:var(--text-faint);font-size:0.6rem">'+g.progress+'%</span></div>';
       panels+='</div>';
     });
   } else {
@@ -2576,12 +2578,12 @@ function renderOverview(){
   if(_properties.length){
     panels+='<div style="display:flex;gap:12px;margin:10px 0">';
     panels+='<div style="flex:1;text-align:center"><div style="font-size:0.65rem;color:var(--text-faint)">Owned</div><div style="font-weight:700;color:var(--teal)">'+ownedProps.length+'</div></div>';
-    panels+='<div style="flex:1;text-align:center"><div style="font-size:0.65rem;color:var(--text-faint)">Value</div><div style="font-weight:700;color:#fff">$'+(propValue>=1e6?(propValue/1e6).toFixed(2)+'M':propValue.toLocaleString())+'</div></div>';
+    panels+='<div style="flex:1;text-align:center"><div style="font-size:0.65rem;color:var(--text-faint)">Value</div><div style="font-weight:700;color:#1c1b1b">$'+(propValue>=1e6?(propValue/1e6).toFixed(2)+'M':propValue.toLocaleString())+'</div></div>';
     panels+='<div style="flex:1;text-align:center"><div style="font-size:0.65rem;color:var(--text-faint)">Rent /wk</div><div style="font-weight:700;color:var(--teal)">$'+fmt2(propRentWk)+'</div></div>';
     panels+='</div>';
     _properties.slice(0,3).forEach(p=>{
-      const sc={researching:'#96c7f2',watching:'#e9c162',offer:'#f97316',owned:'#2dd4a8',passed:'#8b8b8b'}[p.status]||'#96c7f2';
-      panels+='<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:0.7rem;border-top:1px solid rgba(255,255,255,0.04)">';
+      const sc={researching:'#96c7f2',watching:'#e9c162',offer:'#f97316',owned:'#1a1a1a',passed:'#8b8b8b'}[p.status]||'#96c7f2';
+      panels+='<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:0.7rem;border-top:1px solid rgba(28,27,27,0.04)">';
       panels+='<span style="color:var(--text-secondary)">'+p.name+'</span><span style="padding:1px 6px;border-radius:3px;font-size:0.55rem;background:'+sc+'22;color:'+sc+'">'+p.status+'</span></div>';
     });
   } else {
@@ -2599,7 +2601,7 @@ function renderOverview(){
   _trainingLogs.slice(0,5).forEach(t=>{const d=getWhoopDuration(t);activities.push({text:'💪 '+t.templateName+(d?' — '+d+'m':''),date:t.date,tab:'whoop'})});
   activities.sort((a,b)=>new Date(b.date)-new Date(a.date));
   if(activities.length){
-    panels+=activities.slice(0,6).map(a=>'<div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.03);display:flex;justify-content:space-between;cursor:pointer;font-size:0.72rem" onclick="switchTab(\''+a.tab+'\')"><span style="color:var(--text-secondary)">'+a.text+'</span><span style="color:var(--text-faint);font-size:0.6rem">'+fmtShort(a.date)+'</span></div>').join('');
+    panels+=activities.slice(0,6).map(a=>'<div style="padding:6px 0;border-bottom:1px solid rgba(28,27,27,0.03);display:flex;justify-content:space-between;cursor:pointer;font-size:0.72rem" onclick="switchTab(\''+a.tab+'\')"><span style="color:var(--text-secondary)">'+a.text+'</span><span style="color:var(--text-faint);font-size:0.6rem">'+fmtShort(a.date)+'</span></div>').join('');
   } else {
     panels+='<div style="color:var(--text-faint);font-size:0.75rem">No activity yet</div>';
   }
