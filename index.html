@@ -170,6 +170,11 @@ body{font-family:var(--font);color:var(--text);min-height:100vh;overflow-x:hidde
 .drag-handle{display:inline-block;cursor:grab;color:var(--text-faint);font-size:0.9rem;padding:4px 6px;border-radius:5px;user-select:none;transition:all .15s}
 .drag-handle:hover{background:rgba(28,27,27,0.08);color:var(--text)}
 .drag-handle:active{cursor:grabbing}
+.del-row{display:block;text-align:center;color:var(--text-faint);font-size:0.85rem;line-height:1;padding:3px 6px;border-radius:5px;cursor:pointer;transition:all .15s;margin-top:1px}
+.del-row:hover{background:rgba(239,107,107,0.12);color:var(--red-soft)}
+tr.add-row td{border-bottom:none;padding:8px 2px 2px}
+.add-brand-btn{border:1px dashed var(--glass-border);background:transparent;color:var(--text-muted);font-family:var(--font);font-size:0.76rem;font-weight:500;padding:8px 16px;border-radius:9px;cursor:pointer;width:100%;text-align:center;transition:all .15s}
+.add-brand-btn:hover{background:rgba(28,27,27,0.04);border-color:rgba(28,27,27,0.25);color:var(--text)}
 .jt tbody tr.dragging{opacity:0.35}
 .jt tbody tr.drag-over{box-shadow:inset 0 2px 0 var(--teal)}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
@@ -2835,6 +2840,7 @@ function renderOverview(){
 let _calEvents=[], _calMonth=null, _calSelected=null;
 
 function _esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function _jsKey(k){ return typeof k==='number' ? k : "'"+String(k).replace(/'/g,"\\'")+"'"; }
 function _calUnescape(s){return s.replace(/\\n/gi,' ').replace(/\\,/g,',').replace(/\\;/g,';').replace(/\\\\/g,'\\').trim();}
 function _calTime(d){return d.toLocaleTimeString('en-AU',{hour:'numeric',minute:'2-digit'});}
 function _calKey(d){return d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate();}
@@ -3083,6 +3089,24 @@ function jobEdit(key, field, value){
   localStorage.setItem('dom_income_edits',JSON.stringify(e));
   renderJobs();
 }
+// ── manually-added rows (dashboard-only; not in the Sheet) ──
+function _newRows(){ try{return JSON.parse(localStorage.getItem('dom_income_new')||'[]');}catch(e){return [];} }
+function _saveNewRows(arr){ localStorage.setItem('dom_income_new',JSON.stringify(arr)); }
+function addNewJob(month){
+  const arr=_newRows();
+  const key='new-'+Date.now()+'-'+Math.floor(Math.random()*1000);
+  arr.push({key, month, company:'', fee:null, gst:null, total:null, content:'', invoice:'', status:'PENDING', type:'Job'});
+  _saveNewRows(arr);
+  _cliJobs.push(arr[arr.length-1]);
+  renderJobs();
+  setTimeout(()=>{ const el=document.querySelector('input[data-newbrand="'+key+'"]'); if(el) el.focus(); },30);
+}
+function removeNewJob(key){
+  _saveNewRows(_newRows().filter(r=>r.key!==key));
+  _cliJobs=_cliJobs.filter(j=>j.key!==key);
+  const e=_incEdits(); delete e[key]; localStorage.setItem('dom_income_edits',JSON.stringify(e));
+  renderJobs();
+}
 function _statusDefault(j){ return j.type==='Gifting'?'GIFTING':(j.type==='Event'?'CONFIRMED':j.status.toUpperCase()); }
 function _jobEff(j, edits){
   const e=edits[j.key]||{};
@@ -3096,7 +3120,7 @@ function _jobEff(j, edits){
 function loadClients(){
   fetch('/api/clients',{cache:'no-store'}).then(r=>r.json()).then(data=>{
     _cliClients=parseClientsCsv(data.clients||'');
-    _cliJobs=parseIncomeCsv(data.income||'');
+    _cliJobs=parseIncomeCsv(data.income||'').concat(_newRows());
     const live=data.live&&(data.live.clients||data.live.income);
     document.getElementById('clients-source').innerHTML='<span class="cal-leg"><span class="cal-leg-dot" style="background:'+(live?'#5f7a5a':'#a3663d')+'"></span>'+(live?'Live sync':'Snapshot')+'</span>';
     document.getElementById('clients-updated').textContent='Updated '+new Date().toLocaleTimeString('en-AU',{hour:'numeric',minute:'2-digit'});
@@ -3196,43 +3220,47 @@ function renderJobs(){
   const curM=now.toLocaleString('en-US',{month:'long'}).toUpperCase();
   const priorM=new Date(now.getFullYear(),now.getMonth()-1,1).toLocaleString('en-US',{month:'long'}).toUpperCase();
   // ── income tiles (confirmed = INVOICED+CONFIRMED; gifting & second hand excluded) ──
-  let curInc=0, priorInc=0, yearInc=0, giftCur=0, secondCur=0;
+  let curInc=0, priorInc=0, yearInc=0, giftCur=0, secondYear=0;
   for(const j of _cliJobs){
     const ef=_jobEff(j,edits); const fee=ef.fee||0; const mUp=(j.month||'').toUpperCase();
     const isCur=mUp.startsWith(curM), isPrior=mUp.startsWith(priorM);
     if(ef.status==='INVOICED'||ef.status==='CONFIRMED'){ yearInc+=fee; if(isCur)curInc+=fee; if(isPrior)priorInc+=fee; }
     else if(ef.status==='GIFTING' && isCur){ giftCur+=fee; }
-    else if(ef.status==='SECOND HAND' && isCur){ secondCur+=fee; }
+    else if(ef.status==='SECOND HAND'){ secondYear+=fee; } // all tracked months are already June onwards
   }
   document.getElementById('cli-stats').innerHTML=
     '<div class="card metric-tile"><div class="metric-value">'+fmtMoney(curInc)+'</div><div class="metric-label">'+_titleCase(curM)+' · income</div></div>'
     +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(priorInc)+'</div><div class="metric-label">'+_titleCase(priorM)+' · income</div></div>'
     +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(yearInc)+'</div><div class="metric-label">Tax year · from Jun</div></div>'
     +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(giftCur)+'</div><div class="metric-label">'+_titleCase(curM)+' · gifting</div></div>'
-    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(secondCur)+'</div><div class="metric-label">'+_titleCase(curM)+' · second hand</div></div>';
+    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(secondYear)+'</div><div class="metric-label">Second hand · from Jun</div></div>';
   // ── table, grouped by month, latest month first, rows custom-orderable ──
   const groups=[], gmap={};
   for(const j of _cliJobs){ if(!gmap[j.month]){ gmap[j.month]={month:j.month,items:[]}; groups.push(gmap[j.month]); } gmap[j.month].items.push(j); }
   groups.reverse();
-  const numCell=(key,field,val)=>'<td class="num"><input class="jt-in jt-num" value="'+(val!=null?val:'')+'" inputmode="decimal" onchange="jobEdit('+key+',\''+field+'\',this.value)"></td>';
+  if(!groups.some(g=>(g.month||'').toUpperCase().startsWith(curM))) groups.unshift({month:curM,items:[]});
+  const numCell=(key,field,val)=>'<td class="num"><input class="jt-in jt-num" value="'+(val!=null?val:'')+'" inputmode="decimal" onchange="jobEdit('+_jsKey(key)+',\''+field+'\',this.value)"></td>';
   let html='';
   for(const grp of groups){
     const items=_orderedItems(grp.month, grp.items);
+    const mQ="'"+_esc(grp.month).replace(/'/g,"\\'")+"'";
     html+='<div class="job-month">'+_esc(_titleCase(grp.month))+'</div><div class="card jt-wrap"><table class="jt"><thead><tr>'
       +'<th style="width:30px"></th><th style="width:18%">Brand</th><th style="width:12%">Status</th><th style="width:11%">Invoice #</th><th style="width:25%">Content</th><th class="num" style="width:9%">Fee</th><th class="num" style="width:8%">GST</th><th class="num" style="width:10%">Total</th></tr></thead><tbody>';
     items.forEach((j)=>{
       const ef=_jobEff(j,edits);
       const opts=_STATUSES.map(s=>'<option'+(s===ef.status?' selected':'')+'>'+s+'</option>').join('');
-      const mQ="'"+_esc(grp.month).replace(/'/g,"\\'")+"'";
-      html+='<tr ondragover="jobDragOver(event)" ondragleave="jobDragLeave(event)" ondrop="jobDrop(event,'+mQ+','+j.key+')">'
-        +'<td class="reorder-cell"><span class="drag-handle" draggable="true" ondragstart="jobDragStart(event,'+mQ+','+j.key+')" ondragend="jobDragEnd(event)" title="Drag to reorder">⠿</span></td>'
-        +'<td><input class="jt-in" value="'+_esc(ef.brand)+'" onchange="jobEdit('+j.key+',\'brand\',this.value)"></td>'
-        +'<td><select class="jt-sel st-'+_statusSlug(ef.status)+'" onchange="jobEdit('+j.key+',\'status\',this.value)">'+opts+'</select></td>'
-        +'<td><input class="jt-in" value="'+_esc(ef.invoice)+'" placeholder="—" onchange="jobEdit('+j.key+',\'invoice\',this.value)"></td>'
-        +'<td><input class="jt-in" value="'+_esc(ef.content)+'" placeholder="—" onchange="jobEdit('+j.key+',\'content\',this.value)"></td>'
+      const isNew=typeof j.key==='string'&&j.key.indexOf('new-')===0;
+      html+='<tr ondragover="jobDragOver(event)" ondragleave="jobDragLeave(event)" ondrop="jobDrop(event,'+mQ+','+_jsKey(j.key)+')">'
+        +'<td class="reorder-cell"><span class="drag-handle" draggable="true" ondragstart="jobDragStart(event,'+mQ+','+_jsKey(j.key)+')" ondragend="jobDragEnd(event)" title="Drag to reorder">⠿</span>'
+          +(isNew?'<span class="del-row" onclick="removeNewJob('+_jsKey(j.key)+')" title="Remove row">×</span>':'')+'</td>'
+        +'<td><input class="jt-in" value="'+_esc(ef.brand)+'" placeholder="Brand name" '+(isNew?'data-newbrand="'+_esc(j.key)+'"':'')+' onchange="jobEdit('+_jsKey(j.key)+',\'brand\',this.value)"></td>'
+        +'<td><select class="jt-sel st-'+_statusSlug(ef.status)+'" onchange="jobEdit('+_jsKey(j.key)+',\'status\',this.value)">'+opts+'</select></td>'
+        +'<td><input class="jt-in" value="'+_esc(ef.invoice)+'" placeholder="—" onchange="jobEdit('+_jsKey(j.key)+',\'invoice\',this.value)"></td>'
+        +'<td><input class="jt-in" value="'+_esc(ef.content)+'" placeholder="—" onchange="jobEdit('+_jsKey(j.key)+',\'content\',this.value)"></td>'
         +numCell(j.key,'fee',ef.fee)+numCell(j.key,'gst',ef.gst)+numCell(j.key,'total',ef.total)
         +'</tr>';
     });
+    html+='<tr class="add-row"><td colspan="8"><button class="add-brand-btn" onclick="addNewJob('+mQ+')">+ Add brand</button></td></tr>';
     html+='</tbody></table></div>';
   }
   document.getElementById('cli-jobs-content').innerHTML=html||'<div class="empty-state"><div class="icon">◇</div><h3>No jobs</h3></div>';
