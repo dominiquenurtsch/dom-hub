@@ -147,6 +147,20 @@ body{font-family:var(--font);color:var(--text);min-height:100vh;overflow-x:hidde
 .cli-edit-brand{font-family:var(--serif);font-size:1rem;font-weight:600}
 .cli-edit:focus{border-color:var(--teal);background:#fff}
 .cli-edit::placeholder{color:var(--text-faint)}
+/* ── Investment Properties ── */
+.prop-card{margin-bottom:16px}
+.prop-card-head{display:flex;align-items:flex-start;gap:10px}
+.prop-residence-toggle{display:flex;align-items:center;gap:7px;font-size:0.72rem;color:var(--text-muted);margin:8px 0 12px;cursor:pointer;user-select:none}
+.prop-residence-toggle input{accent-color:var(--teal);cursor:pointer}
+.prop-rent-row{display:flex;gap:22px;align-items:center;padding:10px 14px;background:rgba(28,27,27,0.03);border-radius:9px;margin-bottom:12px;flex-wrap:wrap}
+.prop-rent-row .k{display:block;font-size:0.58rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-faint);margin-bottom:3px}
+.prop-rent-in{width:90px;font-weight:600}
+.prop-rent-net{font-weight:700;font-size:0.9rem;color:var(--text)}
+.prop-expense-table{width:100%;margin-bottom:10px}
+.prop-net-row{font-size:0.85rem;color:var(--text);padding-top:10px;border-top:1px solid rgba(28,27,27,0.08)}
+.prop-net-row strong{font-size:1rem}
+.prop-net-row.negative strong{color:var(--red-soft)}
+.prop-net-sub{font-size:0.68rem;color:var(--text-faint);font-weight:400}
 .cli-count{font-size:0.7rem;color:var(--text-faint);margin-bottom:14px}
 .badge{display:inline-block;font-size:0.58rem;letter-spacing:0.06em;text-transform:uppercase;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap}
 .badge.invoiced{background:rgba(95,122,90,0.15);color:#4c6147}
@@ -473,25 +487,32 @@ select.form-input{cursor:pointer;background:#1a1a1a}
     <div class="tab-panel" id="tab-acct-personal">
       <div class="section-header" style="display:flex;align-items:center;gap:12px"><h2>Accounting — Personal</h2></div>
       <p class="section-lead">Where the money actually goes each month.</p>
-      <div class="metrics-grid" id="acct-personal-stats"></div>
-      <div class="job-month">Recurring Expenses</div>
-      <div id="acct-recurring-wrap"></div>
-      <div class="job-month">Manual Add-ons</div>
-      <div id="acct-addons-grid"></div>
+      <div class="subtabs">
+        <button class="subtab active" data-sub="overview" onclick="acctPersonalSub('overview')">Overview</button>
+        <button class="subtab" data-sub="weekly" onclick="acctPersonalSub('weekly')">Weekly Breakdown</button>
+      </div>
+      <div id="acct-personal-overview">
+        <div class="metrics-grid" id="acct-personal-stats"></div>
+        <div class="job-month">Recurring Expenses</div>
+        <div id="acct-recurring-wrap"></div>
+        <div class="job-month">Manual Add-ons</div>
+        <div id="acct-addons-grid"></div>
+      </div>
+      <div id="acct-personal-weekly" style="display:none"></div>
     </div>
 
     <!-- ═══ ACCOUNTING — BUSINESS TAB ═══ -->
     <div class="tab-panel" id="tab-acct-business">
-      <div class="section-header" style="display:flex;align-items:center;gap:12px"><h2>Accounting — Business</h2><span class="soon">Coming soon</span></div>
-      <p class="section-lead">Ottilie Studios' numbers, pulled straight from Xero.</p>
+      <div class="section-header" style="display:flex;align-items:center;gap:12px"><h2>Accounting — Business</h2></div>
+      <p class="section-lead">Ottilie Studios' recurring costs. Wage, Super and PAYG are seeded as placeholders — fill in the real figures whenever you have them.</p>
+      <div class="metrics-grid" id="biz-recur-stats"></div>
+      <div class="job-month">Recurring Expenses</div>
+      <div id="biz-recurring-wrap"></div>
       <div class="card">
-        <div class="card-header"><span class="card-title">Planned</span></div>
+        <div class="card-header"><span class="card-title">Still to come</span></div>
         <ul class="roadmap">
           <li>Linked to <strong>Xero</strong></li>
-          <li>Monthly recurring expenses tracker</li>
           <li>Monthly income</li>
-          <li>Monthly super payments</li>
-          <li>Monthly tax payments</li>
         </ul>
       </div>
     </div>
@@ -589,49 +610,14 @@ select.form-input{cursor:pointer;background:#1a1a1a}
     <div class="tab-panel" id="tab-properties">
       <div class="section-header">
         <h2>Investment Properties</h2>
-        <div style="display:flex;gap:8px;align-items:center">
-          <div class="updated" id="properties-updated"></div>
-          <button class="btn" onclick="showPropertyModal()">+ Add Property</button>
-        </div>
       </div>
-      <div id="properties-content"></div>
+      <p class="section-lead">Weekly cash flow across everything you own.</p>
+      <div class="metrics-grid" id="props-stats"></div>
+      <div id="props-grid"></div>
+      <button class="add-brand-btn" style="margin-top:14px" onclick="propAdd()">+ Add property</button>
     </div>
 
   </main>
-</div>
-
-<!-- ═══ PROPERTY MODAL ═══ -->
-<div id="property-modal" style="display:none;position:fixed;inset:0;background:rgba(28,27,27,0.45);z-index:1000;display:none;align-items:center;justify-content:center">
-  <div style="background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:24px;width:90%;max-width:520px;max-height:85vh;overflow-y:auto">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-      <h3 style="margin:0;font-size:1rem;color:#1c1b1b" id="property-modal-title">Add Property</h3>
-      <button onclick="closePropertyModal()" style="background:none;border:none;color:var(--text-faint);font-size:1.2rem;cursor:pointer">&times;</button>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <input id="prop-name" placeholder="Property name / address" class="input" style="width:100%">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <select id="prop-status" class="input"><option value="researching">Researching</option><option value="watching">Watching</option><option value="offer">Offer Made</option><option value="owned">Owned</option><option value="passed">Passed</option></select>
-        <select id="prop-type" class="input"><option value="house">House</option><option value="unit">Unit/Apartment</option><option value="townhouse">Townhouse</option><option value="land">Land</option><option value="duplex">Duplex</option></select>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <input id="prop-price" type="number" placeholder="Price / Value $" class="input">
-        <input id="prop-rent" type="number" placeholder="Weekly Rent $" class="input">
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <input id="prop-deposit" type="number" placeholder="Deposit $" class="input">
-        <input id="prop-rate" type="number" step="0.01" placeholder="Interest Rate %" class="input">
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-        <input id="prop-beds" type="number" placeholder="Beds" class="input">
-        <input id="prop-baths" type="number" placeholder="Baths" class="input">
-        <input id="prop-cars" type="number" placeholder="Cars" class="input">
-      </div>
-      <input id="prop-suburb" placeholder="Suburb / Location" class="input" style="width:100%">
-      <input id="prop-url" placeholder="Listing URL" class="input" style="width:100%">
-      <textarea id="prop-notes" placeholder="Notes" class="input" rows="3" style="width:100%;resize:vertical"></textarea>
-      <button class="btn" onclick="saveProperty()" style="width:100%;margin-top:4px">Save Property</button>
-    </div>
-  </div>
 </div>
 
 <!-- ═══ ACTIVE WORKOUT MODAL ═══ -->
@@ -852,7 +838,7 @@ let _activeWorkout=null;
 
 // ─── Load All Data ───
 async function loadAll(){
-  await Promise.all([loadChecklists(),loadNotes(),loadGoals(),loadFinances(),loadTraining(),loadWhoop(),loadProperties()]);
+  await Promise.all([loadChecklists(),loadNotes(),loadGoals(),loadFinances(),loadTraining(),loadWhoop()]);
   renderOverview();
 }
 
@@ -2552,157 +2538,9 @@ function showWhoopWorkoutDetail(workoutId){
 // OVERVIEW
 // ════════════════════════════════════════
 // ════════════════════════════════════════
-// INVESTMENT PROPERTIES
+// INVESTMENT PROPERTIES (legacy placeholder — see renderInvestmentProperties() below for the live tracker)
 // ════════════════════════════════════════
-let _properties=[];
-async function loadProperties(){
-  try{
-    const res=await fetch('/api/properties?t='+Date.now());
-    if(res.ok){const d=await res.json();_properties=d.properties||[];if(d.updated)document.getElementById('properties-updated').textContent='Saved: '+fmt(d.updated);renderProperties()}
-  }catch(e){console.warn('Properties load failed',e)}
-}
-async function saveProperties(){
-  try{await fetch('/api/properties',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'save',properties:_properties})});document.getElementById('properties-updated').textContent='Saved: '+fmt(new Date().toISOString())}catch(e){console.warn('Properties save failed',e)}
-}
-
-let _editingPropertyId=null;
-function showPropertyModal(id){
-  _editingPropertyId=id||null;
-  const m=document.getElementById('property-modal');
-  m.style.display='flex';
-  document.getElementById('property-modal-title').textContent=id?'Edit Property':'Add Property';
-  const p=id?_properties.find(x=>x.id===id):{};
-  document.getElementById('prop-name').value=p.name||'';
-  document.getElementById('prop-status').value=p.status||'researching';
-  document.getElementById('prop-type').value=p.type||'house';
-  document.getElementById('prop-price').value=p.price||'';
-  document.getElementById('prop-rent').value=p.rent||'';
-  document.getElementById('prop-deposit').value=p.deposit||'';
-  document.getElementById('prop-rate').value=p.rate||'';
-  document.getElementById('prop-beds').value=p.beds||'';
-  document.getElementById('prop-baths').value=p.baths||'';
-  document.getElementById('prop-cars').value=p.cars||'';
-  document.getElementById('prop-suburb').value=p.suburb||'';
-  document.getElementById('prop-url').value=p.url||'';
-  document.getElementById('prop-notes').value=p.notes||'';
-}
-function closePropertyModal(){document.getElementById('property-modal').style.display='none';_editingPropertyId=null}
-function saveProperty(){
-  const data={
-    name:document.getElementById('prop-name').value.trim(),
-    status:document.getElementById('prop-status').value,
-    type:document.getElementById('prop-type').value,
-    price:parseFloat(document.getElementById('prop-price').value)||0,
-    rent:parseFloat(document.getElementById('prop-rent').value)||0,
-    deposit:parseFloat(document.getElementById('prop-deposit').value)||0,
-    rate:parseFloat(document.getElementById('prop-rate').value)||0,
-    beds:parseInt(document.getElementById('prop-beds').value)||0,
-    baths:parseInt(document.getElementById('prop-baths').value)||0,
-    cars:parseInt(document.getElementById('prop-cars').value)||0,
-    suburb:document.getElementById('prop-suburb').value.trim(),
-    url:document.getElementById('prop-url').value.trim(),
-    notes:document.getElementById('prop-notes').value.trim(),
-  };
-  if(!data.name)return;
-  if(_editingPropertyId){
-    const p=_properties.find(x=>x.id===_editingPropertyId);
-    if(p)Object.assign(p,data,{modified:new Date().toISOString()});
-  } else {
-    _properties.unshift({id:Date.now().toString(),created:new Date().toISOString(),modified:new Date().toISOString(),...data});
-  }
-  closePropertyModal();
-  saveProperties();renderProperties();renderOverview();
-}
-function deleteProperty(id){
-  if(!confirm('Delete this property?'))return;
-  _properties=_properties.filter(p=>p.id!==id);
-  saveProperties();renderProperties();renderOverview();
-}
-
-function renderProperties(){
-  const el=document.getElementById('properties-content');
-  if(!_properties.length){
-    el.innerHTML='<div class="empty-state"><div class="icon">🏠</div><h3>No properties yet</h3><p>Add your first investment property to start tracking</p></div>';
-    return;
-  }
-
-  const statusColors={researching:'#96c7f2',watching:'#e9c162',offer:'#f97316',owned:'#1a1a1a',passed:'#8b8b8b'};
-  const statusLabels={researching:'Researching',watching:'Watching',offer:'Offer Made',owned:'Owned',passed:'Passed'};
-  const typeLabels={house:'House',unit:'Unit/Apartment',townhouse:'Townhouse',land:'Land',duplex:'Duplex'};
-
-  // Summary tiles
-  const owned=_properties.filter(p=>p.status==='owned');
-  const totalValue=owned.reduce((s,p)=>s+p.price,0);
-  const totalRentWk=owned.reduce((s,p)=>s+p.rent,0);
-  const totalRentYr=totalRentWk*52;
-  const avgYield=totalValue?((totalRentYr/totalValue)*100):0;
-
-  let html='<div class="metrics-grid" style="margin-bottom:16px">';
-  html+='<div class="card metric-tile"><div class="metric-value">'+_properties.length+'</div><div class="metric-label">Total Properties</div></div>';
-  html+='<div class="card metric-tile"><div class="metric-value teal">'+owned.length+'</div><div class="metric-label">Owned</div></div>';
-  html+='<div class="card metric-tile"><div class="metric-value">$'+(totalValue>=1e6?(totalValue/1e6).toFixed(2)+'M':totalValue.toLocaleString())+'</div><div class="metric-label">Portfolio Value</div></div>';
-  html+='<div class="card metric-tile"><div class="metric-value teal">$'+fmt2(totalRentWk)+'</div><div class="metric-label">Rent /wk</div></div>';
-  html+='<div class="card metric-tile"><div class="metric-value" style="color:var(--amber)">'+avgYield.toFixed(1)+'%</div><div class="metric-label">Avg Yield</div></div>';
-  html+='</div>';
-
-  // Property cards
-  html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px">';
-  _properties.forEach(p=>{
-    const sc=statusColors[p.status]||'#96c7f2';
-    const mortgage=p.price&&p.deposit?(p.price-p.deposit):0;
-    const weeklyMortgage=mortgage&&p.rate?((mortgage*(p.rate/100/12))/(1-Math.pow(1+p.rate/100/12,-360)))*12/52:0;
-    const cashflow=p.rent-weeklyMortgage;
-    const yieldPct=p.price?((p.rent*52/p.price)*100):0;
-
-    html+='<div class="card" style="padding:16px;border-left:3px solid '+sc+'">';
-    html+='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">';
-    html+='<div><div style="font-size:0.85rem;font-weight:700;color:#1c1b1b">'+p.name+'</div>';
-    if(p.suburb)html+='<div style="font-size:0.65rem;color:var(--text-faint);margin-top:2px">📍 '+p.suburb+'</div>';
-    html+='</div>';
-    html+='<div style="display:flex;gap:6px;align-items:center">';
-    html+='<span style="padding:2px 8px;border-radius:4px;font-size:0.6rem;background:'+sc+'22;color:'+sc+';border:1px solid '+sc+'44">'+statusLabels[p.status]+'</span>';
-    html+='<span style="padding:2px 8px;border-radius:4px;font-size:0.6rem;background:rgba(28,27,27,0.06);color:var(--text-muted);border:1px solid rgba(28,27,27,0.08)">'+typeLabels[p.type]+'</span>';
-    html+='</div></div>';
-
-    // Specs
-    if(p.beds||p.baths||p.cars){
-      html+='<div style="display:flex;gap:12px;font-size:0.7rem;color:var(--text-secondary);margin-bottom:10px">';
-      if(p.beds)html+='<span>🛏 '+p.beds+'</span>';
-      if(p.baths)html+='<span>🚿 '+p.baths+'</span>';
-      if(p.cars)html+='<span>🚗 '+p.cars+'</span>';
-      html+='</div>';
-    }
-
-    // Financials
-    html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:10px;border-radius:8px;background:rgba(28,27,27,0.03);margin-bottom:8px">';
-    html+='<div style="text-align:center"><div style="font-size:0.55rem;color:var(--text-faint)">Price</div><div style="font-size:0.78rem;font-weight:700;color:#1c1b1b">$'+(p.price>=1e6?(p.price/1e6).toFixed(2)+'M':p.price?p.price.toLocaleString():'—')+'</div></div>';
-    html+='<div style="text-align:center"><div style="font-size:0.55rem;color:var(--text-faint)">Rent /wk</div><div style="font-size:0.78rem;font-weight:700;color:var(--teal)">$'+fmt2(p.rent)+'</div></div>';
-    html+='<div style="text-align:center"><div style="font-size:0.55rem;color:var(--text-faint)">Yield</div><div style="font-size:0.78rem;font-weight:700;color:var(--amber)">'+yieldPct.toFixed(1)+'%</div></div>';
-    html+='</div>';
-
-    if(mortgage>0&&p.rate){
-      html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:10px;border-radius:8px;background:rgba(28,27,27,0.03);margin-bottom:8px">';
-      html+='<div style="text-align:center"><div style="font-size:0.55rem;color:var(--text-faint)">Mortgage</div><div style="font-size:0.78rem;font-weight:600;color:var(--text-secondary)">$'+mortgage.toLocaleString()+'</div></div>';
-      html+='<div style="text-align:center"><div style="font-size:0.55rem;color:var(--text-faint)">Repayment /wk</div><div style="font-size:0.78rem;font-weight:600;color:var(--red-soft)">$'+fmt2(weeklyMortgage)+'</div></div>';
-      html+='<div style="text-align:center"><div style="font-size:0.55rem;color:var(--text-faint)">Cashflow /wk</div><div style="font-size:0.78rem;font-weight:700;color:'+(cashflow>=0?'var(--teal)':'var(--red-soft)')+'">$'+fmt2(cashflow)+'</div></div>';
-      html+='</div>';
-    }
-
-    if(p.notes){
-      html+='<div style="font-size:0.68rem;color:var(--text-muted);padding:6px 0;border-top:1px solid rgba(28,27,27,0.04)">'+p.notes+'</div>';
-    }
-
-    html+='<div style="display:flex;gap:8px;margin-top:8px">';
-    html+='<button class="btn btn-ghost" onclick="showPropertyModal(\''+p.id+'\')" style="font-size:0.65rem;flex:1">Edit</button>';
-    if(p.url)html+='<a href="'+p.url+'" target="_blank" class="btn btn-ghost" style="font-size:0.65rem;text-decoration:none;text-align:center">🔗 Listing</a>';
-    html+='<button class="btn btn-ghost" onclick="deleteProperty(\''+p.id+'\')" style="font-size:0.65rem;color:var(--red-soft)">Delete</button>';
-    html+='</div>';
-    html+='</div>';
-  });
-  html+='</div>';
-
-  el.innerHTML=html;
-}
+let _properties=[]; // kept empty for the (hidden, unused) legacy Overview panel below
 
 function renderOverview(){
   const totalChecklistItems=_checklists.reduce((s,l)=>s+l.items.length,0);
@@ -3269,12 +3107,12 @@ function jobDragEnd(e){
   document.querySelectorAll('.jt tbody tr.drag-over').forEach(r=>r.classList.remove('drag-over'));
   _dragKey=null; _dragMonth=null;
 }
-function renderJobs(){
+function _businessIncomeStats(){
   const edits=_incEdits();
   const now=new Date();
   const curM=now.toLocaleString('en-US',{month:'long'}).toUpperCase();
   const priorM=new Date(now.getFullYear(),now.getMonth()-1,1).toLocaleString('en-US',{month:'long'}).toUpperCase();
-  // ── income tiles (confirmed = INVOICED+CONFIRMED; gifting & second hand excluded) ──
+  // confirmed = INVOICED+CONFIRMED; gifting & second hand excluded
   let curInc=0, priorInc=0, yearInc=0, giftCur=0;
   for(const j of _cliJobs){
     const ef=_jobEff(j,edits); const fee=ef.fee||0; const mUp=(j.month||'').toUpperCase();
@@ -3282,12 +3120,18 @@ function renderJobs(){
     if(ef.status==='INVOICED'||ef.status==='CONFIRMED'){ yearInc+=fee; if(isCur)curInc+=fee; if(isPrior)priorInc+=fee; }
     else if(ef.status==='GIFTING' && isCur){ giftCur+=fee; }
   }
+  return {curInc,priorInc,yearInc,giftCur,curM,priorM};
+}
+function renderJobs(){
+  const edits=_incEdits();
+  const biz=_businessIncomeStats();
+  const curM=biz.curM, priorM=biz.priorM;
   const secondYear=_secondHandTotal();
   document.getElementById('cli-stats').innerHTML=
-    '<div class="card metric-tile"><div class="metric-value">'+fmtMoney(curInc)+'</div><div class="metric-label">'+_titleCase(curM)+' · income</div></div>'
-    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(priorInc)+'</div><div class="metric-label">'+_titleCase(priorM)+' · income</div></div>'
-    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(yearInc)+'</div><div class="metric-label">Tax year · from Jun</div></div>'
-    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(giftCur)+'</div><div class="metric-label">'+_titleCase(curM)+' · gifting</div></div>'
+    '<div class="card metric-tile"><div class="metric-value">'+fmtMoney(biz.curInc)+'</div><div class="metric-label">'+_titleCase(curM)+' · income</div></div>'
+    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(biz.priorInc)+'</div><div class="metric-label">'+_titleCase(priorM)+' · income</div></div>'
+    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(biz.yearInc)+'</div><div class="metric-label">Tax year · from Jun</div></div>'
+    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(biz.giftCur)+'</div><div class="metric-label">'+_titleCase(curM)+' · gifting</div></div>'
     +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(secondYear)+'</div><div class="metric-label">Second hand · from Jun</div></div>';
   // ── table, grouped by month, latest month first, rows custom-orderable ──
   const groups=[], gmap={};
@@ -3354,7 +3198,7 @@ function recurEdit(id,field,value){
   _saveRecur(arr); renderAcctPersonal();
 }
 function recurRemove(id){ _saveRecur(_recurItems().filter(x=>x.id!==id)); renderAcctPersonal(); }
-function _toWeekly(amount,cadence){ if(cadence==='monthly') return amount*12/52; if(cadence==='yearly') return amount/52; return amount; }
+function _toWeekly(amount,cadence){ if(cadence==='monthly') return amount*12/52; if(cadence==='quarterly') return amount*4/52; if(cadence==='yearly') return amount/52; return amount; }
 
 const _ADDON_CATS=['Shopping','Fuel','Health'];
 function _addons(){ try{return JSON.parse(localStorage.getItem('dom_personal_addons')||'{}');}catch(e){return {};} }
@@ -3428,11 +3272,227 @@ function renderAcctPersonal(){
   document.getElementById('acct-addons-grid').innerHTML=ah;
 }
 
+function acctPersonalSub(which){
+  document.querySelectorAll('#tab-acct-personal .subtab').forEach(b=>b.classList.toggle('active',b.dataset.sub===which));
+  document.getElementById('acct-personal-overview').style.display=which==='overview'?'block':'none';
+  document.getElementById('acct-personal-weekly').style.display=which==='weekly'?'block':'none';
+  if(which==='weekly') renderAcctWeekly();
+}
+function _taxYearStart(now){ return now.getMonth()>=5 ? new Date(now.getFullYear(),5,1) : new Date(now.getFullYear()-1,5,1); }
+function renderAcctWeekly(){
+  const total=_secondHandTotal();
+  const now=new Date();
+  const weeksElapsed=Math.max(1,(now-_taxYearStart(now))/(7*864e5));
+  const weeklyAvg=total/weeksElapsed;
+  document.getElementById('acct-personal-weekly').innerHTML=
+    '<div class="metrics-grid">'
+    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(weeklyAvg)+'</div><div class="metric-label">Second hand · weekly avg</div></div>'
+    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(total)+'</div><div class="metric-label">Second hand · total (from Jun)</div></div>'
+    +'<div class="card metric-tile"><div class="metric-value">'+weeksElapsed.toFixed(1)+'</div><div class="metric-label">Weeks elapsed</div></div>'
+    +'</div>'
+    +'<p class="section-lead" style="margin-top:16px">Weekly average = total Second Hand income (from June) ÷ weeks elapsed since the start of the tax year.</p>';
+}
+
+// ════════════════════════════════════════
+// INVESTMENT PROPERTIES — weekly cash flow tracker (dashboard-only; localStorage)
+// ════════════════════════════════════════
+const _PROP_DEFAULTS=[
+  { id:'p1', name:'Unit 4/2315 Gold Coast Hwy, Mermaid Beach QLD 4218',
+    url:'https://www.realestate.com.au/property/unit-4-2315-gold-coast-hwy-mermaid-beach-qld-4218/',
+    isResidence:false, rentWeekly:625, managementFeePct:7, note:'',
+    expenses:[
+      {id:'p1e1',label:'Levies',amount:75},
+      {id:'p1e2',label:'Mortgage repayments',amount:849},
+      {id:'p1e3',label:'Landlord insurance (extra)',amount:8},
+      {id:'p1e4',label:'Rates',amount:58},
+      {id:'p1e5',label:'Water',amount:37},
+    ]},
+  { id:'p2', name:'33/286 The Esplanade, Miami QLD (50% share)',
+    url:'https://www.realestate.com.au/sold/property-unit-qld-miami-149801636',
+    isResidence:false, rentWeekly:375, managementFeePct:7, note:'You own 50% — figures shown are already your 50% share.',
+    expenses:[
+      {id:'p2e1',label:'Mortgage repayments',amount:646.50},
+      {id:'p2e2',label:'Levies',amount:44},
+      {id:'p2e3',label:'Landlord insurance (extra)',amount:4},
+      {id:'p2e4',label:'Rates',amount:29},
+      {id:'p2e5',label:'Water',amount:15},
+    ]},
+  { id:'p3', name:'Unit 2/286 The Esplanade, Miami QLD 4220',
+    url:'https://www.realestate.com.au/property/unit-2-286-the-esplanade-miami-qld-4220/',
+    isResidence:true, rentWeekly:0, managementFeePct:0, note:'Owner-occupied — this is where you live.',
+    expenses:[
+      {id:'p3e1',label:'Levies',amount:88},
+      {id:'p3e2',label:'Mortgage',amount:639},
+      {id:'p3e3',label:'Rates',amount:58},
+      {id:'p3e4',label:'Water',amount:32},
+      {id:'p3e5',label:'Electricity',amount:35},
+    ]},
+];
+function _props(){
+  try{ const raw=localStorage.getItem('dom_properties_v2'); if(raw) return JSON.parse(raw); }catch(e){}
+  localStorage.setItem('dom_properties_v2',JSON.stringify(_PROP_DEFAULTS));
+  return JSON.parse(JSON.stringify(_PROP_DEFAULTS));
+}
+function _saveProps(arr){ localStorage.setItem('dom_properties_v2',JSON.stringify(arr)); }
+function propAdd(){
+  const arr=_props();
+  const id='prop-'+Date.now()+'-'+Math.floor(Math.random()*1000);
+  arr.push({id,name:'',url:'',isResidence:false,rentWeekly:0,managementFeePct:7,note:'',expenses:[]});
+  _saveProps(arr); renderInvestmentProperties();
+  setTimeout(()=>{ const el=document.querySelector('input[data-prop-name="'+id+'"]'); if(el) el.focus(); },30);
+}
+function propEdit(id,field,value){
+  const arr=_props(); const p=arr.find(x=>x.id===id); if(!p) return;
+  if(field==='rentWeekly'||field==='managementFeePct') p[field]=parseFloat(value)||0;
+  else if(field==='isResidence') p[field]=!!value;
+  else p[field]=value;
+  _saveProps(arr); renderInvestmentProperties();
+}
+function propRemove(id){ _saveProps(_props().filter(p=>p.id!==id)); renderInvestmentProperties(); }
+function propExpenseAdd(propId){
+  const arr=_props(); const p=arr.find(x=>x.id===propId); if(!p) return;
+  const id='pe-'+Date.now()+'-'+Math.floor(Math.random()*1000);
+  p.expenses.push({id,label:'',amount:0});
+  _saveProps(arr); renderInvestmentProperties();
+  setTimeout(()=>{ const el=document.querySelector('input[data-expense-label="'+id+'"]'); if(el) el.focus(); },30);
+}
+function propExpenseEdit(propId,expId,field,value){
+  const arr=_props(); const p=arr.find(x=>x.id===propId); if(!p) return;
+  const e=p.expenses.find(x=>x.id===expId); if(!e) return;
+  if(field==='amount') e.amount=parseFloat(value)||0; else e.label=value;
+  _saveProps(arr); renderInvestmentProperties();
+}
+function propExpenseRemove(propId,expId){
+  const arr=_props(); const p=arr.find(x=>x.id===propId); if(!p) return;
+  p.expenses=p.expenses.filter(x=>x.id!==expId);
+  _saveProps(arr); renderInvestmentProperties();
+}
+function _propNet(p){
+  const expTotal=(p.expenses||[]).reduce((s,e)=>s+(e.amount||0),0);
+  const rentNet=p.isResidence?0:(p.rentWeekly||0)*(1-(p.managementFeePct||0)/100);
+  return {expTotal, rentNet, net:rentNet-expTotal};
+}
+function renderInvestmentProperties(){
+  const props=_props();
+  let rentTotal=0, invExpTotal=0, invNetTotal=0, residenceCostTotal=0;
+  props.forEach(p=>{
+    const {expTotal,rentNet,net}=_propNet(p);
+    if(p.isResidence) residenceCostTotal+=expTotal;
+    else { rentTotal+=rentNet; invExpTotal+=expTotal; invNetTotal+=net; }
+  });
+  document.getElementById('props-stats').innerHTML=
+    '<div class="card metric-tile"><div class="metric-value">'+fmtMoney(rentTotal)+'</div><div class="metric-label">Rental income · weekly (after mgmt)</div></div>'
+    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(invExpTotal)+'</div><div class="metric-label">Investment expenses · weekly</div></div>'
+    +'<div class="card metric-tile"><div class="metric-value" style="color:'+(invNetTotal<0?'var(--red-soft)':'inherit')+'">'+(invNetTotal<0?'-':'')+fmtMoney(Math.abs(invNetTotal))+'</div><div class="metric-label">Investment net · weekly</div></div>'
+    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(residenceCostTotal)+'</div><div class="metric-label">Residence cost · weekly</div></div>'
+    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney((invNetTotal<0?-invNetTotal:0)+residenceCostTotal)+'</div><div class="metric-label">Total cost · weekly (incl. residence)</div></div>';
+
+  let html='';
+  props.forEach(p=>{
+    const {expTotal,rentNet,net}=_propNet(p);
+    const k="'"+p.id.replace(/'/g,"\\'")+"'";
+    const isNeg=!p.isResidence&&net<0;
+    const displayVal=p.isResidence?expTotal:net;
+    html+='<div class="card prop-card">'
+      +'<div class="prop-card-head"><div style="flex:1;min-width:0">'
+      +'<input class="cli-edit cli-edit-brand" style="margin-bottom:4px" placeholder="Property name / address" value="'+_esc(p.name)+'" data-prop-name="'+_esc(p.id)+'" onchange="propEdit('+k+',\'name\',this.value)">'
+      +'<input class="cli-edit" style="font-size:0.72rem" placeholder="Listing URL" value="'+_esc(p.url)+'" onchange="propEdit('+k+',\'url\',this.value)">'
+      +'</div><span class="del-row" onclick="propRemove('+k+')" title="Remove property">×</span></div>';
+    if(p.url) html+='<a class="link-out" style="font-size:0.7rem;display:inline-block;margin:6px 0" href="'+_esc(p.url)+'" target="_blank" rel="noopener">View listing ↗</a>';
+    html+='<label class="prop-residence-toggle"><input type="checkbox" '+(p.isResidence?'checked':'')+' onchange="propEdit('+k+',\'isResidence\',this.checked)"> I live here (no rental income)</label>';
+    if(!p.isResidence){
+      html+='<div class="prop-rent-row">'
+        +'<div><span class="k">Rent /wk</span><input class="jt-in jt-num prop-rent-in" inputmode="decimal" value="'+p.rentWeekly+'" onchange="propEdit('+k+',\'rentWeekly\',this.value)"></div>'
+        +'<div><span class="k">Mgmt fee %</span><input class="jt-in jt-num prop-rent-in" inputmode="decimal" value="'+p.managementFeePct+'" onchange="propEdit('+k+',\'managementFeePct\',this.value)"></div>'
+        +'<div><span class="k">Rent after fee</span><span class="prop-rent-net">'+fmtMoney(rentNet)+'</span></div>'
+        +'</div>';
+    }
+    html+='<table class="jt prop-expense-table"><thead><tr><th>Expense</th><th class="num" style="width:90px">Weekly</th><th style="width:30px"></th></tr></thead><tbody>';
+    (p.expenses||[]).forEach(e=>{
+      const ek="'"+e.id.replace(/'/g,"\\'")+"'";
+      html+='<tr>'
+        +'<td><input class="jt-in" value="'+_esc(e.label)+'" placeholder="Expense" data-expense-label="'+_esc(e.id)+'" onchange="propExpenseEdit('+k+','+ek+',\'label\',this.value)"></td>'
+        +'<td class="num"><input class="jt-in jt-num" value="'+e.amount+'" inputmode="decimal" onchange="propExpenseEdit('+k+','+ek+',\'amount\',this.value)"></td>'
+        +'<td class="reorder-cell"><span class="del-row" onclick="propExpenseRemove('+k+','+ek+')" title="Remove">×</span></td>'
+        +'</tr>';
+    });
+    html+='<tr class="add-row"><td colspan="3"><button class="add-brand-btn" onclick="propExpenseAdd('+k+')">+ Add expense</button></td></tr>';
+    html+='</tbody></table>';
+    html+='<div class="prop-net-row'+(isNeg?' negative':'')+'">'+(p.isResidence?'Weekly cost: ':'Net weekly: ')+'<strong>'+(isNeg?'-':'')+fmtMoney(Math.abs(displayVal))+'</strong>'
+      +(p.isResidence?'':' <span class="prop-net-sub">(rent after mgmt '+fmtMoney(rentNet)+' − expenses '+fmtMoney(expTotal)+')</span>')
+      +'</div>';
+    if(p.note) html+='<div class="cli-note">'+_esc(p.note)+'</div>';
+    html+='</div>';
+  });
+  document.getElementById('props-grid').innerHTML=html||'<div class="empty-state"><div class="icon">🏠</div><h3>No properties yet</h3></div>';
+}
+
+// ════════════════════════════════════════
+// ACCOUNTING — BUSINESS (dashboard-only; localStorage)
+// ════════════════════════════════════════
+const _BIZ_RECUR_DEFAULTS=[
+  {id:'b1',name:'Wage (to self)',note:'',amount:null,cadence:'weekly',paused:false},
+  {id:'b2',name:'Super',note:'',amount:null,cadence:'quarterly',paused:false},
+  {id:'b3',name:'PAYG withholding',note:'',amount:null,cadence:'monthly',paused:false},
+];
+function _bizRecurItems(){
+  try{ const raw=localStorage.getItem('dom_business_recurring'); if(raw) return JSON.parse(raw); }catch(e){}
+  localStorage.setItem('dom_business_recurring',JSON.stringify(_BIZ_RECUR_DEFAULTS));
+  return JSON.parse(JSON.stringify(_BIZ_RECUR_DEFAULTS));
+}
+function _saveBizRecur(arr){ localStorage.setItem('dom_business_recurring',JSON.stringify(arr)); }
+function bizRecurAdd(){
+  const arr=_bizRecurItems();
+  const id='brc-'+Date.now()+'-'+Math.floor(Math.random()*1000);
+  arr.push({id,name:'',note:'',amount:null,cadence:'monthly',paused:false});
+  _saveBizRecur(arr); renderAcctBusiness();
+  setTimeout(()=>{ const el=document.querySelector('input[data-bizrecur-name="'+id+'"]'); if(el) el.focus(); },30);
+}
+function bizRecurEdit(id,field,value){
+  const arr=_bizRecurItems(); const it=arr.find(x=>x.id===id); if(!it) return;
+  if(field==='amount') it.amount=(value===''?null:(parseFloat(value)||0));
+  else if(field==='paused') it.paused=!!value;
+  else it[field]=value;
+  _saveBizRecur(arr); renderAcctBusiness();
+}
+function bizRecurRemove(id){ _saveBizRecur(_bizRecurItems().filter(x=>x.id!==id)); renderAcctBusiness(); }
+function renderAcctBusiness(){
+  const items=_bizRecurItems();
+  let weekly=0; items.forEach(it=>{ if(!it.paused) weekly+=_toWeekly(it.amount||0,it.cadence); });
+  const monthly=weekly*52/12, yearly=weekly*52;
+  document.getElementById('biz-recur-stats').innerHTML=
+    '<div class="card metric-tile"><div class="metric-value">'+fmtMoney(weekly)+'</div><div class="metric-label">Recurring · weekly</div></div>'
+    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(monthly)+'</div><div class="metric-label">Recurring · monthly</div></div>'
+    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(yearly)+'</div><div class="metric-label">Recurring · yearly</div></div>';
+
+  let html='<div class="card jt-wrap"><table class="jt"><thead><tr>'
+    +'<th style="width:22%">Category</th><th style="width:20%">Note</th><th class="num" style="width:11%">Amount</th><th style="width:13%">Cadence</th><th style="width:9%">Paused</th><th class="num" style="width:13%">Weekly equiv</th><th style="width:30px"></th>'
+    +'</tr></thead><tbody>';
+  items.forEach(it=>{
+    const k="'"+it.id.replace(/'/g,"\\'")+"'";
+    const wk=_toWeekly(it.amount||0,it.cadence);
+    html+='<tr>'
+      +'<td><input class="jt-in" value="'+_esc(it.name)+'" placeholder="Category" data-bizrecur-name="'+_esc(it.id)+'" onchange="bizRecurEdit('+k+',\'name\',this.value)"></td>'
+      +'<td><input class="jt-in" value="'+_esc(it.note)+'" placeholder="—" onchange="bizRecurEdit('+k+',\'note\',this.value)"></td>'
+      +'<td class="num"><input class="jt-in jt-num" value="'+(it.amount!=null?it.amount:'')+'" placeholder="—" inputmode="decimal" onchange="bizRecurEdit('+k+',\'amount\',this.value)"></td>'
+      +'<td><select class="jt-sel" onchange="bizRecurEdit('+k+',\'cadence\',this.value)">'+['weekly','monthly','quarterly','yearly'].map(c=>'<option'+(c===it.cadence?' selected':'')+'>'+c+'</option>').join('')+'</select></td>'
+      +'<td style="text-align:center"><input type="checkbox" '+(it.paused?'checked':'')+' onchange="bizRecurEdit('+k+',\'paused\',this.checked)"></td>'
+      +'<td class="num">'+(it.paused?'<span style="color:var(--text-faint)">paused</span>':(it.amount!=null?fmtMoney(wk):'<span style="color:var(--text-faint)">—</span>'))+'</td>'
+      +'<td class="reorder-cell"><span class="del-row" onclick="bizRecurRemove('+k+')" title="Remove">×</span></td>'
+      +'</tr>';
+  });
+  html+='<tr class="add-row"><td colspan="7"><button class="add-brand-btn" onclick="bizRecurAdd()">+ Add expense</button></td></tr>';
+  html+='</tbody></table></div>';
+  document.getElementById('biz-recurring-wrap').innerHTML=html;
+}
+
 // ─── Init ───
 loadAll();
 loadCalendar();
 loadClients();
+renderInvestmentProperties();
 renderAcctPersonal();
+renderAcctBusiness();
 </script>
 </body>
 </html>
