@@ -165,6 +165,13 @@ body{font-family:var(--font);color:var(--text);min-height:100vh;overflow-x:hidde
 .jt-sel.st-confirmed{color:#3f5872}
 .jt-sel.st-gifting{color:#8a5533}
 .jt-sel.st-pending{color:var(--text-muted)}
+.jt-sel.st-second-hand{color:#7a5570}
+.reorder-cell{padding:2px 4px !important;text-align:center}
+.drag-handle{display:inline-block;cursor:grab;color:var(--text-faint);font-size:0.9rem;padding:4px 6px;border-radius:5px;user-select:none;transition:all .15s}
+.drag-handle:hover{background:rgba(28,27,27,0.08);color:var(--text)}
+.drag-handle:active{cursor:grabbing}
+.jt tbody tr.dragging{opacity:0.35}
+.jt tbody tr.drag-over{box-shadow:inset 0 2px 0 var(--teal)}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .section-header{margin-bottom:24px}
 .section-header h2{font-family:var(--serif);font-size:2rem;font-weight:600;color:var(--black);letter-spacing:-0.01em}
@@ -3063,7 +3070,7 @@ function parseIncomeCsv(csv){
     const fee=num(netto);
     const invoiceNo=/^\d/.test(inv)?inv:'';
     const status = invoiceNo ? 'Invoiced' : (fee!=null ? 'Confirmed' : 'Pending');
-    jobs.push({key:i, month, company, fee, gst:num(g(cGst)), total:num(g(cTotal)), content:g(cContent), status, type, date:g(cDate), paid:g(cPaid).toUpperCase()==='YES'});
+    jobs.push({key:i, month, company, invoice:invoiceNo, fee, gst:num(g(cGst)), total:num(g(cTotal)), content:g(cContent), status, type, date:g(cDate), paid:g(cPaid).toUpperCase()==='YES'});
   }
   return jobs;
 }
@@ -3083,7 +3090,7 @@ function _jobEff(j, edits){
   const fee=(e.fee!==undefined&&e.fee!=='')?parseFloat(e.fee):j.fee;
   const gst=(e.gst!==undefined&&e.gst!=='')?parseFloat(e.gst):(j.gst!=null?j.gst:(fee!=null?Math.round(fee*10)/100:null));
   const total=(e.total!==undefined&&e.total!=='')?parseFloat(e.total):(j.total!=null?j.total:(fee!=null?Math.round((fee+(gst||0))*100)/100:null));
-  return { brand:(e.brand!==undefined?e.brand:j.company), content:(e.content!==undefined?e.content:j.content), status, fee, gst, total };
+  return { brand:(e.brand!==undefined?e.brand:j.company), invoice:(e.invoice!==undefined?e.invoice:j.invoice), content:(e.content!==undefined?e.content:j.content), status, fee, gst, total };
 }
 
 function loadClients(){
@@ -3131,45 +3138,101 @@ function renderAddressBook(){
   el.innerHTML=html;
 }
 
-const _STATUSES=['INVOICED','CONFIRMED','GIFTING','PENDING'];
+const _STATUSES=['INVOICED','CONFIRMED','GIFTING','PENDING','SECOND HAND'];
+function _statusSlug(s){ return (s||'').toLowerCase().replace(/\s+/g,'-'); }
 function _titleCase(m){ m=(m||'').split(' ')[0]; return m?m.charAt(0)+m.slice(1).toLowerCase():'—'; }
+
+// ── row order overlay (dashboard-only; per month, persists across reloads) ──
+function _incOrder(){ try{return JSON.parse(localStorage.getItem('dom_income_order')||'{}');}catch(e){return {};} }
+function _orderedItems(month, items){
+  const order=_incOrder()[month];
+  if(!order||!order.length) return items;
+  const byKey={}; items.forEach(j=>byKey[j.key]=j);
+  const seen=new Set(), out=[];
+  order.forEach(k=>{ if(byKey[k]){ out.push(byKey[k]); seen.add(k); } });
+  items.forEach(j=>{ if(!seen.has(j.key)) out.push(j); });
+  return out;
+}
+let _dragKey=null, _dragMonth=null;
+function jobDragStart(e, month, key){
+  _dragKey=key; _dragMonth=month;
+  e.dataTransfer.effectAllowed='move';
+  try{ e.dataTransfer.setData('text/plain', String(key)); }catch(err){}
+  const row=e.currentTarget.closest('tr'); if(row) row.classList.add('dragging');
+}
+function jobDragOver(e){
+  if(_dragKey==null) return;
+  e.preventDefault();
+  e.dataTransfer.dropEffect='move';
+  e.currentTarget.classList.add('drag-over');
+}
+function jobDragLeave(e){ e.currentTarget.classList.remove('drag-over'); }
+function jobDrop(e, month, targetKey){
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  const draggedRow=document.querySelector('.jt tbody tr.dragging'); if(draggedRow) draggedRow.classList.remove('dragging');
+  if(_dragKey==null||month!==_dragMonth||targetKey===_dragKey){ _dragKey=null; _dragMonth=null; return; }
+  const rect=e.currentTarget.getBoundingClientRect();
+  const before=(e.clientY-rect.top)<rect.height/2;
+  const order=_incOrder();
+  let arr=order[month];
+  arr=arr?arr.slice():_orderedItems(month,_cliJobs.filter(j=>j.month===month)).map(j=>j.key);
+  const fromIdx=arr.indexOf(_dragKey); if(fromIdx>=0) arr.splice(fromIdx,1);
+  let toIdx=arr.indexOf(targetKey); if(toIdx<0) toIdx=arr.length; if(!before) toIdx++;
+  arr.splice(toIdx,0,_dragKey);
+  order[month]=arr;
+  localStorage.setItem('dom_income_order',JSON.stringify(order));
+  _dragKey=null; _dragMonth=null;
+  renderJobs();
+}
+function jobDragEnd(e){
+  const row=e.currentTarget.closest('tr'); if(row) row.classList.remove('dragging');
+  document.querySelectorAll('.jt tbody tr.drag-over').forEach(r=>r.classList.remove('drag-over'));
+  _dragKey=null; _dragMonth=null;
+}
 function renderJobs(){
   const edits=_incEdits();
   const now=new Date();
   const curM=now.toLocaleString('en-US',{month:'long'}).toUpperCase();
   const priorM=new Date(now.getFullYear(),now.getMonth()-1,1).toLocaleString('en-US',{month:'long'}).toUpperCase();
-  // ── income tiles (confirmed = INVOICED+CONFIRMED; gifting excluded from income) ──
-  let curInc=0, priorInc=0, yearInc=0, giftCur=0;
+  // ── income tiles (confirmed = INVOICED+CONFIRMED; gifting & second hand excluded) ──
+  let curInc=0, priorInc=0, yearInc=0, giftCur=0, secondCur=0;
   for(const j of _cliJobs){
     const ef=_jobEff(j,edits); const fee=ef.fee||0; const mUp=(j.month||'').toUpperCase();
     const isCur=mUp.startsWith(curM), isPrior=mUp.startsWith(priorM);
     if(ef.status==='INVOICED'||ef.status==='CONFIRMED'){ yearInc+=fee; if(isCur)curInc+=fee; if(isPrior)priorInc+=fee; }
     else if(ef.status==='GIFTING' && isCur){ giftCur+=fee; }
+    else if(ef.status==='SECOND HAND' && isCur){ secondCur+=fee; }
   }
   document.getElementById('cli-stats').innerHTML=
     '<div class="card metric-tile"><div class="metric-value">'+fmtMoney(curInc)+'</div><div class="metric-label">'+_titleCase(curM)+' · income</div></div>'
     +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(priorInc)+'</div><div class="metric-label">'+_titleCase(priorM)+' · income</div></div>'
     +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(yearInc)+'</div><div class="metric-label">Tax year · from Jun</div></div>'
-    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(giftCur)+'</div><div class="metric-label">'+_titleCase(curM)+' · gifting</div></div>';
-  // ── table, grouped by month, latest month first ──
+    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(giftCur)+'</div><div class="metric-label">'+_titleCase(curM)+' · gifting</div></div>'
+    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(secondCur)+'</div><div class="metric-label">'+_titleCase(curM)+' · second hand</div></div>';
+  // ── table, grouped by month, latest month first, rows custom-orderable ──
   const groups=[], gmap={};
   for(const j of _cliJobs){ if(!gmap[j.month]){ gmap[j.month]={month:j.month,items:[]}; groups.push(gmap[j.month]); } gmap[j.month].items.push(j); }
   groups.reverse();
   const numCell=(key,field,val)=>'<td class="num"><input class="jt-in jt-num" value="'+(val!=null?val:'')+'" inputmode="decimal" onchange="jobEdit('+key+',\''+field+'\',this.value)"></td>';
   let html='';
   for(const grp of groups){
+    const items=_orderedItems(grp.month, grp.items);
     html+='<div class="job-month">'+_esc(_titleCase(grp.month))+'</div><div class="card jt-wrap"><table class="jt"><thead><tr>'
-      +'<th style="width:22%">Brand</th><th style="width:15%">Status</th><th style="width:31%">Content</th><th class="num" style="width:10%">Fee</th><th class="num" style="width:10%">GST</th><th class="num" style="width:12%">Total</th></tr></thead><tbody>';
-    for(const j of grp.items){
+      +'<th style="width:30px"></th><th style="width:18%">Brand</th><th style="width:12%">Status</th><th style="width:11%">Invoice #</th><th style="width:25%">Content</th><th class="num" style="width:9%">Fee</th><th class="num" style="width:8%">GST</th><th class="num" style="width:10%">Total</th></tr></thead><tbody>';
+    items.forEach((j)=>{
       const ef=_jobEff(j,edits);
       const opts=_STATUSES.map(s=>'<option'+(s===ef.status?' selected':'')+'>'+s+'</option>').join('');
-      html+='<tr>'
+      const mQ="'"+_esc(grp.month).replace(/'/g,"\\'")+"'";
+      html+='<tr ondragover="jobDragOver(event)" ondragleave="jobDragLeave(event)" ondrop="jobDrop(event,'+mQ+','+j.key+')">'
+        +'<td class="reorder-cell"><span class="drag-handle" draggable="true" ondragstart="jobDragStart(event,'+mQ+','+j.key+')" ondragend="jobDragEnd(event)" title="Drag to reorder">⠿</span></td>'
         +'<td><input class="jt-in" value="'+_esc(ef.brand)+'" onchange="jobEdit('+j.key+',\'brand\',this.value)"></td>'
-        +'<td><select class="jt-sel st-'+ef.status.toLowerCase()+'" onchange="jobEdit('+j.key+',\'status\',this.value)">'+opts+'</select></td>'
+        +'<td><select class="jt-sel st-'+_statusSlug(ef.status)+'" onchange="jobEdit('+j.key+',\'status\',this.value)">'+opts+'</select></td>'
+        +'<td><input class="jt-in" value="'+_esc(ef.invoice)+'" placeholder="—" onchange="jobEdit('+j.key+',\'invoice\',this.value)"></td>'
         +'<td><input class="jt-in" value="'+_esc(ef.content)+'" placeholder="—" onchange="jobEdit('+j.key+',\'content\',this.value)"></td>'
         +numCell(j.key,'fee',ef.fee)+numCell(j.key,'gst',ef.gst)+numCell(j.key,'total',ef.total)
         +'</tr>';
-    }
+    });
     html+='</tbody></table></div>';
   }
   document.getElementById('cli-jobs-content').innerHTML=html||'<div class="empty-state"><div class="icon">◇</div><h3>No jobs</h3></div>';
