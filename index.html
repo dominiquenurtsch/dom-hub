@@ -140,6 +140,13 @@ body{font-family:var(--font);color:var(--text);min-height:100vh;overflow-x:hidde
 .cli-row a{color:var(--teal);text-decoration:none;word-break:break-word}
 .cli-row a:hover{text-decoration:underline}
 .cli-note{margin-top:10px;padding-top:10px;border-top:1px solid rgba(28,27,27,0.06);font-size:0.72rem;color:var(--text-muted);line-height:1.45;white-space:pre-line}
+.cli-card-new{border-style:dashed;border-color:rgba(28,27,27,0.2);display:flex;flex-direction:column;gap:7px}
+.cli-card-new-head{display:flex;align-items:center;gap:6px}
+.cli-card-new-head .cli-edit-brand{flex:1}
+.cli-edit{width:100%;border:1px solid var(--glass-border);background:rgba(255,255,255,0.6);color:var(--text);font-family:var(--font);font-size:0.8rem;padding:8px 10px;border-radius:8px;outline:none;transition:border .15s;resize:vertical}
+.cli-edit-brand{font-family:var(--serif);font-size:1rem;font-weight:600}
+.cli-edit:focus{border-color:var(--teal);background:#fff}
+.cli-edit::placeholder{color:var(--text-faint)}
 .cli-count{font-size:0.7rem;color:var(--text-faint);margin-bottom:14px}
 .badge{display:inline-block;font-size:0.58rem;letter-spacing:0.06em;text-transform:uppercase;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap}
 .badge.invoiced{background:rgba(95,122,90,0.15);color:#4c6147}
@@ -166,6 +173,14 @@ body{font-family:var(--font);color:var(--text);min-height:100vh;overflow-x:hidde
 .jt-sel.st-gifting{color:#8a5533}
 .jt-sel.st-pending{color:var(--text-muted)}
 .jt-sel.st-second-hand{color:#7a5570}
+.jt input[type=checkbox]{accent-color:var(--teal);width:15px;height:15px;cursor:pointer}
+.addon-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.addon-card{display:flex;flex-direction:column}
+.addon-list{display:flex;flex-direction:column;gap:5px;margin:10px 0}
+.addon-row{display:flex;gap:6px;align-items:center}
+.addon-date{flex:0 0 128px}
+.addon-desc{flex:1;min-width:0}
+.addon-amt{flex:0 0 76px;text-align:right}
 .reorder-cell{padding:2px 4px !important;text-align:center}
 .drag-handle{display:inline-block;cursor:grab;color:var(--text-faint);font-size:0.9rem;padding:4px 6px;border-radius:5px;user-select:none;transition:all .15s}
 .drag-handle:hover{background:rgba(28,27,27,0.08);color:var(--text)}
@@ -426,16 +441,17 @@ select.form-input{cursor:pointer;background:#1a1a1a}
         </div>
       </div>
       <div class="subtabs">
-        <button class="subtab active" data-sub="book" onclick="clientsSub('book')">Address Book</button>
-        <button class="subtab" data-sub="jobs" onclick="clientsSub('jobs')">Jobs &amp; Income</button>
+        <button class="subtab active" data-sub="jobs" onclick="clientsSub('jobs')">Jobs &amp; Income</button>
+        <button class="subtab" data-sub="book" onclick="clientsSub('book')">Address Book</button>
       </div>
-      <div id="clients-book">
-        <input class="cli-search" id="cli-search" placeholder="Search brand, contact, email, location, notes…" oninput="renderAddressBook()" autocomplete="off">
-        <div id="cli-book-content"><div class="empty-state"><div class="icon">▦</div><h3>Loading…</h3></div></div>
-      </div>
-      <div id="clients-jobs" style="display:none">
+      <div id="clients-jobs">
         <div class="metrics-grid" id="cli-stats"></div>
         <div id="cli-jobs-content"></div>
+      </div>
+      <div id="clients-book" style="display:none">
+        <input class="cli-search" id="cli-search" placeholder="Search brand, contact, email, location, notes…" oninput="renderAddressBook()" autocomplete="off">
+        <button class="add-brand-btn" style="margin-bottom:16px" onclick="addNewBrand()">+ Add new brand</button>
+        <div id="cli-book-content"><div class="empty-state"><div class="icon">▦</div><h3>Loading…</h3></div></div>
       </div>
     </div>
 
@@ -455,15 +471,13 @@ select.form-input{cursor:pointer;background:#1a1a1a}
 
     <!-- ═══ ACCOUNTING — PERSONAL TAB ═══ -->
     <div class="tab-panel" id="tab-acct-personal">
-      <div class="section-header" style="display:flex;align-items:center;gap:12px"><h2>Accounting — Personal</h2><span class="soon">Coming soon</span></div>
+      <div class="section-header" style="display:flex;align-items:center;gap:12px"><h2>Accounting — Personal</h2></div>
       <p class="section-lead">Where the money actually goes each month.</p>
-      <div class="card">
-        <div class="card-header"><span class="card-title">Planned</span></div>
-        <ul class="roadmap">
-          <li>Monthly recurring expenses by category — <strong>subscriptions</strong>, <strong>takeaway coffee</strong>, <strong>pilates</strong>, <strong>p3</strong></li>
-          <li>Manual add-ons — shopping, fuel, health</li>
-        </ul>
-      </div>
+      <div class="metrics-grid" id="acct-personal-stats"></div>
+      <div class="job-month">Recurring Expenses</div>
+      <div id="acct-recurring-wrap"></div>
+      <div class="job-month">Manual Add-ons</div>
+      <div id="acct-addons-grid"></div>
     </div>
 
     <!-- ═══ ACCOUNTING — BUSINESS TAB ═══ -->
@@ -3116,15 +3130,20 @@ function _jobEff(j, edits){
   const total=(e.total!==undefined&&e.total!=='')?parseFloat(e.total):(j.total!=null?j.total:(fee!=null?Math.round((fee+(gst||0))*100)/100:null));
   return { brand:(e.brand!==undefined?e.brand:j.company), invoice:(e.invoice!==undefined?e.invoice:j.invoice), content:(e.content!==undefined?e.content:j.content), status, fee, gst, total };
 }
+function _secondHandTotal(){
+  const edits=_incEdits(); let total=0;
+  for(const j of _cliJobs){ const ef=_jobEff(j,edits); if(ef.status==='SECOND HAND') total+=ef.fee||0; }
+  return total;
+}
 
 function loadClients(){
   fetch('/api/clients',{cache:'no-store'}).then(r=>r.json()).then(data=>{
-    _cliClients=parseClientsCsv(data.clients||'');
+    _cliClients=_newClients().concat(parseClientsCsv(data.clients||''));
     _cliJobs=parseIncomeCsv(data.income||'').concat(_newRows());
     const live=data.live&&(data.live.clients||data.live.income);
     document.getElementById('clients-source').innerHTML='<span class="cal-leg"><span class="cal-leg-dot" style="background:'+(live?'#5f7a5a':'#a3663d')+'"></span>'+(live?'Live sync':'Snapshot')+'</span>';
     document.getElementById('clients-updated').textContent='Updated '+new Date().toLocaleTimeString('en-AU',{hour:'numeric',minute:'2-digit'});
-    renderAddressBook(); renderJobs();
+    renderAddressBook(); renderJobs(); renderAcctPersonal();
   }).catch(e=>{ document.getElementById('cli-book-content').innerHTML='<div class="empty-state"><div class="icon">⚠</div><h3>Couldn\'t load</h3><p style="font-size:0.75rem;color:var(--text-muted)">'+_esc(e.message)+'</p></div>'; });
 }
 
@@ -3138,6 +3157,30 @@ function _mailLinks(email){
   if(!email) return '<span style="color:var(--text-faint)">—</span>';
   return email.split(/[\s,;]+/).filter(e=>e.includes('@')).map(e=>'<a href="mailto:'+_esc(e)+'">'+_esc(e)+'</a>').join('<br>')||_esc(email);
 }
+// ── manually-added brands (dashboard-only; not in the Sheet) ──
+function _newClients(){ try{return JSON.parse(localStorage.getItem('dom_clients_new')||'[]');}catch(e){return [];} }
+function _saveNewClients(arr){ localStorage.setItem('dom_clients_new',JSON.stringify(arr)); }
+function addNewBrand(){
+  const arr=_newClients();
+  const key='newc-'+Date.now()+'-'+Math.floor(Math.random()*1000);
+  const c={key, brand:'', contact:'', email:'', linkedin:'', location:'', plans:'', status:'', isNew:true};
+  arr.unshift(c);
+  _saveNewClients(arr);
+  _cliClients.unshift(c);
+  document.getElementById('cli-search').value='';
+  renderAddressBook();
+  setTimeout(()=>{ const el=document.querySelector('input[data-newclient-brand="'+key+'"]'); if(el) el.focus(); },30);
+}
+function clientEdit(key, field, value){
+  const arr=_newClients(); const c=arr.find(x=>x.key===key); if(c){ c[field]=value; _saveNewClients(arr); }
+  const live=_cliClients.find(x=>x.key===key); if(live) live[field]=value;
+  renderAddressBook();
+}
+function removeNewBrand(key){
+  _saveNewClients(_newClients().filter(c=>c.key!==key));
+  _cliClients=_cliClients.filter(c=>c.key!==key);
+  renderAddressBook();
+}
 function renderAddressBook(){
   const q=(document.getElementById('cli-search').value||'').toLowerCase().trim();
   const list=_cliClients.filter(c=>{
@@ -3148,6 +3191,18 @@ function renderAddressBook(){
   if(!list.length){ el.innerHTML='<div class="empty-state"><div class="icon">▦</div><h3>No matches</h3></div>'; return; }
   let html='<div class="cli-count">'+list.length+' of '+_cliClients.length+' brands</div><div class="cli-grid">';
   for(const c of list){
+    if(c.isNew){
+      const k="'"+c.key.replace(/'/g,"\\'")+"'";
+      html+='<div class="cli-card cli-card-new">'
+        +'<div class="cli-card-new-head"><input class="cli-edit cli-edit-brand" placeholder="Brand name" value="'+_esc(c.brand)+'" data-newclient-brand="'+_esc(c.key)+'" onchange="clientEdit('+k+',\'brand\',this.value)"><span class="del-row" onclick="removeNewBrand('+k+')" title="Remove">×</span></div>'
+        +'<input class="cli-edit" placeholder="Location" value="'+_esc(c.location)+'" onchange="clientEdit('+k+',\'location\',this.value)">'
+        +'<input class="cli-edit" placeholder="Contact name(s)" value="'+_esc(c.contact)+'" onchange="clientEdit('+k+',\'contact\',this.value)">'
+        +'<input class="cli-edit" placeholder="Email" value="'+_esc(c.email)+'" onchange="clientEdit('+k+',\'email\',this.value)">'
+        +'<input class="cli-edit" placeholder="LinkedIn URL" value="'+_esc(c.linkedin)+'" onchange="clientEdit('+k+',\'linkedin\',this.value)">'
+        +'<textarea class="cli-edit cli-edit-notes" placeholder="Notes / status" rows="2" onchange="clientEdit('+k+',\'status\',this.value)">'+_esc(c.status)+'</textarea>'
+        +'</div>';
+      continue;
+    }
     const notes=[c.plans,c.status].filter(Boolean).join('\n');
     const li=/^https?:/i.test(c.linkedin)?'<div class="cli-row"><span class="k">LinkedIn</span><span><a href="'+_esc(c.linkedin)+'" target="_blank" rel="noopener">profile</a></span></div>':'';
     html+='<div class="cli-card"><div class="cli-brand">'+_esc(c.brand)+'</div>'
@@ -3220,14 +3275,14 @@ function renderJobs(){
   const curM=now.toLocaleString('en-US',{month:'long'}).toUpperCase();
   const priorM=new Date(now.getFullYear(),now.getMonth()-1,1).toLocaleString('en-US',{month:'long'}).toUpperCase();
   // ── income tiles (confirmed = INVOICED+CONFIRMED; gifting & second hand excluded) ──
-  let curInc=0, priorInc=0, yearInc=0, giftCur=0, secondYear=0;
+  let curInc=0, priorInc=0, yearInc=0, giftCur=0;
   for(const j of _cliJobs){
     const ef=_jobEff(j,edits); const fee=ef.fee||0; const mUp=(j.month||'').toUpperCase();
     const isCur=mUp.startsWith(curM), isPrior=mUp.startsWith(priorM);
     if(ef.status==='INVOICED'||ef.status==='CONFIRMED'){ yearInc+=fee; if(isCur)curInc+=fee; if(isPrior)priorInc+=fee; }
     else if(ef.status==='GIFTING' && isCur){ giftCur+=fee; }
-    else if(ef.status==='SECOND HAND'){ secondYear+=fee; } // all tracked months are already June onwards
   }
+  const secondYear=_secondHandTotal();
   document.getElementById('cli-stats').innerHTML=
     '<div class="card metric-tile"><div class="metric-value">'+fmtMoney(curInc)+'</div><div class="metric-label">'+_titleCase(curM)+' · income</div></div>'
     +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(priorInc)+'</div><div class="metric-label">'+_titleCase(priorM)+' · income</div></div>'
@@ -3266,10 +3321,118 @@ function renderJobs(){
   document.getElementById('cli-jobs-content').innerHTML=html||'<div class="empty-state"><div class="icon">◇</div><h3>No jobs</h3></div>';
 }
 
+// ════════════════════════════════════════
+// ACCOUNTING — PERSONAL (dashboard-only; localStorage)
+// ════════════════════════════════════════
+const _RECUR_DEFAULTS=[
+  {id:'r1',name:'Subscriptions',note:'Netflix',amount:20,cadence:'weekly',paused:true},
+  {id:'r2',name:'Takeaway coffee',note:'',amount:80,cadence:'weekly',paused:false},
+  {id:'r3',name:'Pilates',note:'',amount:30,cadence:'weekly',paused:false},
+  {id:'r4',name:'P3',note:'',amount:35,cadence:'weekly',paused:false},
+  {id:'r5',name:'Electricity',note:'',amount:81,cadence:'monthly',paused:false},
+  {id:'r6',name:'Vodafone',note:'',amount:90,cadence:'monthly',paused:false},
+  {id:'r7',name:'VOGUE',note:'',amount:40,cadence:'yearly',paused:false},
+];
+function _recurItems(){
+  try{ const raw=localStorage.getItem('dom_personal_recurring'); if(raw) return JSON.parse(raw); }catch(e){}
+  localStorage.setItem('dom_personal_recurring',JSON.stringify(_RECUR_DEFAULTS));
+  return _RECUR_DEFAULTS.slice();
+}
+function _saveRecur(arr){ localStorage.setItem('dom_personal_recurring',JSON.stringify(arr)); }
+function recurAdd(){
+  const arr=_recurItems();
+  const id='rc-'+Date.now()+'-'+Math.floor(Math.random()*1000);
+  arr.push({id,name:'',note:'',amount:0,cadence:'weekly',paused:false});
+  _saveRecur(arr); renderAcctPersonal();
+  setTimeout(()=>{ const el=document.querySelector('input[data-recur-name="'+id+'"]'); if(el) el.focus(); },30);
+}
+function recurEdit(id,field,value){
+  const arr=_recurItems(); const it=arr.find(x=>x.id===id); if(!it) return;
+  if(field==='amount') it.amount=parseFloat(value)||0;
+  else if(field==='paused') it.paused=!!value;
+  else it[field]=value;
+  _saveRecur(arr); renderAcctPersonal();
+}
+function recurRemove(id){ _saveRecur(_recurItems().filter(x=>x.id!==id)); renderAcctPersonal(); }
+function _toWeekly(amount,cadence){ if(cadence==='monthly') return amount*12/52; if(cadence==='yearly') return amount/52; return amount; }
+
+const _ADDON_CATS=['Shopping','Fuel','Health'];
+function _addons(){ try{return JSON.parse(localStorage.getItem('dom_personal_addons')||'{}');}catch(e){return {};} }
+function _saveAddons(o){ localStorage.setItem('dom_personal_addons',JSON.stringify(o)); }
+function addonAdd(cat){
+  const all=_addons(); all[cat]=all[cat]||[];
+  const id='ad-'+Date.now()+'-'+Math.floor(Math.random()*1000);
+  all[cat].unshift({id,date:new Date().toISOString().slice(0,10),desc:'',amount:0});
+  _saveAddons(all); renderAcctPersonal();
+  setTimeout(()=>{ const el=document.querySelector('input[data-addon-desc="'+id+'"]'); if(el) el.focus(); },30);
+}
+function addonEdit(cat,id,field,value){
+  const all=_addons(); const it=(all[cat]||[]).find(x=>x.id===id); if(!it) return;
+  if(field==='amount') it.amount=parseFloat(value)||0; else it[field]=value;
+  _saveAddons(all); renderAcctPersonal();
+}
+function addonRemove(cat,id){ const all=_addons(); all[cat]=(all[cat]||[]).filter(x=>x.id!==id); _saveAddons(all); renderAcctPersonal(); }
+
+function renderAcctPersonal(){
+  const items=_recurItems();
+  let weekly=0; items.forEach(it=>{ if(!it.paused) weekly+=_toWeekly(it.amount,it.cadence); });
+  const monthly=weekly*52/12, yearly=weekly*52;
+  document.getElementById('acct-personal-stats').innerHTML=
+    '<div class="card metric-tile"><div class="metric-value">'+fmtMoney(weekly)+'</div><div class="metric-label">Recurring · weekly</div></div>'
+    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(monthly)+'</div><div class="metric-label">Recurring · monthly</div></div>'
+    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(yearly)+'</div><div class="metric-label">Recurring · yearly</div></div>'
+    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(_secondHandTotal())+'</div><div class="metric-label">Income · second hand</div></div>';
+
+  let html='<div class="card jt-wrap"><table class="jt"><thead><tr>'
+    +'<th style="width:22%">Category</th><th style="width:20%">Note</th><th class="num" style="width:11%">Amount</th><th style="width:13%">Cadence</th><th style="width:9%">Paused</th><th class="num" style="width:13%">Weekly equiv</th><th style="width:30px"></th>'
+    +'</tr></thead><tbody>';
+  items.forEach(it=>{
+    const k="'"+it.id.replace(/'/g,"\\'")+"'";
+    const wk=_toWeekly(it.amount,it.cadence);
+    html+='<tr>'
+      +'<td><input class="jt-in" value="'+_esc(it.name)+'" placeholder="Category" data-recur-name="'+_esc(it.id)+'" onchange="recurEdit('+k+',\'name\',this.value)"></td>'
+      +'<td><input class="jt-in" value="'+_esc(it.note)+'" placeholder="—" onchange="recurEdit('+k+',\'note\',this.value)"></td>'
+      +'<td class="num"><input class="jt-in jt-num" value="'+it.amount+'" inputmode="decimal" onchange="recurEdit('+k+',\'amount\',this.value)"></td>'
+      +'<td><select class="jt-sel" onchange="recurEdit('+k+',\'cadence\',this.value)">'+['weekly','monthly','yearly'].map(c=>'<option'+(c===it.cadence?' selected':'')+'>'+c+'</option>').join('')+'</select></td>'
+      +'<td style="text-align:center"><input type="checkbox" '+(it.paused?'checked':'')+' onchange="recurEdit('+k+',\'paused\',this.checked)"></td>'
+      +'<td class="num">'+(it.paused?'<span style="color:var(--text-faint)">paused</span>':fmtMoney(wk))+'</td>'
+      +'<td class="reorder-cell"><span class="del-row" onclick="recurRemove('+k+')" title="Remove">×</span></td>'
+      +'</tr>';
+  });
+  html+='<tr class="add-row"><td colspan="7"><button class="add-brand-btn" onclick="recurAdd()">+ Add expense</button></td></tr>';
+  html+='</tbody></table></div>';
+  document.getElementById('acct-recurring-wrap').innerHTML=html;
+
+  const all=_addons();
+  let ah='<div class="addon-grid">';
+  _ADDON_CATS.forEach(cat=>{
+    const list=all[cat]||[];
+    const total=list.reduce((s,x)=>s+(x.amount||0),0);
+    ah+='<div class="card addon-card"><div class="card-header"><span class="card-title">'+cat+'</span><span style="font-weight:600;font-size:0.85rem">'+fmtMoney(total)+'</span></div>';
+    if(list.length){
+      ah+='<div class="addon-list">';
+      list.forEach(it=>{
+        const k="'"+it.id+"'", cq="'"+cat+"'";
+        ah+='<div class="addon-row">'
+          +'<input class="jt-in addon-date" type="date" value="'+_esc(it.date)+'" onchange="addonEdit('+cq+','+k+',\'date\',this.value)">'
+          +'<input class="jt-in addon-desc" placeholder="Description" value="'+_esc(it.desc)+'" data-addon-desc="'+_esc(it.id)+'" onchange="addonEdit('+cq+','+k+',\'desc\',this.value)">'
+          +'<input class="jt-in jt-num addon-amt" inputmode="decimal" value="'+it.amount+'" onchange="addonEdit('+cq+','+k+',\'amount\',this.value)">'
+          +'<span class="del-row" onclick="addonRemove('+cq+','+k+')" title="Remove">×</span>'
+          +'</div>';
+      });
+      ah+='</div>';
+    }
+    ah+='<button class="add-brand-btn" style="margin-top:8px" onclick="addonAdd(\''+cat+'\')">+ Add '+cat.toLowerCase()+' entry</button></div>';
+  });
+  ah+='</div>';
+  document.getElementById('acct-addons-grid').innerHTML=ah;
+}
+
 // ─── Init ───
 loadAll();
 loadCalendar();
 loadClients();
+renderAcctPersonal();
 </script>
 </body>
 </html>
