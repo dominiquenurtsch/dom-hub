@@ -122,6 +122,49 @@ body{font-family:var(--font);color:var(--text);min-height:100vh;overflow-x:hidde
 .agenda-time{font-size:0.68rem;color:var(--text-muted);font-variant-numeric:tabular-nums;min-width:66px;flex-shrink:0}
 .agenda-title{font-size:0.82rem;color:var(--text);line-height:1.35}
 @media(max-width:900px){.cal-layout{grid-template-columns:1fr}.cal-day{min-height:52px}}
+/* ── Client Database ── */
+.subtabs{display:flex;gap:6px;margin-bottom:18px;border-bottom:1px solid var(--glass-border)}
+.subtab{padding:9px 16px;border:none;background:transparent;color:var(--text-muted);font-family:var(--font);font-size:0.8rem;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s}
+.subtab:hover{color:var(--text)}
+.subtab.active{color:var(--black);border-bottom-color:var(--teal);font-weight:600}
+.cli-search{width:100%;padding:12px 16px;border-radius:12px;border:1px solid var(--glass-border);background:var(--glass-bg);color:var(--text);font-family:var(--font);font-size:0.85rem;outline:none;margin-bottom:16px;transition:border .2s}
+.cli-search:focus{border-color:var(--teal)}
+.cli-search::placeholder{color:var(--text-faint)}
+.cli-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.cli-card{background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:var(--radius-sm);padding:16px 18px;transition:all .2s}
+.cli-card:hover{border-color:rgba(28,27,27,0.2);box-shadow:var(--glass-shadow)}
+.cli-brand{font-family:var(--serif);font-size:1.05rem;font-weight:600;color:var(--black);line-height:1.2;margin-bottom:2px}
+.cli-loc{display:inline-block;font-size:0.58rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);border:1px solid var(--glass-border);padding:2px 8px;border-radius:20px;margin-bottom:10px}
+.cli-row{display:flex;gap:8px;font-size:0.78rem;color:var(--text-secondary);margin-top:6px;line-height:1.4}
+.cli-row .k{color:var(--text-faint);min-width:52px;flex-shrink:0;font-size:0.7rem;padding-top:1px}
+.cli-row a{color:var(--teal);text-decoration:none;word-break:break-word}
+.cli-row a:hover{text-decoration:underline}
+.cli-note{margin-top:10px;padding-top:10px;border-top:1px solid rgba(28,27,27,0.06);font-size:0.72rem;color:var(--text-muted);line-height:1.45;white-space:pre-line}
+.cli-count{font-size:0.7rem;color:var(--text-faint);margin-bottom:14px}
+.badge{display:inline-block;font-size:0.58rem;letter-spacing:0.06em;text-transform:uppercase;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.badge.invoiced{background:rgba(95,122,90,0.15);color:#4c6147}
+.badge.confirmed{background:rgba(79,109,140,0.15);color:#3f5872}
+.badge.pending{background:rgba(28,27,27,0.06);color:var(--text-muted)}
+.badge.gifting{background:rgba(163,102,61,0.15);color:#8a5533}
+.badge.event{background:rgba(138,90,122,0.15);color:#754963}
+.job-month{font-family:var(--serif);font-size:1.05rem;font-weight:600;color:var(--black);margin:22px 0 6px}
+.job-month:first-child{margin-top:4px}
+.jt-wrap{overflow-x:auto;padding:8px 10px}
+.jt{width:100%;border-collapse:collapse;min-width:660px}
+.jt th{font-size:0.56rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-faint);text-align:left;padding:4px 8px 8px;font-weight:600;border-bottom:1px solid var(--glass-border)}
+.jt th.num{text-align:right}
+.jt td{padding:2px 2px;border-bottom:1px solid rgba(28,27,27,0.05);vertical-align:middle}
+.jt td.num{text-align:right}
+.jt-in,.jt-sel{width:100%;border:1px solid transparent;background:transparent;font-family:var(--font);font-size:0.8rem;color:var(--text);padding:7px 8px;border-radius:7px;outline:none;transition:all .15s}
+.jt-in:hover,.jt-sel:hover{background:rgba(28,27,27,0.04)}
+.jt-in:focus,.jt-sel:focus{background:#fff;border-color:var(--teal);box-shadow:0 0 0 2px rgba(28,27,27,0.05)}
+.jt-in::placeholder{color:var(--text-faint)}
+.jt-num{text-align:right;font-variant-numeric:tabular-nums}
+.jt-sel{cursor:pointer;font-size:0.62rem;font-weight:600;letter-spacing:0.04em;-webkit-appearance:none;appearance:none;text-align:left}
+.jt-sel.st-invoiced{color:#4c6147}
+.jt-sel.st-confirmed{color:#3f5872}
+.jt-sel.st-gifting{color:#8a5533}
+.jt-sel.st-pending{color:var(--text-muted)}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .section-header{margin-bottom:24px}
 .section-header h2{font-family:var(--serif);font-size:2rem;font-weight:600;color:var(--black);letter-spacing:-0.01em}
@@ -362,16 +405,25 @@ select.form-input{cursor:pointer;background:#1a1a1a}
 
     <!-- ═══ CLIENT DATABASE TAB ═══ -->
     <div class="tab-panel" id="tab-clients">
-      <div class="section-header" style="display:flex;align-items:center;gap:12px"><h2>Client Database</h2><span class="soon">Coming soon</span></div>
-      <p class="section-lead">Your address book of content clients — status, contact and spend in one place.</p>
-      <div class="card">
-        <div class="card-header"><span class="card-title">Planned</span></div>
-        <ul class="roadmap">
-          <li>Overview of <strong>confirmed</strong> and <strong>pending</strong> content clients</li>
-          <li>Linked to Gmail</li>
-          <li>Linked to Xero for highest-spending clients</li>
-          <li>Linked to Apollo</li>
-        </ul>
+      <div class="section-header" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <h2>Client Database</h2>
+        <span id="clients-source"></span>
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+          <div class="updated" id="clients-updated"></div>
+          <button class="btn btn-ghost" onclick="loadClients()" style="font-size:0.68rem">Refresh</button>
+        </div>
+      </div>
+      <div class="subtabs">
+        <button class="subtab active" data-sub="book" onclick="clientsSub('book')">Address Book</button>
+        <button class="subtab" data-sub="jobs" onclick="clientsSub('jobs')">Jobs &amp; Income</button>
+      </div>
+      <div id="clients-book">
+        <input class="cli-search" id="cli-search" placeholder="Search brand, contact, email, location, notes…" oninput="renderAddressBook()" autocomplete="off">
+        <div id="cli-book-content"><div class="empty-state"><div class="icon">▦</div><h3>Loading…</h3></div></div>
+      </div>
+      <div id="clients-jobs" style="display:none">
+        <div class="metrics-grid" id="cli-stats"></div>
+        <div id="cli-jobs-content"></div>
       </div>
     </div>
 
@@ -2942,9 +2994,191 @@ function _calRender(){
   el.innerHTML=html||'<div class="empty-state"><div class="icon">▤</div><h3>Nothing scheduled</h3></div>';
 }
 
+// ════════════════════════════════════════
+// CLIENT DATABASE (CSV via /api/clients)
+// ════════════════════════════════════════
+let _cliClients=[], _cliJobs=[];
+
+function parseCSV(text){
+  const rows=[]; let row=[], field='', i=0, inQ=false;
+  while(i<text.length){
+    const c=text[i];
+    if(inQ){
+      if(c==='"'){ if(text[i+1]==='"'){field+='"';i+=2;continue;} inQ=false;i++;continue; }
+      field+=c;i++;
+    } else {
+      if(c==='"'){inQ=true;i++;}
+      else if(c===','){row.push(field);field='';i++;}
+      else if(c==='\r'){i++;}
+      else if(c==='\n'){row.push(field);rows.push(row);row=[];field='';i++;}
+      else {field+=c;i++;}
+    }
+  }
+  if(field!==''||row.length){row.push(field);rows.push(row);}
+  return rows;
+}
+function fmtMoney(n){return '$'+Number(n||0).toLocaleString('en-AU',{maximumFractionDigits:0});}
+
+function parseClientsCsv(csv){
+  const rows=parseCSV(csv);
+  if(!rows.length) return [];
+  // locate the header row (contains EMAIL + NAME/CONTACT), tolerant of a leading column
+  let hi=0;
+  for(let i=0;i<Math.min(rows.length,6);i++){
+    const up=(rows[i]||[]).map(c=>(c||'').trim().toUpperCase());
+    if(up.includes('EMAIL')&&(up.includes('NAME')||up.includes('CONTACT'))){ hi=i; break; }
+  }
+  const hdr=(rows[hi]||[]).map(c=>(c||'').trim().toUpperCase());
+  const col=n=>hdr.indexOf(n);
+  const ci={brand:col('NAME'),contact:col('CONTACT'),email:col('EMAIL'),linkedin:col('LINKEDIN'),location:col('LOCATION'),plans:col('PLANS'),status:col('STATUS')};
+  const g=(r,idx)=>(idx>=0&&idx<r.length)?(r[idx]||'').trim():'';
+  const out=[];
+  for(let i=hi+1;i<rows.length;i++){
+    const r=rows[i]||[];
+    const brand=g(r,ci.brand);
+    if(!brand) continue;
+    out.push({ brand, contact:g(r,ci.contact), email:g(r,ci.email), linkedin:g(r,ci.linkedin), location:g(r,ci.location), plans:g(r,ci.plans), status:g(r,ci.status) });
+  }
+  return out;
+}
+
+const _MONTHS=['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];
+function parseIncomeCsv(csv){
+  const rows=parseCSV(csv), jobs=[];
+  const hdr=(rows[0]||[]).map(c=>(c||'').trim().toUpperCase());
+  const H=(name,fb)=>{const i=hdr.indexOf(name);return i>=0?i:fb;};
+  const cInv=H('INVOICE #',0), cDate=H('DATE',1), cCompany=H('COMPANY',4), cFee=H('NETTO',5), cGst=H('GST 10%',6), cTotal=H('WITH GST',7), cContent=H('PRODUCT',10), cPaid=H('PAID',11);
+  const num=v=>{v=String(v||'').trim();if(!v)return null;const n=parseFloat(v.replace(/[^0-9.]/g,''));return isFinite(n)?n:null;};
+  let month='', type='Job';
+  for(let i=1853;i<rows.length;i++){ // spreadsheet row 1854 = index 1853 (from June 2026)
+    const r=rows[i]||[];
+    const g=idx=>(idx>=0&&idx<r.length)?(r[idx]||'').trim():'';
+    const inv=g(cInv), company=g(cCompany), netto=g(cFee);
+    const u=inv.toUpperCase();
+    // A label may be a standalone header row OR sit inline in col A of the first data row
+    if(_MONTHS.includes(u.split(' ')[0])){ month=inv.replace(/\s+/g,' ').trim(); type='Job'; }
+    else if(u.includes('GIFTING')){ type='Gifting'; }
+    else if(u.includes('TRIP')||u.includes('EVENT')){ type='Event'; }
+    if(!company) continue; // standalone header / blank row
+    const fee=num(netto);
+    const invoiceNo=/^\d/.test(inv)?inv:'';
+    const status = invoiceNo ? 'Invoiced' : (fee!=null ? 'Confirmed' : 'Pending');
+    jobs.push({key:i, month, company, fee, gst:num(g(cGst)), total:num(g(cTotal)), content:g(cContent), status, type, date:g(cDate), paid:g(cPaid).toUpperCase()==='YES'});
+  }
+  return jobs;
+}
+// ── local edit overlay (dashboard-only; does not write back to the Sheet) ──
+function _incEdits(){ try{return JSON.parse(localStorage.getItem('dom_income_edits')||'{}');}catch(e){return {};} }
+function jobEdit(key, field, value){
+  const e=_incEdits(); e[key]=e[key]||{};
+  if(value===''||value==null) delete e[key][field]; else e[key][field]=value;
+  if(!Object.keys(e[key]).length) delete e[key];
+  localStorage.setItem('dom_income_edits',JSON.stringify(e));
+  renderJobs();
+}
+function _statusDefault(j){ return j.type==='Gifting'?'GIFTING':(j.type==='Event'?'CONFIRMED':j.status.toUpperCase()); }
+function _jobEff(j, edits){
+  const e=edits[j.key]||{};
+  const status=e.status||_statusDefault(j);
+  const fee=(e.fee!==undefined&&e.fee!=='')?parseFloat(e.fee):j.fee;
+  const gst=(e.gst!==undefined&&e.gst!=='')?parseFloat(e.gst):(j.gst!=null?j.gst:(fee!=null?Math.round(fee*10)/100:null));
+  const total=(e.total!==undefined&&e.total!=='')?parseFloat(e.total):(j.total!=null?j.total:(fee!=null?Math.round((fee+(gst||0))*100)/100:null));
+  return { brand:(e.brand!==undefined?e.brand:j.company), content:(e.content!==undefined?e.content:j.content), status, fee, gst, total };
+}
+
+function loadClients(){
+  fetch('/api/clients',{cache:'no-store'}).then(r=>r.json()).then(data=>{
+    _cliClients=parseClientsCsv(data.clients||'');
+    _cliJobs=parseIncomeCsv(data.income||'');
+    const live=data.live&&(data.live.clients||data.live.income);
+    document.getElementById('clients-source').innerHTML='<span class="cal-leg"><span class="cal-leg-dot" style="background:'+(live?'#5f7a5a':'#a3663d')+'"></span>'+(live?'Live sync':'Snapshot')+'</span>';
+    document.getElementById('clients-updated').textContent='Updated '+new Date().toLocaleTimeString('en-AU',{hour:'numeric',minute:'2-digit'});
+    renderAddressBook(); renderJobs();
+  }).catch(e=>{ document.getElementById('cli-book-content').innerHTML='<div class="empty-state"><div class="icon">⚠</div><h3>Couldn\'t load</h3><p style="font-size:0.75rem;color:var(--text-muted)">'+_esc(e.message)+'</p></div>'; });
+}
+
+function clientsSub(which){
+  document.querySelectorAll('#tab-clients .subtab').forEach(b=>b.classList.toggle('active',b.dataset.sub===which));
+  document.getElementById('clients-book').style.display = which==='book'?'block':'none';
+  document.getElementById('clients-jobs').style.display = which==='jobs'?'block':'none';
+}
+
+function _mailLinks(email){
+  if(!email) return '<span style="color:var(--text-faint)">—</span>';
+  return email.split(/[\s,;]+/).filter(e=>e.includes('@')).map(e=>'<a href="mailto:'+_esc(e)+'">'+_esc(e)+'</a>').join('<br>')||_esc(email);
+}
+function renderAddressBook(){
+  const q=(document.getElementById('cli-search').value||'').toLowerCase().trim();
+  const list=_cliClients.filter(c=>{
+    if(!q) return true;
+    return (c.brand+' '+c.contact+' '+c.email+' '+c.location+' '+c.plans+' '+c.status).toLowerCase().includes(q);
+  });
+  const el=document.getElementById('cli-book-content');
+  if(!list.length){ el.innerHTML='<div class="empty-state"><div class="icon">▦</div><h3>No matches</h3></div>'; return; }
+  let html='<div class="cli-count">'+list.length+' of '+_cliClients.length+' brands</div><div class="cli-grid">';
+  for(const c of list){
+    const notes=[c.plans,c.status].filter(Boolean).join('\n');
+    const li=/^https?:/i.test(c.linkedin)?'<div class="cli-row"><span class="k">LinkedIn</span><span><a href="'+_esc(c.linkedin)+'" target="_blank" rel="noopener">profile</a></span></div>':'';
+    html+='<div class="cli-card"><div class="cli-brand">'+_esc(c.brand)+'</div>'
+      +(c.location?'<span class="cli-loc">'+_esc(c.location)+'</span>':'')
+      +(c.contact?'<div class="cli-row"><span class="k">Contact</span><span>'+_esc(c.contact).replace(/\n/g,' · ')+'</span></div>':'')
+      +'<div class="cli-row"><span class="k">Email</span><span>'+_mailLinks(c.email)+'</span></div>'
+      +li
+      +(notes?'<div class="cli-note">'+_esc(notes)+'</div>':'')
+      +'</div>';
+  }
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+const _STATUSES=['INVOICED','CONFIRMED','GIFTING','PENDING'];
+function _titleCase(m){ m=(m||'').split(' ')[0]; return m?m.charAt(0)+m.slice(1).toLowerCase():'—'; }
+function renderJobs(){
+  const edits=_incEdits();
+  const now=new Date();
+  const curM=now.toLocaleString('en-US',{month:'long'}).toUpperCase();
+  const priorM=new Date(now.getFullYear(),now.getMonth()-1,1).toLocaleString('en-US',{month:'long'}).toUpperCase();
+  // ── income tiles (confirmed = INVOICED+CONFIRMED; gifting excluded from income) ──
+  let curInc=0, priorInc=0, yearInc=0, giftCur=0;
+  for(const j of _cliJobs){
+    const ef=_jobEff(j,edits); const fee=ef.fee||0; const mUp=(j.month||'').toUpperCase();
+    const isCur=mUp.startsWith(curM), isPrior=mUp.startsWith(priorM);
+    if(ef.status==='INVOICED'||ef.status==='CONFIRMED'){ yearInc+=fee; if(isCur)curInc+=fee; if(isPrior)priorInc+=fee; }
+    else if(ef.status==='GIFTING' && isCur){ giftCur+=fee; }
+  }
+  document.getElementById('cli-stats').innerHTML=
+    '<div class="card metric-tile"><div class="metric-value">'+fmtMoney(curInc)+'</div><div class="metric-label">'+_titleCase(curM)+' · income</div></div>'
+    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(priorInc)+'</div><div class="metric-label">'+_titleCase(priorM)+' · income</div></div>'
+    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(yearInc)+'</div><div class="metric-label">Tax year · from Jun</div></div>'
+    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(giftCur)+'</div><div class="metric-label">'+_titleCase(curM)+' · gifting</div></div>';
+  // ── table, grouped by month, latest month first ──
+  const groups=[], gmap={};
+  for(const j of _cliJobs){ if(!gmap[j.month]){ gmap[j.month]={month:j.month,items:[]}; groups.push(gmap[j.month]); } gmap[j.month].items.push(j); }
+  groups.reverse();
+  const numCell=(key,field,val)=>'<td class="num"><input class="jt-in jt-num" value="'+(val!=null?val:'')+'" inputmode="decimal" onchange="jobEdit('+key+',\''+field+'\',this.value)"></td>';
+  let html='';
+  for(const grp of groups){
+    html+='<div class="job-month">'+_esc(_titleCase(grp.month))+'</div><div class="card jt-wrap"><table class="jt"><thead><tr>'
+      +'<th style="width:22%">Brand</th><th style="width:15%">Status</th><th style="width:31%">Content</th><th class="num" style="width:10%">Fee</th><th class="num" style="width:10%">GST</th><th class="num" style="width:12%">Total</th></tr></thead><tbody>';
+    for(const j of grp.items){
+      const ef=_jobEff(j,edits);
+      const opts=_STATUSES.map(s=>'<option'+(s===ef.status?' selected':'')+'>'+s+'</option>').join('');
+      html+='<tr>'
+        +'<td><input class="jt-in" value="'+_esc(ef.brand)+'" onchange="jobEdit('+j.key+',\'brand\',this.value)"></td>'
+        +'<td><select class="jt-sel st-'+ef.status.toLowerCase()+'" onchange="jobEdit('+j.key+',\'status\',this.value)">'+opts+'</select></td>'
+        +'<td><input class="jt-in" value="'+_esc(ef.content)+'" placeholder="—" onchange="jobEdit('+j.key+',\'content\',this.value)"></td>'
+        +numCell(j.key,'fee',ef.fee)+numCell(j.key,'gst',ef.gst)+numCell(j.key,'total',ef.total)
+        +'</tr>';
+    }
+    html+='</tbody></table></div>';
+  }
+  document.getElementById('cli-jobs-content').innerHTML=html||'<div class="empty-state"><div class="icon">◇</div><h3>No jobs</h3></div>';
+}
+
 // ─── Init ───
 loadAll();
 loadCalendar();
+loadClients();
 </script>
 </body>
 </html>
