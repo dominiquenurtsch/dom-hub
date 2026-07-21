@@ -3459,8 +3459,18 @@ function renderInvestmentProperties(){
 // ════════════════════════════════════════
 const _BIZ_RECUR_DEFAULTS=[
   {id:'b1',name:'Wage (to self)',note:'',amount:null,cadence:'weekly',paused:false},
-  {id:'b2',name:'Super',note:'',amount:null,cadence:'quarterly',paused:false},
-  {id:'b3',name:'PAYG withholding',note:'',amount:null,cadence:'monthly',paused:false},
+  {id:'b2',name:'Super',note:'',amount:null,cadence:'weekly',paused:false},
+  {id:'b3',name:'PAYG withholding',note:'',amount:null,cadence:'weekly',paused:false},
+  {id:'b4',name:'Apple iCloud',note:'Amex',amount:45,cadence:'monthly',paused:false},
+  {id:'b5',name:'Google Workspace',note:'Amex',amount:25,cadence:'monthly',paused:false},
+  {id:'b6',name:'Accountant BAS',note:'',amount:110,cadence:'monthly',paused:false},
+  {id:'b7',name:'Accountant TAX RETURN',note:'',amount:null,cadence:'monthly',paused:false},
+  {id:'b8',name:'Meta Verified',note:'Amex',amount:23,cadence:'monthly',paused:false},
+  {id:'b9',name:'Lens Buddy',note:'Amex',amount:50,cadence:'yearly',paused:false},
+  {id:'b10',name:'Inshot Pro',note:'Amex',amount:30,cadence:'yearly',paused:false},
+  {id:'b11',name:'Xero',note:'Bank debit',amount:37,cadence:'monthly',paused:false},
+  {id:'b12',name:'Health Insurance',note:'Amex',amount:183,cadence:'monthly',paused:false},
+  {id:'b13',name:'Claude',note:'Amex',amount:31,cadence:'monthly',paused:false},
 ];
 function _bizRecurItems(){
   try{ const raw=localStorage.getItem('dom_business_recurring'); if(raw) return JSON.parse(raw); }catch(e){}
@@ -3593,6 +3603,22 @@ function bizAddonRemove(sheetId,cat,entryId){
   s.addons[cat]=(s.addons[cat]||[]).filter(x=>x.id!==entryId);
   _saveBizMonthlySheets(arr); renderBizMonths();
 }
+function _renderBizMonthStats(sheet){
+  const items=_bizRecurItems();
+  let weekly=0; items.forEach(it=>{ if(!it.paused) weekly+=_toWeekly(it.amount||0,it.cadence); });
+  const monthly=weekly*52/12;
+  const addonSpend=sheet.addons?Object.values(sheet.addons).reduce((sum,list)=>sum+(list||[]).reduce((s,x)=>s+(x.amount||0),0),0):0;
+  const weeksInMonth=_monthWeeks(sheet.label);
+  const totalMonthlySpend=monthly+addonSpend;
+  const totalMonthlySpendWeekly=totalMonthlySpend/weeksInMonth;
+  let html='<div class="metrics-grid" style="margin-bottom:16px">';
+  html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(addonSpend)+'</div><div class="metric-label">'+_esc(sheet.label||'Month')+' · travel/misc/marketing</div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(weekly)+'</div><div class="metric-label">Recurring · weekly</div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(monthly)+'</div><div class="metric-label">Recurring · monthly</div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(totalMonthlySpendWeekly)+'</div><div class="metric-label">Total monthly spend · weekly</div></div>';
+  html+='</div>';
+  return html;
+}
 function renderBizMonths(){
   const sheets=_bizMonthlySheets();
   let html='';
@@ -3601,6 +3627,7 @@ function renderBizMonths(){
     const visible=_bizActiveSub===s.id;
     html+='<div class="biz-month-panel" data-sheet-id="'+_esc(s.id)+'" style="display:'+(visible?'block':'none')+'">';
     html+='<div class="prop-card-head" style="margin-bottom:14px"><input class="cli-edit cli-edit-brand" style="max-width:240px" placeholder="Month label" value="'+_esc(s.label)+'" data-biz-month-label="'+_esc(s.id)+'" onchange="bizMonthLabelEdit('+sk+',this.value)"><span class="del-row" onclick="bizMonthRemove('+sk+')" title="Remove month">×</span></div>';
+    html+=_renderBizMonthStats(s);
 
     html+='<div class="job-month">Discretionary Costs</div><div class="addon-grid">';
     _BIZ_ADDON_CATS.forEach(cat=>{
