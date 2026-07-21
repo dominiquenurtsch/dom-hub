@@ -217,6 +217,10 @@ tr.add-row td{border-bottom:none;padding:8px 2px 2px}
 @media(min-width:768px){.metric-value{font-size:1.8rem}}
 .metric-value.teal{color:var(--teal)}
 .metric-label{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--text-muted);margin-top:7px;font-weight:500}
+.metric-edit-input{width:100%;border:none;background:transparent;text-align:center;font-family:var(--font);font-size:1.4rem;font-weight:600;color:var(--black);letter-spacing:-0.01em;line-height:1;-moz-appearance:textfield;outline:none;border-radius:6px;transition:background .15s}
+.metric-edit-input::-webkit-outer-spin-button,.metric-edit-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.metric-edit-input:hover,.metric-edit-input:focus{background:rgba(28,27,27,0.05)}
+@media(min-width:768px){.metric-edit-input{font-size:1.8rem}}
 .data-table{width:100%;border-collapse:collapse}
 .data-table th{font-size:0.62rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--text-faint);padding:9px 13px;text-align:left;border-bottom:1px solid rgba(28,27,27,0.06);font-weight:600}
 .data-table td{padding:11px 13px;font-size:0.8rem;border-bottom:1px solid rgba(28,27,27,0.03);color:var(--text-secondary)}
@@ -489,16 +493,20 @@ select.form-input{cursor:pointer;background:#1a1a1a}
       <p class="section-lead">Where the money actually goes each month.</p>
       <div class="subtabs">
         <button class="subtab active" data-sub="overview" onclick="acctPersonalSub('overview')">Overview</button>
-        <button class="subtab" data-sub="weekly" onclick="acctPersonalSub('weekly')">Weekly Breakdown</button>
+        <button class="subtab" data-sub="monthly" onclick="acctPersonalSub('monthly')">Monthly Expenses</button>
       </div>
       <div id="acct-personal-overview">
         <div class="metrics-grid" id="acct-personal-stats"></div>
+        <div id="acct-personal-weekly"></div>
         <div class="job-month">Recurring Expenses</div>
         <div id="acct-recurring-wrap"></div>
         <div class="job-month">Manual Add-ons</div>
         <div id="acct-addons-grid"></div>
       </div>
-      <div id="acct-personal-weekly" style="display:none"></div>
+      <div id="acct-personal-monthly" style="display:none">
+        <p class="section-lead" style="margin-top:-6px">Actuals per month, seeded from your recurring categories. Add a month whenever you need one.</p>
+        <div id="acct-monthly-wrap"></div>
+      </div>
     </div>
 
     <!-- ═══ ACCOUNTING — BUSINESS TAB ═══ -->
@@ -519,16 +527,38 @@ select.form-input{cursor:pointer;background:#1a1a1a}
 
     <!-- ═══ SUBSTACK TAB ═══ -->
     <div class="tab-panel" id="tab-substack">
-      <div class="section-header" style="display:flex;align-items:center;gap:12px"><h2>Substack</h2><span class="soon">Coming soon</span></div>
-      <p class="section-lead">From idea to published — and what's landing with readers.</p>
-      <div class="card">
-        <div class="card-header"><span class="card-title">Planned</span></div>
-        <ul class="roadmap">
-          <li>Article ideas</li>
-          <li>Writing articles and newsletters</li>
-          <li>Track best-performing articles and other substacks</li>
-          <li>Subscribers and income</li>
-        </ul>
+      <div class="section-header" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <h2>Substack</h2>
+        <a class="link-out" style="font-size:0.7rem" href="https://domoverseas.substack.com" target="_blank" rel="noopener">@domoverseas ↗</a>
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+          <div class="updated" id="substack-updated"></div>
+          <button class="btn btn-ghost" onclick="loadSubstack()" style="font-size:0.68rem">Refresh</button>
+        </div>
+      </div>
+      <div class="subtabs">
+        <button class="subtab active" data-sub="workspace" onclick="substackSub('workspace')">Workspace</button>
+        <button class="subtab" data-sub="performance" onclick="substackSub('performance')">Performance</button>
+      </div>
+
+      <div id="substack-workspace">
+        <div class="job-month">Weekly Trends</div>
+        <p class="section-lead" style="margin-top:-6px">What's moving in fashion, luxury and content right now — log it here before it goes cold.</p>
+        <div id="substack-trends-wrap"></div>
+
+        <div class="job-month">Article Ideas</div>
+        <div id="substack-ideas-wrap"></div>
+      </div>
+
+      <div id="substack-performance" style="display:none">
+        <div class="job-month">Published Articles</div>
+        <p class="section-lead" style="margin-top:-6px">Pulled live from your RSS feed. Add views/subscriber notes as you learn what's landing.</p>
+        <div id="substack-posts-wrap"></div>
+
+        <div class="job-month">Subscribers &amp; Income</div>
+        <div class="metrics-grid" id="substack-stats"></div>
+
+        <div class="job-month">Substacks to Watch</div>
+        <div id="substack-watch-wrap"></div>
       </div>
     </div>
 
@@ -3217,12 +3247,27 @@ function addonEdit(cat,id,field,value){
 }
 function addonRemove(cat,id){ const all=_addons(); all[cat]=(all[cat]||[]).filter(x=>x.id!==id); _saveAddons(all); renderAcctPersonal(); }
 
+function _addonsMonthTotal(d){
+  const all=_addons(); let total=0;
+  Object.values(all).forEach(list=>{
+    (list||[]).forEach(e=>{
+      if(!e.date) return;
+      const ed=new Date(e.date+'T00:00:00');
+      if(ed.getFullYear()===d.getFullYear()&&ed.getMonth()===d.getMonth()) total+=(e.amount||0);
+    });
+  });
+  return total;
+}
 function renderAcctPersonal(){
   const items=_recurItems();
   let weekly=0; items.forEach(it=>{ if(!it.paused) weekly+=_toWeekly(it.amount,it.cadence); });
   const monthly=weekly*52/12, yearly=weekly*52;
+  const now=new Date();
+  const monthLabel=now.toLocaleString('en-US',{month:'long'});
+  const addonSpend=_addonsMonthTotal(now);
   document.getElementById('acct-personal-stats').innerHTML=
-    '<div class="card metric-tile"><div class="metric-value">'+fmtMoney(weekly)+'</div><div class="metric-label">Recurring · weekly</div></div>'
+    '<div class="card metric-tile"><div class="metric-value">'+fmtMoney(addonSpend)+'</div><div class="metric-label">'+monthLabel+' spend · shopping/fuel/health</div></div>'
+    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(weekly)+'</div><div class="metric-label">Recurring · weekly</div></div>'
     +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(monthly)+'</div><div class="metric-label">Recurring · monthly</div></div>'
     +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(yearly)+'</div><div class="metric-label">Recurring · yearly</div></div>'
     +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(_secondHandTotal())+'</div><div class="metric-label">Income · second hand</div></div>';
@@ -3270,13 +3315,14 @@ function renderAcctPersonal(){
   });
   ah+='</div>';
   document.getElementById('acct-addons-grid').innerHTML=ah;
+  renderAcctWeekly();
 }
 
 function acctPersonalSub(which){
   document.querySelectorAll('#tab-acct-personal .subtab').forEach(b=>b.classList.toggle('active',b.dataset.sub===which));
   document.getElementById('acct-personal-overview').style.display=which==='overview'?'block':'none';
-  document.getElementById('acct-personal-weekly').style.display=which==='weekly'?'block':'none';
-  if(which==='weekly') renderAcctWeekly();
+  document.getElementById('acct-personal-monthly').style.display=which==='monthly'?'block':'none';
+  if(which==='monthly') renderMonthlyExpenses();
 }
 function _taxYearStart(now){ return now.getMonth()>=5 ? new Date(now.getFullYear(),5,1) : new Date(now.getFullYear()-1,5,1); }
 function renderAcctWeekly(){
@@ -3285,12 +3331,13 @@ function renderAcctWeekly(){
   const weeksElapsed=Math.max(1,(now-_taxYearStart(now))/(7*864e5));
   const weeklyAvg=total/weeksElapsed;
   document.getElementById('acct-personal-weekly').innerHTML=
-    '<div class="metrics-grid">'
+    '<div class="job-month">Second Hand — Weekly Breakdown</div>'
+    +'<div class="metrics-grid">'
     +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(weeklyAvg)+'</div><div class="metric-label">Second hand · weekly avg</div></div>'
     +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(total)+'</div><div class="metric-label">Second hand · total (from Jun)</div></div>'
     +'<div class="card metric-tile"><div class="metric-value">'+weeksElapsed.toFixed(1)+'</div><div class="metric-label">Weeks elapsed</div></div>'
     +'</div>'
-    +'<p class="section-lead" style="margin-top:16px">Weekly average = total Second Hand income (from June) ÷ weeks elapsed since the start of the tax year.</p>';
+    +'<p class="section-lead" style="margin-top:-8px;margin-bottom:20px">Weekly average = total Second Hand income (from June) ÷ weeks elapsed since the start of the tax year.</p>';
 }
 
 // ════════════════════════════════════════
@@ -3486,6 +3533,255 @@ function renderAcctBusiness(){
   document.getElementById('biz-recurring-wrap').innerHTML=html;
 }
 
+// ════════════════════════════════════════
+// SUBSTACK (RSS via /api/substack + dashboard-only localStorage)
+// ════════════════════════════════════════
+let _substackPosts=[];
+
+function substackSub(which){
+  document.querySelectorAll('#tab-substack .subtab').forEach(b=>b.classList.toggle('active',b.dataset.sub===which));
+  document.getElementById('substack-workspace').style.display=which==='workspace'?'block':'none';
+  document.getElementById('substack-performance').style.display=which==='performance'?'block':'none';
+}
+
+function loadSubstack(){
+  fetch('/api/substack',{cache:'no-store'}).then(r=>r.json()).then(data=>{
+    _substackPosts=data.posts||[];
+    document.getElementById('substack-updated').textContent='Updated '+new Date().toLocaleTimeString('en-AU',{hour:'numeric',minute:'2-digit'});
+    renderSubstackAll();
+  }).catch(e=>{
+    const el=document.getElementById('substack-posts-wrap');
+    if(el) el.innerHTML='<div class="empty-state"><div class="icon">⚠</div><h3>Couldn\'t load feed</h3><p style="font-size:0.75rem;color:var(--text-muted)">'+_esc(e.message)+'</p></div>';
+  });
+}
+function renderSubstackAll(){ renderSubstackTrends(); renderSubstackIdeas(); renderSubstackPosts(); renderSubstackStats(); renderSubstackWatch(); }
+
+// ── Weekly Trends ──
+function _trends(){ try{return JSON.parse(localStorage.getItem('dom_substack_trends')||'[]');}catch(e){return [];} }
+function _saveTrends(arr){ localStorage.setItem('dom_substack_trends',JSON.stringify(arr)); }
+function trendAdd(){
+  const arr=_trends();
+  const id='tr-'+Date.now()+'-'+Math.floor(Math.random()*1000);
+  arr.unshift({id,date:new Date().toISOString().slice(0,10),trend:'',notes:''});
+  _saveTrends(arr); renderSubstackTrends();
+  setTimeout(()=>{ const el=document.querySelector('input[data-trend-title="'+id+'"]'); if(el) el.focus(); },30);
+}
+function trendEdit(id,field,value){ const arr=_trends(); const t=arr.find(x=>x.id===id); if(!t) return; t[field]=value; _saveTrends(arr); }
+function trendRemove(id){ _saveTrends(_trends().filter(x=>x.id!==id)); renderSubstackTrends(); }
+function renderSubstackTrends(){
+  const items=_trends();
+  let html='<div class="card jt-wrap"><table class="jt"><thead><tr><th style="width:14%">Date</th><th style="width:30%">Trend</th><th>Notes / source</th><th style="width:30px"></th></tr></thead><tbody>';
+  items.forEach(t=>{
+    const k="'"+t.id+"'";
+    html+='<tr>'
+      +'<td><input class="jt-in" type="date" value="'+_esc(t.date)+'" onchange="trendEdit('+k+',\'date\',this.value)"></td>'
+      +'<td><input class="jt-in" placeholder="What\'s trending" value="'+_esc(t.trend)+'" data-trend-title="'+_esc(t.id)+'" onchange="trendEdit('+k+',\'trend\',this.value)"></td>'
+      +'<td><input class="jt-in" placeholder="—" value="'+_esc(t.notes)+'" onchange="trendEdit('+k+',\'notes\',this.value)"></td>'
+      +'<td class="reorder-cell"><span class="del-row" onclick="trendRemove('+k+')" title="Remove">×</span></td>'
+      +'</tr>';
+  });
+  html+='<tr class="add-row"><td colspan="4"><button class="add-brand-btn" onclick="trendAdd()">+ Add trend</button></td></tr>';
+  html+='</tbody></table></div>';
+  document.getElementById('substack-trends-wrap').innerHTML=html;
+}
+
+// ── Article Ideas ──
+const _IDEA_STATUSES=['IDEA','DRAFTING','READY','PUBLISHED'];
+function _ideas(){ try{return JSON.parse(localStorage.getItem('dom_substack_ideas')||'[]');}catch(e){return [];} }
+function _saveIdeas(arr){ localStorage.setItem('dom_substack_ideas',JSON.stringify(arr)); }
+function ideaAdd(){
+  const arr=_ideas();
+  const id='id-'+Date.now()+'-'+Math.floor(Math.random()*1000);
+  arr.unshift({id,title:'',angle:'',notes:'',status:'IDEA'});
+  _saveIdeas(arr); renderSubstackIdeas();
+  setTimeout(()=>{ const el=document.querySelector('input[data-idea-title="'+id+'"]'); if(el) el.focus(); },30);
+}
+function ideaEdit(id,field,value){ const arr=_ideas(); const it=arr.find(x=>x.id===id); if(!it) return; it[field]=value; _saveIdeas(arr); if(field==='status') renderSubstackIdeas(); }
+function ideaRemove(id){ _saveIdeas(_ideas().filter(x=>x.id!==id)); renderSubstackIdeas(); }
+function renderSubstackIdeas(){
+  const items=_ideas();
+  let html='<div class="card jt-wrap"><table class="jt"><thead><tr><th style="width:24%">Title</th><th style="width:26%">Angle / hook</th><th>Notes</th><th style="width:13%">Status</th><th style="width:30px"></th></tr></thead><tbody>';
+  items.forEach(it=>{
+    const k="'"+it.id+"'";
+    const opts=_IDEA_STATUSES.map(s=>'<option'+(s===it.status?' selected':'')+'>'+s+'</option>').join('');
+    html+='<tr>'
+      +'<td><input class="jt-in" placeholder="Article title" value="'+_esc(it.title)+'" data-idea-title="'+_esc(it.id)+'" onchange="ideaEdit('+k+',\'title\',this.value)"></td>'
+      +'<td><input class="jt-in" placeholder="—" value="'+_esc(it.angle)+'" onchange="ideaEdit('+k+',\'angle\',this.value)"></td>'
+      +'<td><input class="jt-in" placeholder="—" value="'+_esc(it.notes)+'" onchange="ideaEdit('+k+',\'notes\',this.value)"></td>'
+      +'<td><select class="jt-sel st-'+_statusSlug(it.status)+'" onchange="ideaEdit('+k+',\'status\',this.value)">'+opts+'</select></td>'
+      +'<td class="reorder-cell"><span class="del-row" onclick="ideaRemove('+k+')" title="Remove">×</span></td>'
+      +'</tr>';
+  });
+  html+='<tr class="add-row"><td colspan="5"><button class="add-brand-btn" onclick="ideaAdd()">+ Add idea</button></td></tr>';
+  html+='</tbody></table></div>';
+  document.getElementById('substack-ideas-wrap').innerHTML=html;
+}
+
+// ── Published Articles (RSS + manual performance overlay) ──
+function _substackPerf(){ try{return JSON.parse(localStorage.getItem('dom_substack_perf')||'{}');}catch(e){return {};} }
+function _saveSubstackPerf(o){ localStorage.setItem('dom_substack_perf',JSON.stringify(o)); }
+function substackPerfEdit(link,field,value){
+  const all=_substackPerf(); all[link]=all[link]||{};
+  if(field==='notes') all[link].notes=value; else all[link][field]=parseFloat(value)||0;
+  _saveSubstackPerf(all);
+  if(field!=='notes') renderSubstackPosts();
+}
+function renderSubstackPosts(){
+  const el=document.getElementById('substack-posts-wrap');
+  if(!_substackPosts.length){ el.innerHTML='<div class="empty-state"><div class="icon">✒</div><h3>No posts loaded yet</h3><p style="font-size:0.75rem;color:var(--text-muted)">Hit Refresh to pull from your RSS feed.</p></div>'; return; }
+  const perf=_substackPerf();
+  const topViews=Math.max(0,..._substackPosts.map(p=>(perf[p.link]||{}).views||0));
+  let html='<div class="card jt-wrap"><table class="jt"><thead><tr><th style="width:13%">Date</th><th style="width:29%">Title</th><th class="num" style="width:11%">Views</th><th class="num" style="width:13%">Subs gained</th><th>Notes</th></tr></thead><tbody>';
+  _substackPosts.forEach(p=>{
+    const pf=perf[p.link]||{};
+    const d=p.pubDate?new Date(p.pubDate):null;
+    const dStr=d?d.toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}):'—';
+    const isTop=topViews>0&&(pf.views||0)===topViews;
+    const lk="'"+p.link.replace(/'/g,"\\'")+"'";
+    html+='<tr>'
+      +'<td>'+dStr+'</td>'
+      +'<td><a class="link-out" href="'+_esc(p.link)+'" target="_blank" rel="noopener">'+_esc(p.title)+'</a>'+(isTop?' <span class="cal-source"><span class="cal-leg"><span class="cal-leg-dot" style="background:#c9a227"></span>Top</span></span>':'')+'</td>'
+      +'<td class="num"><input class="jt-in jt-num" inputmode="decimal" value="'+(pf.views!=null?pf.views:'')+'" placeholder="—" onchange="substackPerfEdit('+lk+',\'views\',this.value)"></td>'
+      +'<td class="num"><input class="jt-in jt-num" inputmode="decimal" value="'+(pf.subs!=null?pf.subs:'')+'" placeholder="—" onchange="substackPerfEdit('+lk+',\'subs\',this.value)"></td>'
+      +'<td><input class="jt-in" placeholder="—" value="'+_esc(pf.notes)+'" onchange="substackPerfEdit('+lk+',\'notes\',this.value)"></td>'
+      +'</tr>';
+  });
+  html+='</tbody></table></div>';
+  el.innerHTML=html;
+}
+
+// ── Subscribers & Income ──
+function _substackStats(){
+  try{ const raw=localStorage.getItem('dom_substack_stats'); if(raw) return JSON.parse(raw); }catch(e){}
+  const seed={subscribers:13,paid:0,incomeMonthly:0};
+  localStorage.setItem('dom_substack_stats',JSON.stringify(seed));
+  return seed;
+}
+function substackStatEdit(field,value){
+  const s=_substackStats(); s[field]=parseFloat(value)||0;
+  localStorage.setItem('dom_substack_stats',JSON.stringify(s));
+}
+function renderSubstackStats(){
+  const s=_substackStats();
+  const tile=(label,field,val)=>'<div class="card metric-tile"><input class="metric-edit-input" type="number" inputmode="decimal" value="'+(val!=null?val:'')+'" onchange="substackStatEdit(\''+field+'\',this.value)"><div class="metric-label">'+label+'</div></div>';
+  document.getElementById('substack-stats').innerHTML=
+    tile('Subscribers','subscribers',s.subscribers)
+    +tile('Paid subscribers','paid',s.paid)
+    +tile('Income · monthly $','incomeMonthly',s.incomeMonthly);
+}
+
+// ── Substacks to Watch ──
+function _watchList(){ try{return JSON.parse(localStorage.getItem('dom_substack_watch')||'[]');}catch(e){return [];} }
+function _saveWatch(arr){ localStorage.setItem('dom_substack_watch',JSON.stringify(arr)); }
+function watchAdd(){
+  const arr=_watchList();
+  const id='w-'+Date.now()+'-'+Math.floor(Math.random()*1000);
+  arr.push({id,name:'',url:'',notes:''});
+  _saveWatch(arr); renderSubstackWatch();
+  setTimeout(()=>{ const el=document.querySelector('input[data-watch-name="'+id+'"]'); if(el) el.focus(); },30);
+}
+function watchEdit(id,field,value){ const arr=_watchList(); const w=arr.find(x=>x.id===id); if(!w) return; w[field]=value; _saveWatch(arr); }
+function watchRemove(id){ _saveWatch(_watchList().filter(x=>x.id!==id)); renderSubstackWatch(); }
+function renderSubstackWatch(){
+  const items=_watchList();
+  let html='<div class="card jt-wrap"><table class="jt"><thead><tr><th style="width:22%">Substack</th><th style="width:32%">URL</th><th>Notes</th><th style="width:30px"></th></tr></thead><tbody>';
+  items.forEach(w=>{
+    const k="'"+w.id+"'";
+    html+='<tr>'
+      +'<td><input class="jt-in" placeholder="Name" value="'+_esc(w.name)+'" data-watch-name="'+_esc(w.id)+'" onchange="watchEdit('+k+',\'name\',this.value)"></td>'
+      +'<td><input class="jt-in" placeholder="https://…" value="'+_esc(w.url)+'" onchange="watchEdit('+k+',\'url\',this.value)"></td>'
+      +'<td><input class="jt-in" placeholder="Why you\'re watching them" value="'+_esc(w.notes)+'" onchange="watchEdit('+k+',\'notes\',this.value)"></td>'
+      +'<td class="reorder-cell"><span class="del-row" onclick="watchRemove('+k+')" title="Remove">×</span></td>'
+      +'</tr>';
+  });
+  html+='<tr class="add-row"><td colspan="4"><button class="add-brand-btn" onclick="watchAdd()">+ Add substack</button></td></tr>';
+  html+='</tbody></table></div>';
+  document.getElementById('substack-watch-wrap').innerHTML=html;
+}
+
+// ════════════════════════════════════════
+// ACCOUNTING PERSONAL — Monthly Expense Sheets (dashboard-only; localStorage)
+// ════════════════════════════════════════
+function _monthlySheets(){
+  try{ const raw=localStorage.getItem('dom_personal_monthly'); if(raw) return JSON.parse(raw); }catch(e){}
+  const cats=_recurItems().map(r=>r.name);
+  const seedLabels=['July','August','September','October'];
+  const seed=seedLabels.map((label,mi)=>({
+    id:'ms-seed-'+mi, label,
+    entries:cats.map((name,ci)=>({id:'ms-seed-'+mi+'-'+ci,category:name,amount:null,note:''}))
+  }));
+  localStorage.setItem('dom_personal_monthly',JSON.stringify(seed));
+  return seed;
+}
+function _saveMonthlySheets(arr){ localStorage.setItem('dom_personal_monthly',JSON.stringify(arr)); }
+function monthlySheetAdd(){
+  const arr=_monthlySheets();
+  const cats=_recurItems().map(r=>r.name);
+  const id='ms-'+Date.now()+'-'+Math.floor(Math.random()*1000);
+  arr.push({id,label:'',entries:cats.map((name,ci)=>({id:id+'-'+ci,category:name,amount:null,note:''}))});
+  _saveMonthlySheets(arr); renderMonthlyExpenses();
+  setTimeout(()=>{ const el=document.querySelector('input[data-month-label="'+id+'"]'); if(el) el.focus(); },30);
+}
+function monthlySheetLabelEdit(sheetId,value){
+  const arr=_monthlySheets(); const s=arr.find(x=>x.id===sheetId); if(!s) return;
+  s.label=value; _saveMonthlySheets(arr); renderMonthlyExpenses();
+}
+function monthlySheetRemove(sheetId){
+  if(!confirm('Remove this month\'s sheet?')) return;
+  _saveMonthlySheets(_monthlySheets().filter(s=>s.id!==sheetId)); renderMonthlyExpenses();
+}
+function monthlyEntryAdd(sheetId){
+  const arr=_monthlySheets(); const s=arr.find(x=>x.id===sheetId); if(!s) return;
+  const id='me-'+Date.now()+'-'+Math.floor(Math.random()*1000);
+  s.entries.push({id,category:'',amount:null,note:''});
+  _saveMonthlySheets(arr); renderMonthlyExpenses();
+  setTimeout(()=>{ const el=document.querySelector('input[data-entry-cat="'+id+'"]'); if(el) el.focus(); },30);
+}
+function monthlyEntryEdit(sheetId,entryId,field,value){
+  const arr=_monthlySheets(); const s=arr.find(x=>x.id===sheetId); if(!s) return;
+  const e=s.entries.find(x=>x.id===entryId); if(!e) return;
+  if(field==='amount') e.amount=(value===''?null:(parseFloat(value)||0)); else e[field]=value;
+  _saveMonthlySheets(arr); renderMonthlyExpenses();
+}
+function monthlyEntryRemove(sheetId,entryId){
+  const arr=_monthlySheets(); const s=arr.find(x=>x.id===sheetId); if(!s) return;
+  s.entries=s.entries.filter(x=>x.id!==entryId);
+  _saveMonthlySheets(arr); renderMonthlyExpenses();
+}
+function renderMonthlyExpenses(){
+  const sheets=_monthlySheets();
+  let stripHtml='<div class="metrics-grid" style="margin-bottom:18px">';
+  sheets.forEach(s=>{
+    const total=s.entries.reduce((sum,e)=>sum+(e.amount||0),0);
+    stripHtml+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(total)+'</div><div class="metric-label">'+_esc(s.label||'Untitled')+'</div></div>';
+  });
+  stripHtml+='</div>';
+
+  let html='';
+  sheets.forEach(s=>{
+    const total=s.entries.reduce((sum,e)=>sum+(e.amount||0),0);
+    const sk="'"+s.id.replace(/'/g,"\\'")+"'";
+    html+='<div class="card prop-card">'
+      +'<div class="prop-card-head"><input class="cli-edit cli-edit-brand" style="max-width:240px" placeholder="Month label" value="'+_esc(s.label)+'" data-month-label="'+_esc(s.id)+'" onchange="monthlySheetLabelEdit('+sk+',this.value)"><span class="del-row" onclick="monthlySheetRemove('+sk+')" title="Remove month">×</span></div>'
+      +'<table class="jt"><thead><tr><th style="width:36%">Category</th><th class="num" style="width:16%">Amount</th><th>Note</th><th style="width:30px"></th></tr></thead><tbody>';
+    s.entries.forEach(e=>{
+      const ek="'"+e.id.replace(/'/g,"\\'")+"'";
+      html+='<tr>'
+        +'<td><input class="jt-in" placeholder="Category" value="'+_esc(e.category)+'" data-entry-cat="'+_esc(e.id)+'" onchange="monthlyEntryEdit('+sk+','+ek+',\'category\',this.value)"></td>'
+        +'<td class="num"><input class="jt-in jt-num" inputmode="decimal" placeholder="—" value="'+(e.amount!=null?e.amount:'')+'" onchange="monthlyEntryEdit('+sk+','+ek+',\'amount\',this.value)"></td>'
+        +'<td><input class="jt-in" placeholder="—" value="'+_esc(e.note)+'" onchange="monthlyEntryEdit('+sk+','+ek+',\'note\',this.value)"></td>'
+        +'<td class="reorder-cell"><span class="del-row" onclick="monthlyEntryRemove('+sk+','+ek+')" title="Remove">×</span></td>'
+        +'</tr>';
+    });
+    html+='<tr class="add-row"><td colspan="4"><button class="add-brand-btn" onclick="monthlyEntryAdd('+sk+')">+ Add expense</button></td></tr>';
+    html+='</tbody></table>';
+    html+='<div class="prop-net-row">Month total: <strong>'+fmtMoney(total)+'</strong></div>';
+    html+='</div>';
+  });
+  html+='<button class="add-brand-btn" onclick="monthlySheetAdd()">+ Add month</button>';
+  document.getElementById('acct-monthly-wrap').innerHTML=stripHtml+html;
+}
+
 // ─── Init ───
 loadAll();
 loadCalendar();
@@ -3493,6 +3789,11 @@ loadClients();
 renderInvestmentProperties();
 renderAcctPersonal();
 renderAcctBusiness();
+loadSubstack();
+renderSubstackTrends();
+renderSubstackIdeas();
+renderSubstackStats();
+renderSubstackWatch();
 </script>
 </body>
 </html>
