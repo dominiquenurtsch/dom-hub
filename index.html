@@ -3243,10 +3243,7 @@ function _renderMonthStats(sheet){
   let weekly=0; items.forEach(it=>{ if(!it.paused) weekly+=_toWeekly(it.amount,it.cadence); });
   const monthly=weekly*52/12;
   const addonSpend=_sheetAddonsTotal(sheet);
-  const weeksInMonth=_monthWeeks(sheet.label);
-  const totalMonthlySpend=monthly+addonSpend;
-  const totalMonthlySpendWeekly=totalMonthlySpend/weeksInMonth;
-  const totalWeeklySpend=(weekly+addonSpend)/weeksInMonth;
+  const totalMonthlySpendWeekly=weekly+(addonSpend*12/52);
   let html='<div class="metrics-grid" style="margin-bottom:16px">';
   html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(addonSpend)+'</div><div class="metric-label">'+_esc(sheet.label||'Month')+' · shopping/fuel/health</div></div>';
   html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(weekly)+'</div><div class="metric-label">Recurring · weekly</div></div>';
@@ -3608,9 +3605,7 @@ function _renderBizMonthStats(sheet){
   let weekly=0; items.forEach(it=>{ if(!it.paused) weekly+=_toWeekly(it.amount||0,it.cadence); });
   const monthly=weekly*52/12;
   const addonSpend=sheet.addons?Object.values(sheet.addons).reduce((sum,list)=>sum+(list||[]).reduce((s,x)=>s+(x.amount||0),0),0):0;
-  const weeksInMonth=_monthWeeks(sheet.label);
-  const totalMonthlySpend=monthly+addonSpend;
-  const totalMonthlySpendWeekly=totalMonthlySpend/weeksInMonth;
+  const totalMonthlySpendWeekly=weekly+(addonSpend*12/52);
   let html='<div class="metrics-grid" style="margin-bottom:16px">';
   html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(addonSpend)+'</div><div class="metric-label">'+_esc(sheet.label||'Month')+' · travel/misc/marketing</div></div>';
   html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(weekly)+'</div><div class="metric-label">Recurring · weekly</div></div>';
