@@ -3622,6 +3622,26 @@ function renderBizMonths(){
     html+='<div class="prop-card-head" style="margin-bottom:14px"><input class="cli-edit cli-edit-brand" style="max-width:240px" placeholder="Month label" value="'+_esc(s.label)+'" data-biz-month-label="'+_esc(s.id)+'" onchange="bizMonthLabelEdit('+sk+',this.value)"><span class="del-row" onclick="bizMonthRemove('+sk+')" title="Remove month">×</span></div>';
     html+=_renderBizMonthStats(s);
 
+    // Recurring expenses (global, same across all months)
+    const bizRecurItems=_bizRecurItems();
+    html+='<div class="job-month">Recurring Expenses</div>';
+    html+='<div class="card jt-wrap"><table class="jt"><thead><tr><th style="width:22%">Category</th><th style="width:20%">Note</th><th class="num" style="width:11%">Amount</th><th style="width:13%">Cadence</th><th style="width:9%">Paused</th><th class="num" style="width:13%">Weekly equiv</th><th style="width:30px"></th></tr></thead><tbody>';
+    bizRecurItems.forEach(it=>{
+      const k="'"+it.id.replace(/'/g,"\\'")+"'";
+      const wk=_toWeekly(it.amount||0,it.cadence);
+      html+='<tr>'
+        +'<td><input class="jt-in" value="'+_esc(it.name)+'" placeholder="Category" data-bizrecur-name="'+_esc(it.id)+'" onchange="bizRecurEdit('+k+',\'name\',this.value)"></td>'
+        +'<td><input class="jt-in" value="'+_esc(it.note)+'" placeholder="—" onchange="bizRecurEdit('+k+',\'note\',this.value)"></td>'
+        +'<td class="num"><input class="jt-in jt-num" value="'+(it.amount!=null?it.amount:'')+'" placeholder="—" inputmode="decimal" onchange="bizRecurEdit('+k+',\'amount\',this.value)"></td>'
+        +'<td><select class="jt-sel" onchange="bizRecurEdit('+k+',\'cadence\',this.value)">'+['weekly','monthly','quarterly','yearly'].map(c=>'<option'+(c===it.cadence?' selected':'')+'>'+c+'</option>').join('')+'</select></td>'
+        +'<td style="text-align:center"><input type="checkbox" '+(it.paused?'checked':'')+' onchange="bizRecurEdit('+k+',\'paused\',this.checked)"></td>'
+        +'<td class="num">'+(it.paused?'<span style="color:var(--text-faint)">paused</span>':(it.amount!=null?fmtMoney(wk):'<span style="color:var(--text-faint)">—</span>'))+'</td>'
+        +'<td class="reorder-cell"><span class="del-row" onclick="bizRecurRemove('+k+')" title="Remove">×</span></td>'
+        +'</tr>';
+    });
+    html+='<tr class="add-row"><td colspan="7"><button class="add-brand-btn" onclick="bizRecurAdd()">+ Add expense</button></td></tr>';
+    html+='</tbody></table></div>';
+
     html+='<div class="job-month">Discretionary Costs</div><div class="addon-grid">';
     _BIZ_ADDON_CATS.forEach(cat=>{
       const list=(s.addons&&s.addons[cat])||[];
