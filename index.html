@@ -3016,7 +3016,7 @@ function loadClients(){
     const live=data.live&&(data.live.clients||data.live.income);
     document.getElementById('clients-source').innerHTML='<span class="cal-leg"><span class="cal-leg-dot" style="background:'+(live?'#5f7a5a':'#a3663d')+'"></span>'+(live?'Live sync':'Snapshot')+'</span>';
     document.getElementById('clients-updated').textContent='Updated '+new Date().toLocaleTimeString('en-AU',{hour:'numeric',minute:'2-digit'});
-    renderAddressBook(); renderJobs(); renderAcctPersonal();
+    renderAddressBook(); renderJobs(); renderAcctPersonal(); renderFinancesSnapshot('july');
   }).catch(e=>{ document.getElementById('cli-book-content').innerHTML='<div class="empty-state"><div class="icon">⚠</div><h3>Couldn\'t load</h3><p style="font-size:0.75rem;color:var(--text-muted)">'+_esc(e.message)+'</p></div>'; });
 }
 
@@ -4094,7 +4094,7 @@ function _calculateSecondHandWeekly(){
 }
 function _calculateBusinessIncomeWeekly(){
   const stats=_businessIncomeStats();
-  return stats.curInc;
+  return stats.curInc*12/52;
 }
 function renderFinancesSnapshot(monthLabel){
   const monthMap={'july':'July','august':'August','september':'September','october':'October','november':'November','december':'December','january':'January','february':'February','march':'March','april':'April','may':'May','june':'June'};
@@ -4165,7 +4165,6 @@ renderSubstackTrends();
 renderSubstackIdeas();
 renderSubstackStats();
 renderSubstackWatch();
-renderFinancesSnapshot('july');
 </script>
 </body>
 </html>
