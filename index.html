@@ -3247,7 +3247,6 @@ function _renderMonthStats(sheet){
   let html='<div class="metrics-grid" style="margin-bottom:16px">';
   html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(addonSpend)+'</div><div class="metric-label">'+_esc(sheet.label||'Month')+' · shopping/fuel/health</div></div>';
   html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(weekly)+'</div><div class="metric-label">Recurring · weekly</div></div>';
-  html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(monthly)+'</div><div class="metric-label">Recurring · monthly</div></div>';
   html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(totalMonthlySpendWeekly)+'</div><div class="metric-label">Total monthly spend · weekly</div></div>';
   html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(_secondHandTotal())+'</div><div class="metric-label">Income · second hand</div></div>';
   html+='</div>';
@@ -3609,7 +3608,6 @@ function _renderBizMonthStats(sheet){
   let html='<div class="metrics-grid" style="margin-bottom:16px">';
   html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(addonSpend)+'</div><div class="metric-label">'+_esc(sheet.label||'Month')+' · travel/misc/marketing</div></div>';
   html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(weekly)+'</div><div class="metric-label">Recurring · weekly</div></div>';
-  html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(monthly)+'</div><div class="metric-label">Recurring · monthly</div></div>';
   html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(totalMonthlySpendWeekly)+'</div><div class="metric-label">Total monthly spend · weekly</div></div>';
   html+='</div>';
   return html;
