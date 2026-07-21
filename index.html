@@ -3244,12 +3244,14 @@ function _renderMonthStats(sheet){
   const monthly=weekly*52/12;
   const addonSpend=_sheetAddonsTotal(sheet);
   const weeksInMonth=_monthWeeks(sheet.label);
+  const totalMonthlySpend=monthly+addonSpend;
+  const totalMonthlySpendWeekly=totalMonthlySpend/weeksInMonth;
   const totalWeeklySpend=(weekly+addonSpend)/weeksInMonth;
   let html='<div class="metrics-grid" style="margin-bottom:16px">';
   html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(addonSpend)+'</div><div class="metric-label">'+_esc(sheet.label||'Month')+' · shopping/fuel/health</div></div>';
   html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(weekly)+'</div><div class="metric-label">Recurring · weekly</div></div>';
   html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(monthly)+'</div><div class="metric-label">Recurring · monthly</div></div>';
-  html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(totalWeeklySpend)+'</div><div class="metric-label">Total weekly spend</div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(totalMonthlySpendWeekly)+'</div><div class="metric-label">Total monthly spend · weekly</div></div>';
   html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(_secondHandTotal())+'</div><div class="metric-label">Income · second hand</div></div>';
   html+='</div>';
   return html;
