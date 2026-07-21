@@ -3963,21 +3963,6 @@ function renderAcctPersonalMonths(){
     html+='<tr class="add-row"><td colspan="7"><button class="add-brand-btn" onclick="recurAdd()">+ Add expense</button></td></tr>';
     html+='</tbody></table></div>';
 
-    html+='<div class="job-month">Monthly Adjustments</div>';
-    html+='<div class="card jt-wrap"><table class="jt"><thead><tr><th style="width:36%">Category</th><th class="num" style="width:16%">Amount</th><th>Note</th><th style="width:30px"></th></tr></thead><tbody>';
-    s.entries.forEach(e=>{
-      const ek="'"+e.id.replace(/'/g,"\\'")+"'";
-      html+='<tr>'
-        +'<td><input class="jt-in" placeholder="Category" value="'+_esc(e.category)+'" data-entry-cat="'+_esc(e.id)+'" onchange="monthlyEntryEdit('+sk+','+ek+',\'category\',this.value)"></td>'
-        +'<td class="num"><input class="jt-in jt-num" inputmode="decimal" placeholder="—" value="'+(e.amount!=null?e.amount:'')+'" onchange="monthlyEntryEdit('+sk+','+ek+',\'amount\',this.value)"></td>'
-        +'<td><input class="jt-in" placeholder="—" value="'+_esc(e.note)+'" onchange="monthlyEntryEdit('+sk+','+ek+',\'note\',this.value)"></td>'
-        +'<td class="reorder-cell"><span class="del-row" onclick="monthlyEntryRemove('+sk+','+ek+')" title="Remove">×</span></td>'
-        +'</tr>';
-    });
-    html+='<tr class="add-row"><td colspan="4"><button class="add-brand-btn" onclick="monthlyEntryAdd('+sk+')">+ Add expense</button></td></tr>';
-    html+='</tbody></table></div>';
-    html+='<div class="prop-net-row">Recurring total: <strong>'+fmtMoney(total)+'</strong></div>';
-
     html+='<div class="job-month">Manual Add-ons</div><div class="addon-grid">';
     _ADDON_CATS.forEach(cat=>{
       const list=(s.addons&&s.addons[cat])||[];
