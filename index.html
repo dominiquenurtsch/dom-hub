@@ -3943,7 +3943,27 @@ function renderAcctPersonalMonths(){
     html+='<div class="prop-card-head" style="margin-bottom:14px"><input class="cli-edit cli-edit-brand" style="max-width:240px" placeholder="Month label" value="'+_esc(s.label)+'" data-month-label="'+_esc(s.id)+'" onchange="monthlySheetLabelEdit('+sk+',this.value)"><span class="del-row" onclick="monthlySheetRemove('+sk+')" title="Remove month">×</span></div>';
     html+=_renderMonthStats(s);
 
+    // Global recurring expenses (same across all months)
+    const recurItems=_recurItems();
     html+='<div class="job-month">Recurring Expenses</div>';
+    html+='<div class="card jt-wrap"><table class="jt"><thead><tr><th style="width:22%">Category</th><th style="width:20%">Note</th><th class="num" style="width:11%">Amount</th><th style="width:13%">Cadence</th><th style="width:9%">Paused</th><th class="num" style="width:13%">Weekly equiv</th><th style="width:30px"></th></tr></thead><tbody>';
+    recurItems.forEach(it=>{
+      const k="'"+it.id.replace(/'/g,"\\'")+"'";
+      const wk=_toWeekly(it.amount,it.cadence);
+      html+='<tr>'
+        +'<td><input class="jt-in" value="'+_esc(it.name)+'" placeholder="Category" data-recur-name="'+_esc(it.id)+'" onchange="recurEdit('+k+',\'name\',this.value)"></td>'
+        +'<td><input class="jt-in" value="'+_esc(it.note)+'" placeholder="—" onchange="recurEdit('+k+',\'note\',this.value)"></td>'
+        +'<td class="num"><input class="jt-in jt-num" value="'+it.amount+'" inputmode="decimal" onchange="recurEdit('+k+',\'amount\',this.value)"></td>'
+        +'<td><select class="jt-sel" onchange="recurEdit('+k+',\'cadence\',this.value)">'+['weekly','monthly','yearly'].map(c=>'<option'+(c===it.cadence?' selected':'')+'>'+c+'</option>').join('')+'</select></td>'
+        +'<td style="text-align:center"><input type="checkbox" '+(it.paused?'checked':'')+' onchange="recurEdit('+k+',\'paused\',this.checked)"></td>'
+        +'<td class="num">'+(it.paused?'<span style="color:var(--text-faint)">paused</span>':fmtMoney(wk))+'</td>'
+        +'<td class="reorder-cell"><span class="del-row" onclick="recurRemove('+k+')" title="Remove">×</span></td>'
+        +'</tr>';
+    });
+    html+='<tr class="add-row"><td colspan="7"><button class="add-brand-btn" onclick="recurAdd()">+ Add expense</button></td></tr>';
+    html+='</tbody></table></div>';
+
+    html+='<div class="job-month">Monthly Adjustments</div>';
     html+='<div class="card jt-wrap"><table class="jt"><thead><tr><th style="width:36%">Category</th><th class="num" style="width:16%">Amount</th><th>Note</th><th style="width:30px"></th></tr></thead><tbody>';
     s.entries.forEach(e=>{
       const ek="'"+e.id.replace(/'/g,"\\'")+"'";
