@@ -4152,9 +4152,9 @@ function renderFinancesSnapshot(monthLabel){
   html+='<div class="job-month">Current Savings Snapshot</div>';
   html+='<div class="card">';
   html+='<div class="metrics-grid">';
-  html+='<div class="card metric-tile"><div class="metric-value"><input type="number" class="jt-in jt-num" placeholder="—" style="width:90px;text-align:right" onchange="localStorage.setItem(\'dom_savings_shares\',this.value)" value="'+localStorage.getItem('dom_savings_shares')||'20000'+'"></div><div class="metric-label">Shares</div></div>';
-  html+='<div class="card metric-tile"><div class="metric-value"><input type="number" class="jt-in jt-num" placeholder="—" style="width:90px;text-align:right" onchange="localStorage.setItem(\'dom_savings_paypal\',this.value)" value="'+localStorage.getItem('dom_savings_paypal')||'5400'+'"></div><div class="metric-label">PayPal balance</div></div>';
-  html+='<div class="card metric-tile"><div class="metric-value"><input type="number" class="jt-in jt-num" placeholder="—" style="width:90px;text-align:right" onchange="localStorage.setItem(\'dom_savings_spaceship\',this.value)" value="'+localStorage.getItem('dom_savings_spaceship')||'3500'+'"></div><div class="metric-label">Spaceship balance</div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value"><input type="number" class="jt-in jt-num" placeholder="—" style="width:90px;text-align:right" onchange="localStorage.setItem(\'dom_savings_shares\',this.value)" value="'+(localStorage.getItem('dom_savings_shares')||'20000')+'"></div><div class="metric-label">Shares</div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value"><input type="number" class="jt-in jt-num" placeholder="—" style="width:90px;text-align:right" onchange="localStorage.setItem(\'dom_savings_paypal\',this.value)" value="'+(localStorage.getItem('dom_savings_paypal')||'5400')+'"></div><div class="metric-label">PayPal balance</div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value"><input type="number" class="jt-in jt-num" placeholder="—" style="width:90px;text-align:right" onchange="localStorage.setItem(\'dom_savings_spaceship\',this.value)" value="'+(localStorage.getItem('dom_savings_spaceship')||'3500')+'"></div><div class="metric-label">Spaceship balance</div></div>';
   const sharesVal=parseFloat(localStorage.getItem('dom_savings_shares'))||20000;
   const paypalVal=parseFloat(localStorage.getItem('dom_savings_paypal'))||5400;
   const spaceshipVal=parseFloat(localStorage.getItem('dom_savings_spaceship'))||3500;
