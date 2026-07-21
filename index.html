@@ -373,7 +373,8 @@ select.form-input{cursor:pointer;background:#1a1a1a}
       <div class="subtitle">Personal Operations</div>
     </div>
     <nav class="sidebar-nav">
-      <div class="nav-item active" data-tab="calendar"><span class="nav-icon">▤</span><span>Calendar</span></div>
+      <div class="nav-item active" data-tab="finances-snapshot"><span class="nav-icon">◑</span><span>Finances Snapshot</span></div>
+      <div class="nav-item" data-tab="calendar"><span class="nav-icon">▤</span><span>Calendar</span></div>
       <div class="nav-item" data-tab="clients"><span class="nav-icon">▦</span><span>Client Database</span></div>
       <div class="nav-item" data-tab="instagram"><span class="nav-icon">◎</span><span>Instagram Stats</span></div>
       <div class="nav-item" data-tab="acct-personal"><span class="nav-icon">◇</span><span>Accounting — Personal</span></div>
@@ -420,8 +421,21 @@ select.form-input{cursor:pointer;background:#1a1a1a}
       </div>
     </div>
 
+    <!-- ═══ FINANCES SNAPSHOT TAB ═══ -->
+    <div class="tab-panel active" id="tab-finances-snapshot">
+      <div class="section-header"><h2>Finances Snapshot</h2></div>
+      <div class="subtabs">
+        <button class="subtab active" data-sub="july" onclick="financesSnapshotSub('july')">July</button>
+        <button class="subtab" data-sub="august" onclick="financesSnapshotSub('august')">August</button>
+        <button class="subtab" data-sub="september" onclick="financesSnapshotSub('september')">September</button>
+        <button class="subtab" data-sub="october" onclick="financesSnapshotSub('october')">October</button>
+        <button class="subtab-add" onclick="financesSnapshotAddMonth()">+</button>
+      </div>
+      <div id="finances-snapshot-content"></div>
+    </div>
+
     <!-- ═══ CALENDAR TAB ═══ -->
-    <div class="tab-panel active" id="tab-calendar">
+    <div class="tab-panel" id="tab-calendar">
       <div class="section-header" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
         <h2>Calendar</h2>
         <span class="cal-source" id="cal-source"></span>
@@ -3203,6 +3217,16 @@ function _recurItems(){
   localStorage.setItem('dom_personal_recurring',JSON.stringify(_RECUR_DEFAULTS));
   return _RECUR_DEFAULTS.slice();
 }
+function _investmentSheets(){
+  try{ const raw=localStorage.getItem('dom_properties_v2'); if(raw) return JSON.parse(raw); }catch(e){}
+  return [];
+}
+function _daysSinceJune(){
+  const now=new Date();
+  const juneFirst=new Date(now.getFullYear(),5,1);
+  if(now<juneFirst) return (new Date(now.getFullYear()-1,5,1)).getTime();
+  return Math.floor((now-juneFirst)/(1000*60*60*24));
+}
 function _saveRecur(arr){ localStorage.setItem('dom_personal_recurring',JSON.stringify(arr)); }
 function recurAdd(){
   const arr=_recurItems();
@@ -4003,6 +4027,145 @@ function renderAcctPersonalMonths(){
   document.getElementById('acct-personal-months').innerHTML=html;
 }
 
+// ─── Financial Snapshot ───
+function financesSnapshotSub(month){
+  document.querySelectorAll('.subtab[data-sub]').forEach(t=>t.classList.remove('active'));
+  document.querySelector('.subtab[data-sub="'+month+'"]')?.classList.add('active');
+  renderFinancesSnapshot(month);
+}
+function financesSnapshotAddMonth(){
+  const months=['july','august','september','october','november','december','january','february','march','april','may','june'];
+  const existing=document.querySelectorAll('#tab-finances-snapshot .subtab[data-sub]');
+  const lastMonth=existing[existing.length-1]?.dataset.sub;
+  const lastIdx=months.indexOf(lastMonth||'october');
+  const nextMonth=months[(lastIdx+1)%months.length];
+  const alreadyExists=Array.from(existing).some(e=>e.dataset.sub===nextMonth);
+  if(alreadyExists){alert('All months already added');return;}
+  const btn=document.createElement('button');
+  btn.className='subtab';
+  btn.dataset.sub=nextMonth;
+  btn.textContent=nextMonth.charAt(0).toUpperCase()+nextMonth.slice(1);
+  btn.onclick=()=>financesSnapshotSub(nextMonth);
+  document.querySelector('#tab-finances-snapshot .subtab-add').insertAdjacentElement('beforebegin',btn);
+  financesSnapshotSub(nextMonth);
+}
+function _calculatePersonalExpensesRecurring(monthLabel){
+  const sheets=_monthlySheets();
+  const sheet=sheets.find(s=>s.label===monthLabel);
+  if(!sheet) return 0;
+  const recurItems=_recurItems();
+  return recurItems.filter(r=>!r.paused).reduce((sum,r)=>sum+_toWeekly(r.amount||0,r.cadence),0);
+}
+function _calculatePersonalExpensesAddons(monthLabel){
+  const sheets=_monthlySheets();
+  const sheet=sheets.find(s=>s.label===monthLabel);
+  if(!sheet) return 0;
+  const addonSpend=sheet.addons?Object.values(sheet.addons).reduce((sum,list)=>sum+(list||[]).reduce((s,x)=>s+(x.amount||0),0),0):0;
+  return (addonSpend*12/52);
+}
+function _calculateInvestmentExpenses(){
+  const props=_investmentSheets();
+  let total=0;
+  props.forEach(p=>{
+    if(!p.expenses) return;
+    p.expenses.forEach(e=>{
+      const monthly=e.amount||0;
+      total+=monthly*12/52;
+    });
+  });
+  return total;
+}
+function _calculateBusinessExpensesRecurring(){
+  const bizRecurItems=_bizRecurItems();
+  return bizRecurItems.filter(r=>!r.paused && r.name!=='Wage (to self)').reduce((sum,r)=>sum+_toWeekly(r.amount||0,r.cadence),0);
+}
+function _calculateBusinessExpensesAddons(monthLabel){
+  const sheets=_bizMonthlySheets();
+  const sheet=sheets.find(s=>s.label===monthLabel);
+  if(!sheet) return 0;
+  const addonSpend=sheet.addons?Object.values(sheet.addons).reduce((sum,list)=>sum+(list||[]).reduce((s,x)=>sum+(x.amount||0),0),0):0;
+  return (addonSpend*12/52);
+}
+function _calculateWageWeekly(){
+  const bizRecurItems=_bizRecurItems();
+  const wage=bizRecurItems.find(r=>r.name==='Wage (to self)');
+  return wage?_toWeekly(wage.amount||0,wage.cadence):0;
+}
+function _calculateSecondHandWeekly(){
+  return _secondHandTotal()/(_daysSinceJune()/7);
+}
+function _calculateBusinessIncomeWeekly(){
+  const clientData=localStorage.getItem('dom_clients_jobs')||'[]';
+  let jobs=[];
+  try{jobs=JSON.parse(clientData);}catch(e){}
+  const now=new Date();
+  const thisMonth=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  const lastMonth=new Date(now.getFullYear(),now.getMonth(),0);
+  const lastMonthStr=lastMonth.getFullYear()+'-'+String(lastMonth.getMonth()+1).padStart(2,'0');
+  const thisMonthJobs=(jobs||[]).filter(j=>j.month===thisMonth && j.status==='Invoiced');
+  const lastMonthJobs=(jobs||[]).filter(j=>j.month===lastMonthStr && j.status==='Invoiced');
+  const thisMonthTotal=(thisMonthJobs||[]).reduce((s,j)=>{const f=parseFloat(j.fee)||0;return s+f;},0);
+  const lastMonthTotal=(lastMonthJobs||[]).reduce((s,j)=>{const f=parseFloat(j.fee)||0;return s+f;},0);
+  const combined=thisMonthTotal+lastMonthTotal;
+  return combined/8;
+}
+function renderFinancesSnapshot(monthLabel){
+  const monthMap={'july':'July','august':'August','september':'September','october':'October','november':'November','december':'December','january':'January','february':'February','march':'March','april':'April','may':'May','june':'June'};
+  const monthName=monthMap[monthLabel]||monthLabel;
+  const persExpRecur=_calculatePersonalExpensesRecurring(monthName);
+  const persExpAddon=_calculatePersonalExpensesAddons(monthName);
+  const persExpPersonal=persExpRecur+persExpAddon;
+  const investExp=_calculateInvestmentExpenses();
+  const persExpTotal=persExpPersonal+investExp;
+  const bizExpRecur=_calculateBusinessExpensesRecurring();
+  const bizExpAddon=_calculateBusinessExpensesAddons(monthName);
+  const bizExpTotal=bizExpRecur+bizExpAddon;
+  const bizIncome=_calculateBusinessIncomeWeekly();
+  const wageWeekly=_calculateWageWeekly();
+  const secondHandWeekly=_calculateSecondHandWeekly();
+  const totalActualIncome=bizIncome-bizExpTotal;
+
+  let html='<div class="metrics-grid" style="margin-bottom:20px">';
+  html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(persExpPersonal)+'</div><div class="metric-label">Weekly expenses personal</div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(investExp)+'</div><div class="metric-label">Weekly expenses properties</div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(persExpTotal)+'</div><div class="metric-label">Total weekly expenses</div></div>';
+  html+='</div>';
+
+  html+='<div class="job-month">Personal Income</div>';
+  html+='<div class="card">';
+  html+='<div class="metrics-grid" style="margin-bottom:16px">';
+  html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(wageWeekly)+'</div><div class="metric-label">Weekly wage</div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(secondHandWeekly)+'</div><div class="metric-label">Weekly second hand</div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value"><input type="number" class="jt-in jt-num" value="0" placeholder="—" style="width:60px;text-align:right" data-div-amount="1" onchange="localStorage.setItem(\'dom_dividends_\'+this.dataset.divAmount,this.value)"></div><div class="metric-label">Dividends <select style="width:100px;margin-top:4px;padding:4px;border:1px solid var(--glass-border);border-radius:6px" onchange="this.dataset.cadence=this.value;localStorage.setItem(\'dom_dividends_cadence\',this.value)"><option>weekly</option><option>monthly</option></select></div></div>';
+  html+='</div>';
+  html+='</div>';
+
+  html+='<div class="job-month">Business</div>';
+  html+='<div class="card">';
+  html+='<div class="metrics-grid">';
+  html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(bizIncome)+'</div><div class="metric-label">Weekly business income</div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(bizExpTotal)+'</div><div class="metric-label">Weekly business expenses</div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(totalActualIncome)+'</div><div class="metric-label">Total weekly actual income</div></div>';
+  html+='</div>';
+  html+='</div>';
+
+  html+='<div class="job-month">Current Savings Snapshot</div>';
+  html+='<div class="card">';
+  html+='<div class="metrics-grid">';
+  html+='<div class="card metric-tile"><div class="metric-value"><input type="number" class="jt-in jt-num" placeholder="—" style="width:90px;text-align:right" onchange="localStorage.setItem(\'dom_savings_shares\',this.value)" value="'+localStorage.getItem('dom_savings_shares')||'20000'+'"></div><div class="metric-label">Shares</div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value"><input type="number" class="jt-in jt-num" placeholder="—" style="width:90px;text-align:right" onchange="localStorage.setItem(\'dom_savings_paypal\',this.value)" value="'+localStorage.getItem('dom_savings_paypal')||'5400'+'"></div><div class="metric-label">PayPal balance</div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value"><input type="number" class="jt-in jt-num" placeholder="—" style="width:90px;text-align:right" onchange="localStorage.setItem(\'dom_savings_spaceship\',this.value)" value="'+localStorage.getItem('dom_savings_spaceship')||'3500'+'"></div><div class="metric-label">Spaceship balance</div></div>';
+  const sharesVal=parseFloat(localStorage.getItem('dom_savings_shares'))||20000;
+  const paypalVal=parseFloat(localStorage.getItem('dom_savings_paypal'))||5400;
+  const spaceshipVal=parseFloat(localStorage.getItem('dom_savings_spaceship'))||3500;
+  const totalSavings=sharesVal+paypalVal+spaceshipVal;
+  html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(totalSavings)+'</div><div class="metric-label">Total savings</div></div>';
+  html+='</div>';
+  html+='</div>';
+
+  document.getElementById('finances-snapshot-content').innerHTML=html;
+}
+
 // ─── Init ───
 loadAll();
 loadCalendar();
@@ -4015,6 +4178,7 @@ renderSubstackTrends();
 renderSubstackIdeas();
 renderSubstackStats();
 renderSubstackWatch();
+renderFinancesSnapshot('july');
 </script>
 </body>
 </html>
