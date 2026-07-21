@@ -3221,6 +3221,16 @@ function _investmentSheets(){
   try{ const raw=localStorage.getItem('dom_properties_v2'); if(raw) return JSON.parse(raw); }catch(e){}
   return [];
 }
+function _investmentPropertiesWeeklyTotal(){
+  const props=_props();
+  let rentTotal=0, invExpTotal=0, invNetTotal=0, residenceCostTotal=0;
+  props.forEach(p=>{
+    const {expTotal,rentNet,net}=_propNet(p);
+    if(p.isResidence) residenceCostTotal+=expTotal;
+    else { rentTotal+=rentNet; invExpTotal+=expTotal; invNetTotal+=net; }
+  });
+  return (invNetTotal<0?-invNetTotal:0)+residenceCostTotal;
+}
 function _daysSinceJune(){
   const now=new Date();
   const juneFirst=new Date(now.getFullYear(),5,1);
@@ -4063,18 +4073,6 @@ function _calculatePersonalExpensesAddons(monthLabel){
   const addonSpend=sheet.addons?Object.values(sheet.addons).reduce((sum,list)=>sum+(list||[]).reduce((s,x)=>s+(x.amount||0),0),0):0;
   return (addonSpend*12/52);
 }
-function _calculateInvestmentExpenses(){
-  const props=_investmentSheets();
-  let total=0;
-  props.forEach(p=>{
-    if(!p.expenses) return;
-    p.expenses.forEach(e=>{
-      const monthly=e.amount||0;
-      total+=monthly*12/52;
-    });
-  });
-  return total;
-}
 function _calculateBusinessExpensesRecurring(){
   const bizRecurItems=_bizRecurItems();
   return bizRecurItems.filter(r=>!r.paused && r.name!=='Wage (to self)').reduce((sum,r)=>sum+_toWeekly(r.amount||0,r.cadence),0);
@@ -4095,19 +4093,8 @@ function _calculateSecondHandWeekly(){
   return _secondHandTotal()/(_daysSinceJune()/7);
 }
 function _calculateBusinessIncomeWeekly(){
-  const clientData=localStorage.getItem('dom_clients_jobs')||'[]';
-  let jobs=[];
-  try{jobs=JSON.parse(clientData);}catch(e){}
-  const now=new Date();
-  const thisMonth=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
-  const lastMonth=new Date(now.getFullYear(),now.getMonth(),0);
-  const lastMonthStr=lastMonth.getFullYear()+'-'+String(lastMonth.getMonth()+1).padStart(2,'0');
-  const thisMonthJobs=(jobs||[]).filter(j=>j.month===thisMonth && j.status==='Invoiced');
-  const lastMonthJobs=(jobs||[]).filter(j=>j.month===lastMonthStr && j.status==='Invoiced');
-  const thisMonthTotal=(thisMonthJobs||[]).reduce((s,j)=>{const f=parseFloat(j.fee)||0;return s+f;},0);
-  const lastMonthTotal=(lastMonthJobs||[]).reduce((s,j)=>{const f=parseFloat(j.fee)||0;return s+f;},0);
-  const combined=thisMonthTotal+lastMonthTotal;
-  return combined/8;
+  const stats=_businessIncomeStats();
+  return stats.curInc;
 }
 function renderFinancesSnapshot(monthLabel){
   const monthMap={'july':'July','august':'August','september':'September','october':'October','november':'November','december':'December','january':'January','february':'February','march':'March','april':'April','may':'May','june':'June'};
@@ -4115,7 +4102,7 @@ function renderFinancesSnapshot(monthLabel){
   const persExpRecur=_calculatePersonalExpensesRecurring(monthName);
   const persExpAddon=_calculatePersonalExpensesAddons(monthName);
   const persExpPersonal=persExpRecur+persExpAddon;
-  const investExp=_calculateInvestmentExpenses();
+  const investExp=_investmentPropertiesWeeklyTotal();
   const persExpTotal=persExpPersonal+investExp;
   const bizExpRecur=_calculateBusinessExpensesRecurring();
   const bizExpAddon=_calculateBusinessExpensesAddons(monthName);
