@@ -127,6 +127,8 @@ body{font-family:var(--font);color:var(--text);min-height:100vh;overflow-x:hidde
 .subtab{padding:9px 16px;border:none;background:transparent;color:var(--text-muted);font-family:var(--font);font-size:0.8rem;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s}
 .subtab:hover{color:var(--text)}
 .subtab.active{color:var(--black);border-bottom-color:var(--teal);font-weight:600}
+.subtab-add{font-weight:700;color:var(--text-faint);padding:9px 14px}
+.subtab-add:hover{color:var(--teal)}
 .cli-search{width:100%;padding:12px 16px;border-radius:12px;border:1px solid var(--glass-border);background:var(--glass-bg);color:var(--text);font-family:var(--font);font-size:0.85rem;outline:none;margin-bottom:16px;transition:border .2s}
 .cli-search:focus{border-color:var(--teal)}
 .cli-search::placeholder{color:var(--text-faint)}
@@ -491,38 +493,27 @@ select.form-input{cursor:pointer;background:#1a1a1a}
     <div class="tab-panel" id="tab-acct-personal">
       <div class="section-header" style="display:flex;align-items:center;gap:12px"><h2>Accounting — Personal</h2></div>
       <p class="section-lead">Where the money actually goes each month.</p>
-      <div class="subtabs">
-        <button class="subtab active" data-sub="overview" onclick="acctPersonalSub('overview')">Overview</button>
-        <button class="subtab" data-sub="monthly" onclick="acctPersonalSub('monthly')">Monthly Expenses</button>
-      </div>
+      <div class="subtabs" id="acct-personal-subtabs"></div>
       <div id="acct-personal-overview">
         <div class="metrics-grid" id="acct-personal-stats"></div>
         <div id="acct-personal-weekly"></div>
         <div class="job-month">Recurring Expenses</div>
         <div id="acct-recurring-wrap"></div>
-        <div class="job-month">Manual Add-ons</div>
-        <div id="acct-addons-grid"></div>
       </div>
-      <div id="acct-personal-monthly" style="display:none">
-        <p class="section-lead" style="margin-top:-6px">Actuals per month, seeded from your recurring categories. Add a month whenever you need one.</p>
-        <div id="acct-monthly-wrap"></div>
-      </div>
+      <div id="acct-personal-months"></div>
     </div>
 
     <!-- ═══ ACCOUNTING — BUSINESS TAB ═══ -->
     <div class="tab-panel" id="tab-acct-business">
       <div class="section-header" style="display:flex;align-items:center;gap:12px"><h2>Accounting — Business</h2></div>
-      <p class="section-lead">Ottilie Studios' recurring costs. Wage, Super and PAYG are seeded as placeholders — fill in the real figures whenever you have them.</p>
-      <div class="metrics-grid" id="biz-recur-stats"></div>
-      <div class="job-month">Recurring Expenses</div>
-      <div id="biz-recurring-wrap"></div>
-      <div class="card">
-        <div class="card-header"><span class="card-title">Still to come</span></div>
-        <ul class="roadmap">
-          <li>Linked to <strong>Xero</strong></li>
-          <li>Monthly income</li>
-        </ul>
+      <p class="section-lead">Ottilie Studios' recurring costs + monthly discretionary spend. Wage, Super and PAYG are seeded as placeholders.</p>
+      <div class="subtabs" id="biz-subtabs"></div>
+      <div id="acct-business-overview">
+        <div class="metrics-grid" id="biz-recur-stats"></div>
+        <div class="job-month">Recurring Expenses</div>
+        <div id="biz-recurring-wrap"></div>
       </div>
+      <div id="biz-months"></div>
     </div>
 
     <!-- ═══ SUBSTACK TAB ═══ -->
@@ -3231,46 +3222,45 @@ function recurRemove(id){ _saveRecur(_recurItems().filter(x=>x.id!==id)); render
 function _toWeekly(amount,cadence){ if(cadence==='monthly') return amount*12/52; if(cadence==='quarterly') return amount*4/52; if(cadence==='yearly') return amount/52; return amount; }
 
 const _ADDON_CATS=['Shopping','Fuel','Health'];
-function _addons(){ try{return JSON.parse(localStorage.getItem('dom_personal_addons')||'{}');}catch(e){return {};} }
-function _saveAddons(o){ localStorage.setItem('dom_personal_addons',JSON.stringify(o)); }
-function addonAdd(cat){
-  const all=_addons(); all[cat]=all[cat]||[];
-  const id='ad-'+Date.now()+'-'+Math.floor(Math.random()*1000);
-  all[cat].unshift({id,date:new Date().toISOString().slice(0,10),desc:'',amount:0});
-  _saveAddons(all); renderAcctPersonal();
-  setTimeout(()=>{ const el=document.querySelector('input[data-addon-desc="'+id+'"]'); if(el) el.focus(); },30);
+function _sheetAddonsTotal(s){
+  if(!s||!s.addons) return 0;
+  let t=0; _ADDON_CATS.forEach(cat=>{ (s.addons[cat]||[]).forEach(e=>t+=(e.amount||0)); });
+  return t;
 }
-function addonEdit(cat,id,field,value){
-  const all=_addons(); const it=(all[cat]||[]).find(x=>x.id===id); if(!it) return;
-  if(field==='amount') it.amount=parseFloat(value)||0; else it[field]=value;
-  _saveAddons(all); renderAcctPersonal();
+function _findSheetForDate(d){
+  const monthName=d.toLocaleString('en-US',{month:'long'}).toLowerCase();
+  return _monthlySheets().find(s=>(s.label||'').trim().toLowerCase()===monthName);
 }
-function addonRemove(cat,id){ const all=_addons(); all[cat]=(all[cat]||[]).filter(x=>x.id!==id); _saveAddons(all); renderAcctPersonal(); }
-
-function _addonsMonthTotal(d){
-  const all=_addons(); let total=0;
-  Object.values(all).forEach(list=>{
-    (list||[]).forEach(e=>{
-      if(!e.date) return;
-      const ed=new Date(e.date+'T00:00:00');
-      if(ed.getFullYear()===d.getFullYear()&&ed.getMonth()===d.getMonth()) total+=(e.amount||0);
-    });
-  });
-  return total;
+function _monthWeeks(label){
+  const monthNames=['january','february','march','april','may','june','july','august','september','october','november','december'];
+  const idx=monthNames.indexOf((label||'').toLowerCase());
+  if(idx<0) return 4.3; // default
+  const d=new Date(2026,(idx===11?0:idx+1),0); // last day of month
+  return Math.ceil(d.getDate()/7);
+}
+function _renderMonthStats(sheet){
+  const items=_recurItems();
+  let weekly=0; items.forEach(it=>{ if(!it.paused) weekly+=_toWeekly(it.amount,it.cadence); });
+  const monthly=weekly*52/12;
+  const addonSpend=_sheetAddonsTotal(sheet);
+  const weeksInMonth=_monthWeeks(sheet.label);
+  const totalWeeklySpend=(weekly+addonSpend)/weeksInMonth;
+  let html='<div class="metrics-grid" style="margin-bottom:16px">';
+  html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(addonSpend)+'</div><div class="metric-label">'+_esc(sheet.label||'Month')+' · shopping/fuel/health</div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(weekly)+'</div><div class="metric-label">Recurring · weekly</div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(monthly)+'</div><div class="metric-label">Recurring · monthly</div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(totalWeeklySpend)+'</div><div class="metric-label">Total weekly spend</div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(_secondHandTotal())+'</div><div class="metric-label">Income · second hand</div></div>';
+  html+='</div>';
+  return html;
 }
 function renderAcctPersonal(){
   const items=_recurItems();
   let weekly=0; items.forEach(it=>{ if(!it.paused) weekly+=_toWeekly(it.amount,it.cadence); });
-  const monthly=weekly*52/12, yearly=weekly*52;
+  const monthly=weekly*52/12;
   const now=new Date();
-  const monthLabel=now.toLocaleString('en-US',{month:'long'});
-  const addonSpend=_addonsMonthTotal(now);
-  document.getElementById('acct-personal-stats').innerHTML=
-    '<div class="card metric-tile"><div class="metric-value">'+fmtMoney(addonSpend)+'</div><div class="metric-label">'+monthLabel+' spend · shopping/fuel/health</div></div>'
-    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(weekly)+'</div><div class="metric-label">Recurring · weekly</div></div>'
-    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(monthly)+'</div><div class="metric-label">Recurring · monthly</div></div>'
-    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(yearly)+'</div><div class="metric-label">Recurring · yearly</div></div>'
-    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(_secondHandTotal())+'</div><div class="metric-label">Income · second hand</div></div>';
+  const sheet=_findSheetForDate(now);
+  document.getElementById('acct-personal-stats').innerHTML=_renderMonthStats(sheet||{label:'',addons:_blankSheetAddons()});
 
   let html='<div class="card jt-wrap"><table class="jt"><thead><tr>'
     +'<th style="width:22%">Category</th><th style="width:20%">Note</th><th class="num" style="width:11%">Amount</th><th style="width:13%">Cadence</th><th style="width:9%">Paused</th><th class="num" style="width:13%">Weekly equiv</th><th style="width:30px"></th>'
@@ -3291,38 +3281,26 @@ function renderAcctPersonal(){
   html+='<tr class="add-row"><td colspan="7"><button class="add-brand-btn" onclick="recurAdd()">+ Add expense</button></td></tr>';
   html+='</tbody></table></div>';
   document.getElementById('acct-recurring-wrap').innerHTML=html;
-
-  const all=_addons();
-  let ah='<div class="addon-grid">';
-  _ADDON_CATS.forEach(cat=>{
-    const list=all[cat]||[];
-    const total=list.reduce((s,x)=>s+(x.amount||0),0);
-    ah+='<div class="card addon-card"><div class="card-header"><span class="card-title">'+cat+'</span><span style="font-weight:600;font-size:0.85rem">'+fmtMoney(total)+'</span></div>';
-    if(list.length){
-      ah+='<div class="addon-list">';
-      list.forEach(it=>{
-        const k="'"+it.id+"'", cq="'"+cat+"'";
-        ah+='<div class="addon-row">'
-          +'<input class="jt-in addon-date" type="date" value="'+_esc(it.date)+'" onchange="addonEdit('+cq+','+k+',\'date\',this.value)">'
-          +'<input class="jt-in addon-desc" placeholder="Description" value="'+_esc(it.desc)+'" data-addon-desc="'+_esc(it.id)+'" onchange="addonEdit('+cq+','+k+',\'desc\',this.value)">'
-          +'<input class="jt-in jt-num addon-amt" inputmode="decimal" value="'+it.amount+'" onchange="addonEdit('+cq+','+k+',\'amount\',this.value)">'
-          +'<span class="del-row" onclick="addonRemove('+cq+','+k+')" title="Remove">×</span>'
-          +'</div>';
-      });
-      ah+='</div>';
-    }
-    ah+='<button class="add-brand-btn" style="margin-top:8px" onclick="addonAdd(\''+cat+'\')">+ Add '+cat.toLowerCase()+' entry</button></div>';
-  });
-  ah+='</div>';
-  document.getElementById('acct-addons-grid').innerHTML=ah;
   renderAcctWeekly();
 }
 
+let _acctPersonalActiveSub='overview';
 function acctPersonalSub(which){
-  document.querySelectorAll('#tab-acct-personal .subtab').forEach(b=>b.classList.toggle('active',b.dataset.sub===which));
+  _acctPersonalActiveSub=which;
+  document.querySelectorAll('#acct-personal-subtabs .subtab').forEach(b=>b.classList.toggle('active',b.dataset.sub===which));
   document.getElementById('acct-personal-overview').style.display=which==='overview'?'block':'none';
-  document.getElementById('acct-personal-monthly').style.display=which==='monthly'?'block':'none';
-  if(which==='monthly') renderMonthlyExpenses();
+  document.querySelectorAll('#acct-personal-months .acct-month-panel').forEach(p=>{
+    p.style.display=(p.dataset.sheetId===which)?'block':'none';
+  });
+}
+function renderAcctPersonalSubtabs(){
+  const sheets=_monthlySheets();
+  let html='<button class="subtab'+(_acctPersonalActiveSub==='overview'?' active':'')+'" data-sub="overview" onclick="acctPersonalSub(\'overview\')">Overview</button>';
+  sheets.forEach(s=>{
+    html+='<button class="subtab'+(_acctPersonalActiveSub===s.id?' active':'')+'" data-sub="'+_esc(s.id)+'" onclick="acctPersonalSub('+"'"+s.id+"'"+')">'+_esc(s.label||'Untitled')+'</button>';
+  });
+  html+='<button class="subtab subtab-add" onclick="monthlySheetAdd()" title="Add month">+</button>';
+  document.getElementById('acct-personal-subtabs').innerHTML=html;
 }
 function _taxYearStart(now){ return now.getMonth()>=5 ? new Date(now.getFullYear(),5,1) : new Date(now.getFullYear()-1,5,1); }
 function renderAcctWeekly(){
@@ -3531,7 +3509,122 @@ function renderAcctBusiness(){
   html+='<tr class="add-row"><td colspan="7"><button class="add-brand-btn" onclick="bizRecurAdd()">+ Add expense</button></td></tr>';
   html+='</tbody></table></div>';
   document.getElementById('biz-recurring-wrap').innerHTML=html;
+  renderBizMonths();
 }
+
+// ════════════════════════════════════════
+// ACCOUNTING — BUSINESS Monthly Sheets (dashboard-only; localStorage)
+// ════════════════════════════════════════
+const _BIZ_ADDON_CATS=['Travel','Misc','Marketing'];
+function _bizMonthlySheets(){
+  let arr;
+  try{ const raw=localStorage.getItem('dom_business_monthly'); if(raw) arr=JSON.parse(raw); }catch(e){}
+  if(!arr){
+    const seedLabels=['July','August','September','October'];
+    arr=seedLabels.map((label,mi)=>({
+      id:'bms-seed-'+mi, label,
+      addons:_blankSheetAddons()
+    }));
+    localStorage.setItem('dom_business_monthly',JSON.stringify(arr));
+    return arr;
+  }
+  let changed=false;
+  arr.forEach(s=>{ if(!s.addons){ s.addons={Travel:[],Misc:[],Marketing:[]}; changed=true; } });
+  if(changed) localStorage.setItem('dom_business_monthly',JSON.stringify(arr));
+  return arr;
+}
+function _saveBizMonthlySheets(arr){ localStorage.setItem('dom_business_monthly',JSON.stringify(arr)); }
+let _bizActiveSub='overview';
+function bizSub(which){
+  _bizActiveSub=which;
+  document.querySelectorAll('#biz-subtabs .subtab').forEach(b=>b.classList.toggle('active',b.dataset.sub===which));
+  document.getElementById('acct-business-overview').style.display=which==='overview'?'block':'none';
+  document.querySelectorAll('#biz-months .biz-month-panel').forEach(p=>{
+    p.style.display=(p.dataset.sheetId===which)?'block':'none';
+  });
+}
+function renderBizSubtabs(){
+  const sheets=_bizMonthlySheets();
+  let html='<button class="subtab'+(_bizActiveSub==='overview'?' active':'')+'" data-sub="overview" onclick="bizSub(\'overview\')">Overview</button>';
+  sheets.forEach(s=>{
+    html+='<button class="subtab'+(_bizActiveSub===s.id?' active':'')+'" data-sub="'+_esc(s.id)+'" onclick="bizSub('+"'"+s.id+"'"+')">'+_esc(s.label||'Untitled')+'</button>';
+  });
+  html+='<button class="subtab subtab-add" onclick="bizMonthAdd()" title="Add month">+</button>';
+  document.getElementById('biz-subtabs').innerHTML=html;
+}
+function bizMonthAdd(){
+  const arr=_bizMonthlySheets();
+  const id='bms-'+Date.now()+'-'+Math.floor(Math.random()*1000);
+  arr.push({id,label:'',addons:{Travel:[],Misc:[],Marketing:[]}});
+  _saveBizMonthlySheets(arr);
+  _bizActiveSub=id;
+  renderBizAll();
+  setTimeout(()=>{ const el=document.querySelector('input[data-biz-month-label="'+id+'"]'); if(el) el.focus(); },30);
+}
+function bizMonthLabelEdit(sheetId,value){
+  const arr=_bizMonthlySheets(); const s=arr.find(x=>x.id===sheetId); if(!s) return;
+  s.label=value; _saveBizMonthlySheets(arr); renderBizAll();
+}
+function bizMonthRemove(sheetId){
+  if(!confirm('Remove this month\'s sheet?')) return;
+  _saveBizMonthlySheets(_bizMonthlySheets().filter(s=>s.id!==sheetId));
+  _bizActiveSub='overview';
+  renderBizAll();
+}
+function bizAddonAdd(sheetId,cat){
+  const arr=_bizMonthlySheets(); const s=arr.find(x=>x.id===sheetId); if(!s) return;
+  s.addons=s.addons||{Travel:[],Misc:[],Marketing:[]};
+  const id='bza-'+Date.now()+'-'+Math.floor(Math.random()*1000);
+  s.addons[cat]=s.addons[cat]||[];
+  s.addons[cat].unshift({id,desc:'',amount:0});
+  _saveBizMonthlySheets(arr); renderBizMonths();
+  setTimeout(()=>{ const el=document.querySelector('input[data-biz-addon-desc="'+id+'"]'); if(el) el.focus(); },30);
+}
+function bizAddonEdit(sheetId,cat,entryId,field,value){
+  const arr=_bizMonthlySheets(); const s=arr.find(x=>x.id===sheetId); if(!s) return;
+  const e=(s.addons[cat]||[]).find(x=>x.id===entryId); if(!e) return;
+  if(field==='amount') e.amount=parseFloat(value)||0; else e.desc=value;
+  _saveBizMonthlySheets(arr); renderBizMonths();
+}
+function bizAddonRemove(sheetId,cat,entryId){
+  const arr=_bizMonthlySheets(); const s=arr.find(x=>x.id===sheetId); if(!s) return;
+  s.addons[cat]=(s.addons[cat]||[]).filter(x=>x.id!==entryId);
+  _saveBizMonthlySheets(arr); renderBizMonths();
+}
+function renderBizMonths(){
+  const sheets=_bizMonthlySheets();
+  let html='';
+  sheets.forEach(s=>{
+    const sk="'"+s.id.replace(/'/g,"\\'")+"'";
+    const visible=_bizActiveSub===s.id;
+    html+='<div class="biz-month-panel" data-sheet-id="'+_esc(s.id)+'" style="display:'+(visible?'block':'none')+'">';
+    html+='<div class="prop-card-head" style="margin-bottom:14px"><input class="cli-edit cli-edit-brand" style="max-width:240px" placeholder="Month label" value="'+_esc(s.label)+'" data-biz-month-label="'+_esc(s.id)+'" onchange="bizMonthLabelEdit('+sk+',this.value)"><span class="del-row" onclick="bizMonthRemove('+sk+')" title="Remove month">×</span></div>';
+
+    html+='<div class="job-month">Discretionary Costs</div><div class="addon-grid">';
+    _BIZ_ADDON_CATS.forEach(cat=>{
+      const list=(s.addons&&s.addons[cat])||[];
+      const catTotal=list.reduce((sum,x)=>sum+(x.amount||0),0);
+      html+='<div class="card addon-card"><div class="card-header"><span class="card-title">'+cat+'</span><span style="font-weight:600;font-size:0.85rem">'+fmtMoney(catTotal)+'</span></div>';
+      if(list.length){
+        html+='<div class="addon-list">';
+        list.forEach(it=>{
+          const ik="'"+it.id+"'", cq="'"+cat+"'";
+          html+='<div class="addon-row">'
+            +'<input class="jt-in addon-desc" style="flex:1" placeholder="Description" value="'+_esc(it.desc)+'" data-biz-addon-desc="'+_esc(it.id)+'" onchange="bizAddonEdit('+sk+','+cq+','+ik+',\'desc\',this.value)">'
+            +'<input class="jt-in jt-num addon-amt" inputmode="decimal" value="'+it.amount+'" onchange="bizAddonEdit('+sk+','+cq+','+ik+',\'amount\',this.value)">'
+            +'<span class="del-row" onclick="bizAddonRemove('+sk+','+cq+','+ik+')" title="Remove">×</span>'
+            +'</div>';
+        });
+        html+='</div>';
+      }
+      html+='<button class="add-brand-btn" style="margin-top:8px" onclick="bizAddonAdd('+sk+',\''+cat+'\')">+ Add '+cat.toLowerCase()+' entry</button></div>';
+    });
+    html+='</div>';
+    html+='</div>';
+  });
+  document.getElementById('biz-months').innerHTML=html;
+}
+function renderBizAll(){ renderBizSubtabs(); renderAcctBusiness(); }
 
 // ════════════════════════════════════════
 // SUBSTACK (RSS via /api/substack + dashboard-only localStorage)
@@ -3702,68 +3795,127 @@ function renderSubstackWatch(){
 // ════════════════════════════════════════
 // ACCOUNTING PERSONAL — Monthly Expense Sheets (dashboard-only; localStorage)
 // ════════════════════════════════════════
+function _blankSheetAddons(){ return {Shopping:[],Fuel:[],Health:[]}; }
+// One-time migration: the old Overview "Manual Add-ons" grid stored dated entries
+// under a single global key. Fold any of those into the matching month's sheet
+// (by entry date -> month name) so nothing already logged goes missing.
+function _migrateLegacyAddons(sheets){
+  if(localStorage.getItem('dom_personal_addons_migrated')==='1') return false;
+  let legacy;
+  try{ const raw=localStorage.getItem('dom_personal_addons'); if(raw) legacy=JSON.parse(raw); }catch(e){}
+  localStorage.setItem('dom_personal_addons_migrated','1');
+  if(!legacy || typeof legacy!=='object') return false;
+  let changed=false;
+  _ADDON_CATS.forEach(cat=>{
+    (legacy[cat]||[]).forEach(entry=>{
+      if(!entry.date) return;
+      const monthName=new Date(entry.date+'T00:00:00').toLocaleString('en-US',{month:'long'}).toLowerCase();
+      const sheet=sheets.find(s=>(s.label||'').trim().toLowerCase()===monthName);
+      if(!sheet) return;
+      sheet.addons=sheet.addons||_blankSheetAddons();
+      sheet.addons[cat]=sheet.addons[cat]||[];
+      if(!sheet.addons[cat].some(x=>x.id===entry.id)){
+        sheet.addons[cat].push({id:entry.id,desc:entry.desc||'',amount:entry.amount||0});
+        changed=true;
+      }
+    });
+  });
+  return changed;
+}
 function _monthlySheets(){
-  try{ const raw=localStorage.getItem('dom_personal_monthly'); if(raw) return JSON.parse(raw); }catch(e){}
-  const cats=_recurItems().map(r=>r.name);
-  const seedLabels=['July','August','September','October'];
-  const seed=seedLabels.map((label,mi)=>({
-    id:'ms-seed-'+mi, label,
-    entries:cats.map((name,ci)=>({id:'ms-seed-'+mi+'-'+ci,category:name,amount:null,note:''}))
-  }));
-  localStorage.setItem('dom_personal_monthly',JSON.stringify(seed));
-  return seed;
+  let arr;
+  try{ const raw=localStorage.getItem('dom_personal_monthly'); if(raw) arr=JSON.parse(raw); }catch(e){}
+  if(!arr){
+    const cats=_recurItems().map(r=>r.name);
+    const seedLabels=['July','August','September','October'];
+    arr=seedLabels.map((label,mi)=>({
+      id:'ms-seed-'+mi, label,
+      entries:cats.map((name,ci)=>({id:'ms-seed-'+mi+'-'+ci,category:name,amount:null,note:''})),
+      addons:_blankSheetAddons()
+    }));
+    _migrateLegacyAddons(arr);
+    localStorage.setItem('dom_personal_monthly',JSON.stringify(arr));
+    return arr;
+  }
+  let changed=false;
+  arr.forEach(s=>{ if(!s.addons){ s.addons=_blankSheetAddons(); changed=true; } });
+  if(_migrateLegacyAddons(arr)) changed=true;
+  if(changed) localStorage.setItem('dom_personal_monthly',JSON.stringify(arr));
+  return arr;
 }
 function _saveMonthlySheets(arr){ localStorage.setItem('dom_personal_monthly',JSON.stringify(arr)); }
+function renderAcctPersonalAll(){ renderAcctPersonalSubtabs(); renderAcctPersonal(); renderAcctPersonalMonths(); }
 function monthlySheetAdd(){
   const arr=_monthlySheets();
   const cats=_recurItems().map(r=>r.name);
   const id='ms-'+Date.now()+'-'+Math.floor(Math.random()*1000);
-  arr.push({id,label:'',entries:cats.map((name,ci)=>({id:id+'-'+ci,category:name,amount:null,note:''}))});
-  _saveMonthlySheets(arr); renderMonthlyExpenses();
+  arr.push({id,label:'',entries:cats.map((name,ci)=>({id:id+'-'+ci,category:name,amount:null,note:''})),addons:_blankSheetAddons()});
+  _saveMonthlySheets(arr);
+  _acctPersonalActiveSub=id;
+  renderAcctPersonalAll();
   setTimeout(()=>{ const el=document.querySelector('input[data-month-label="'+id+'"]'); if(el) el.focus(); },30);
 }
 function monthlySheetLabelEdit(sheetId,value){
   const arr=_monthlySheets(); const s=arr.find(x=>x.id===sheetId); if(!s) return;
-  s.label=value; _saveMonthlySheets(arr); renderMonthlyExpenses();
+  s.label=value; _saveMonthlySheets(arr); renderAcctPersonalAll();
 }
 function monthlySheetRemove(sheetId){
   if(!confirm('Remove this month\'s sheet?')) return;
-  _saveMonthlySheets(_monthlySheets().filter(s=>s.id!==sheetId)); renderMonthlyExpenses();
+  _saveMonthlySheets(_monthlySheets().filter(s=>s.id!==sheetId));
+  _acctPersonalActiveSub='overview';
+  renderAcctPersonalAll();
 }
 function monthlyEntryAdd(sheetId){
   const arr=_monthlySheets(); const s=arr.find(x=>x.id===sheetId); if(!s) return;
   const id='me-'+Date.now()+'-'+Math.floor(Math.random()*1000);
   s.entries.push({id,category:'',amount:null,note:''});
-  _saveMonthlySheets(arr); renderMonthlyExpenses();
+  _saveMonthlySheets(arr); renderAcctPersonalMonths();
   setTimeout(()=>{ const el=document.querySelector('input[data-entry-cat="'+id+'"]'); if(el) el.focus(); },30);
 }
 function monthlyEntryEdit(sheetId,entryId,field,value){
   const arr=_monthlySheets(); const s=arr.find(x=>x.id===sheetId); if(!s) return;
   const e=s.entries.find(x=>x.id===entryId); if(!e) return;
   if(field==='amount') e.amount=(value===''?null:(parseFloat(value)||0)); else e[field]=value;
-  _saveMonthlySheets(arr); renderMonthlyExpenses();
+  _saveMonthlySheets(arr); renderAcctPersonalMonths();
 }
 function monthlyEntryRemove(sheetId,entryId){
   const arr=_monthlySheets(); const s=arr.find(x=>x.id===sheetId); if(!s) return;
   s.entries=s.entries.filter(x=>x.id!==entryId);
-  _saveMonthlySheets(arr); renderMonthlyExpenses();
+  _saveMonthlySheets(arr); renderAcctPersonalMonths();
 }
-function renderMonthlyExpenses(){
+function sheetAddonAdd(sheetId,cat){
+  const arr=_monthlySheets(); const s=arr.find(x=>x.id===sheetId); if(!s) return;
+  s.addons=s.addons||_blankSheetAddons();
+  const id='sa-'+Date.now()+'-'+Math.floor(Math.random()*1000);
+  s.addons[cat]=s.addons[cat]||[];
+  s.addons[cat].unshift({id,desc:'',amount:0});
+  _saveMonthlySheets(arr); renderAcctPersonalAll();
+  setTimeout(()=>{ const el=document.querySelector('input[data-sheet-addon-desc="'+id+'"]'); if(el) el.focus(); },30);
+}
+function sheetAddonEdit(sheetId,cat,entryId,field,value){
+  const arr=_monthlySheets(); const s=arr.find(x=>x.id===sheetId); if(!s) return;
+  const e=(s.addons[cat]||[]).find(x=>x.id===entryId); if(!e) return;
+  if(field==='amount') e.amount=parseFloat(value)||0; else e.desc=value;
+  _saveMonthlySheets(arr); renderAcctPersonalAll();
+}
+function sheetAddonRemove(sheetId,cat,entryId){
+  const arr=_monthlySheets(); const s=arr.find(x=>x.id===sheetId); if(!s) return;
+  s.addons[cat]=(s.addons[cat]||[]).filter(x=>x.id!==entryId);
+  _saveMonthlySheets(arr); renderAcctPersonalAll();
+}
+function renderAcctPersonalMonths(){
   const sheets=_monthlySheets();
-  let stripHtml='<div class="metrics-grid" style="margin-bottom:18px">';
-  sheets.forEach(s=>{
-    const total=s.entries.reduce((sum,e)=>sum+(e.amount||0),0);
-    stripHtml+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(total)+'</div><div class="metric-label">'+_esc(s.label||'Untitled')+'</div></div>';
-  });
-  stripHtml+='</div>';
-
   let html='';
   sheets.forEach(s=>{
     const total=s.entries.reduce((sum,e)=>sum+(e.amount||0),0);
     const sk="'"+s.id.replace(/'/g,"\\'")+"'";
-    html+='<div class="card prop-card">'
-      +'<div class="prop-card-head"><input class="cli-edit cli-edit-brand" style="max-width:240px" placeholder="Month label" value="'+_esc(s.label)+'" data-month-label="'+_esc(s.id)+'" onchange="monthlySheetLabelEdit('+sk+',this.value)"><span class="del-row" onclick="monthlySheetRemove('+sk+')" title="Remove month">×</span></div>'
-      +'<table class="jt"><thead><tr><th style="width:36%">Category</th><th class="num" style="width:16%">Amount</th><th>Note</th><th style="width:30px"></th></tr></thead><tbody>';
+    const visible=_acctPersonalActiveSub===s.id;
+    html+='<div class="acct-month-panel" data-sheet-id="'+_esc(s.id)+'" style="display:'+(visible?'block':'none')+'">';
+    html+='<div class="prop-card-head" style="margin-bottom:14px"><input class="cli-edit cli-edit-brand" style="max-width:240px" placeholder="Month label" value="'+_esc(s.label)+'" data-month-label="'+_esc(s.id)+'" onchange="monthlySheetLabelEdit('+sk+',this.value)"><span class="del-row" onclick="monthlySheetRemove('+sk+')" title="Remove month">×</span></div>';
+    html+=_renderMonthStats(s);
+
+    html+='<div class="job-month">Recurring Expenses</div>';
+    html+='<div class="card jt-wrap"><table class="jt"><thead><tr><th style="width:36%">Category</th><th class="num" style="width:16%">Amount</th><th>Note</th><th style="width:30px"></th></tr></thead><tbody>';
     s.entries.forEach(e=>{
       const ek="'"+e.id.replace(/'/g,"\\'")+"'";
       html+='<tr>'
@@ -3774,12 +3926,34 @@ function renderMonthlyExpenses(){
         +'</tr>';
     });
     html+='<tr class="add-row"><td colspan="4"><button class="add-brand-btn" onclick="monthlyEntryAdd('+sk+')">+ Add expense</button></td></tr>';
-    html+='</tbody></table>';
-    html+='<div class="prop-net-row">Month total: <strong>'+fmtMoney(total)+'</strong></div>';
+    html+='</tbody></table></div>';
+    html+='<div class="prop-net-row">Recurring total: <strong>'+fmtMoney(total)+'</strong></div>';
+
+    html+='<div class="job-month">Manual Add-ons</div><div class="addon-grid">';
+    _ADDON_CATS.forEach(cat=>{
+      const list=(s.addons&&s.addons[cat])||[];
+      const catTotal=list.reduce((sum,x)=>sum+(x.amount||0),0);
+      html+='<div class="card addon-card"><div class="card-header"><span class="card-title">'+cat+'</span><span style="font-weight:600;font-size:0.85rem">'+fmtMoney(catTotal)+'</span></div>';
+      if(list.length){
+        html+='<div class="addon-list">';
+        list.forEach(it=>{
+          const ik="'"+it.id+"'", cq="'"+cat+"'";
+          html+='<div class="addon-row">'
+            +'<input class="jt-in addon-desc" style="flex:1" placeholder="Description" value="'+_esc(it.desc)+'" data-sheet-addon-desc="'+_esc(it.id)+'" onchange="sheetAddonEdit('+sk+','+cq+','+ik+',\'desc\',this.value)">'
+            +'<input class="jt-in jt-num addon-amt" inputmode="decimal" value="'+it.amount+'" onchange="sheetAddonEdit('+sk+','+cq+','+ik+',\'amount\',this.value)">'
+            +'<span class="del-row" onclick="sheetAddonRemove('+sk+','+cq+','+ik+')" title="Remove">×</span>'
+            +'</div>';
+        });
+        html+='</div>';
+      }
+      html+='<button class="add-brand-btn" style="margin-top:8px" onclick="sheetAddonAdd('+sk+',\''+cat+'\')">+ Add '+cat.toLowerCase()+' entry</button></div>';
+    });
+    html+='</div>';
+
+    html+='<div class="prop-net-row" style="margin-top:14px">Month total (recurring + add-ons): <strong>'+fmtMoney(total+_sheetAddonsTotal(s))+'</strong></div>';
     html+='</div>';
   });
-  html+='<button class="add-brand-btn" onclick="monthlySheetAdd()">+ Add month</button>';
-  document.getElementById('acct-monthly-wrap').innerHTML=stripHtml+html;
+  document.getElementById('acct-personal-months').innerHTML=html;
 }
 
 // ─── Init ───
@@ -3787,8 +3961,8 @@ loadAll();
 loadCalendar();
 loadClients();
 renderInvestmentProperties();
-renderAcctPersonal();
-renderAcctBusiness();
+renderAcctPersonalAll();
+renderBizAll();
 loadSubstack();
 renderSubstackTrends();
 renderSubstackIdeas();
