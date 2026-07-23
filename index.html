@@ -387,6 +387,7 @@ select.form-input{cursor:pointer;background:#1a1a1a}
       <div class="nav-item active" data-tab="finances-snapshot"><span class="nav-icon">◑</span><span>Finances Snapshot</span></div>
       <div class="nav-item" data-tab="calendar"><span class="nav-icon">▤</span><span>Calendar</span></div>
       <div class="nav-item" data-tab="clients"><span class="nav-icon">▦</span><span>Client Database</span></div>
+      <div class="nav-item" data-tab="sydney"><span class="nav-icon">✈</span><span>Sydney Meetings</span></div>
       <div class="nav-item" data-tab="instagram"><span class="nav-icon">◎</span><span>Instagram Stats</span></div>
       <div class="nav-item" data-tab="acct-personal"><span class="nav-icon">◇</span><span>Accounting — Personal</span></div>
       <div class="nav-item" data-tab="acct-business"><span class="nav-icon">◆</span><span>Accounting — Business</span></div>
@@ -452,6 +453,20 @@ select.form-input{cursor:pointer;background:#1a1a1a}
       <p class="section-lead">Dividends you pay yourself. 35% tax is calculated automatically — tick once you've moved that amount into your savings account.</p>
       <div class="metrics-grid" id="dividends-stats"></div>
       <div id="dividends-content"></div>
+    </div>
+
+    <!-- ═══ SYDNEY MEETINGS TAB ═══ -->
+    <div class="tab-panel" id="tab-sydney">
+      <div class="section-header"><h2>Sydney Meetings</h2></div>
+      <p class="section-lead">Your Sydney contacts (pulled from the address book) plus trip planning and past-visit logs.</p>
+      <div class="subtabs">
+        <button class="subtab active" data-sub="contacts" onclick="sydneySub('contacts')">Sydney Contacts</button>
+        <button class="subtab" data-sub="upcoming" onclick="sydneySub('upcoming')">Upcoming Trips</button>
+        <button class="subtab" data-sub="past" onclick="sydneySub('past')">Past Trips</button>
+      </div>
+      <div id="sydney-contacts"></div>
+      <div id="sydney-upcoming" style="display:none"></div>
+      <div id="sydney-past" style="display:none"></div>
     </div>
 
     <!-- ═══ CALENDAR TAB ═══ -->
@@ -3042,7 +3057,7 @@ function loadClients(){
     const live=data.live&&(data.live.clients||data.live.income);
     document.getElementById('clients-source').innerHTML='<span class="cal-leg"><span class="cal-leg-dot" style="background:'+(live?'#5f7a5a':'#a3663d')+'"></span>'+(live?'Live sync':'Snapshot')+'</span>';
     document.getElementById('clients-updated').textContent='Updated '+new Date().toLocaleTimeString('en-AU',{hour:'numeric',minute:'2-digit'});
-    renderAddressBook(); renderJobs(); renderAcctPersonal(); renderFinancesSnapshot('july');
+    renderAddressBook(); renderJobs(); renderAcctPersonal(); renderFinancesSnapshot('july'); renderSydneyContacts();
   }).catch(e=>{ document.getElementById('cli-book-content').innerHTML='<div class="empty-state"><div class="icon">⚠</div><h3>Couldn\'t load</h3><p style="font-size:0.75rem;color:var(--text-muted)">'+_esc(e.message)+'</p></div>'; });
 }
 
@@ -4259,6 +4274,69 @@ function renderDividends(){
   document.getElementById('dividends-content').innerHTML=html;
 }
 
+// ─── Sydney Meetings ───
+function sydneySub(which){
+  document.querySelectorAll('#tab-sydney .subtab').forEach(b=>b.classList.toggle('active',b.dataset.sub===which));
+  ['contacts','upcoming','past'].forEach(s=>{ const el=document.getElementById('sydney-'+s); if(el) el.style.display = s===which?'block':'none'; });
+}
+function renderSydneyContacts(){
+  const el=document.getElementById('sydney-contacts'); if(!el) return;
+  const list=(_cliClients||[]).filter(c=>(c.location||'').toUpperCase().includes('SYDNEY'));
+  if(!list.length){ el.innerHTML='<div class="empty-state"><div class="icon">✈</div><h3>No Sydney contacts</h3><p style="font-size:0.75rem;color:var(--text-muted)">Brands with "Sydney" in their Location (Address Book) show here automatically.</p></div>'; return; }
+  let html='<div class="cli-count">'+list.length+' Sydney brand'+(list.length>1?'s':'')+'</div><div class="cli-grid">';
+  for(const c of list){
+    const notes=[c.plans,c.status].filter(Boolean).join('\n');
+    const li=/^https?:/i.test(c.linkedin)?'<div class="cli-row"><span class="k">LinkedIn</span><span><a href="'+_esc(c.linkedin)+'" target="_blank" rel="noopener">profile</a></span></div>':'';
+    html+='<div class="cli-card"><div class="cli-brand">'+_esc(c.brand)+'</div>'
+      +(c.location?'<span class="cli-loc">'+_esc(c.location)+'</span>':'')
+      +(c.contact?'<div class="cli-row"><span class="k">Contact</span><span>'+_esc(c.contact).replace(/\n/g,' · ')+'</span></div>':'')
+      +'<div class="cli-row"><span class="k">Email</span><span>'+_mailLinks(c.email)+'</span></div>'
+      +li
+      +(notes?'<div class="cli-note">'+_esc(notes)+'</div>':'')
+      +'</div>';
+  }
+  html+='</div>';
+  el.innerHTML=html;
+}
+// Trip log (planned + past) — dashboard-only, auto-synced
+function _sydTrips(){ try{const r=localStorage.getItem('dom_sydney_trips'); if(r)return JSON.parse(r);}catch(e){} return []; }
+function _saveSydTrips(a){ localStorage.setItem('dom_sydney_trips',JSON.stringify(a)); }
+function sydTripAdd(type){
+  const a=_sydTrips();
+  const id='syd-'+Date.now()+'-'+Math.floor(Math.random()*1000);
+  a.push({id,type,date:'',brand:'',contact:'',location:'Sydney',note:''});
+  _saveSydTrips(a); renderSydneyTrips();
+  setTimeout(()=>{const el=document.querySelector('input[data-syd-brand="'+id+'"]');if(el)el.focus();},30);
+}
+function sydTripEdit(id,field,value){ const a=_sydTrips(); const it=a.find(x=>x.id===id); if(!it)return; it[field]=value; _saveSydTrips(a); }
+function sydTripRemove(id){ _saveSydTrips(_sydTrips().filter(x=>x.id!==id)); renderSydneyTrips(); }
+function _sydTripTable(type){
+  const rows=_sydTripsBy(type);
+  let html='<div class="card jt-wrap"><table class="jt"><thead><tr>'
+    +'<th style="width:14%">Date</th><th style="width:20%">Brand</th><th style="width:18%">Contact</th><th style="width:16%">Location</th><th>Notes</th><th style="width:30px"></th>'
+    +'</tr></thead><tbody>';
+  if(!rows.length){ html+='<tr><td colspan="6" style="text-align:center;color:var(--text-faint);padding:16px">No '+(type==='upcoming'?'planned':'past')+' trips yet.</td></tr>'; }
+  rows.forEach(r=>{
+    const k="'"+r.id.replace(/'/g,"\\'")+"'";
+    html+='<tr>'
+      +'<td><input class="jt-in" type="date" value="'+_esc(r.date||'')+'" onchange="sydTripEdit('+k+',\'date\',this.value)"></td>'
+      +'<td><input class="jt-in" data-syd-brand="'+_esc(r.id)+'" value="'+_esc(r.brand||'')+'" placeholder="Brand" onchange="sydTripEdit('+k+',\'brand\',this.value)"></td>'
+      +'<td><input class="jt-in" value="'+_esc(r.contact||'')+'" placeholder="Contact" onchange="sydTripEdit('+k+',\'contact\',this.value)"></td>'
+      +'<td><input class="jt-in" value="'+_esc(r.location||'')+'" placeholder="Location" onchange="sydTripEdit('+k+',\'location\',this.value)"></td>'
+      +'<td><input class="jt-in" value="'+_esc(r.note||'')+'" placeholder="—" onchange="sydTripEdit('+k+',\'note\',this.value)"></td>'
+      +'<td class="reorder-cell"><span class="del-row" onclick="sydTripRemove('+k+')" title="Remove">×</span></td>'
+      +'</tr>';
+  });
+  html+='<tr class="add-row"><td colspan="6"><button class="add-brand-btn" onclick="sydTripAdd(\''+type+'\')">+ Add '+(type==='upcoming'?'planned meeting':'past meeting')+'</button></td></tr>';
+  html+='</tbody></table></div>';
+  return html;
+}
+function _sydTripsBy(type){ return _sydTrips().filter(t=>t.type===type); }
+function renderSydneyTrips(){
+  const up=document.getElementById('sydney-upcoming'); if(up) up.innerHTML=_sydTripTable('upcoming');
+  const pa=document.getElementById('sydney-past'); if(pa) pa.innerHTML=_sydTripTable('past');
+}
+
 // ─── Server sync (Vercel KV / Upstash Redis via /api/state) ───
 // Editable data lives in localStorage for instant UX; this layer mirrors it
 // to the server so it survives cache clears and syncs across Dom's devices.
@@ -4352,6 +4430,8 @@ async function boot(){
   renderSubstackStats();
   renderSubstackWatch();
   renderDividends();
+  renderSydneyContacts();
+  renderSydneyTrips();
   _enableSyncPush();                        // start tracking edits AFTER hydration
   _setSave('','Saved');                     // baseline: nothing to save yet
   if(pull.ok && !pull.hadData) saveNow(true); // seed empty server with current local state
