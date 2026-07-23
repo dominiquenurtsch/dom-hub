@@ -4104,7 +4104,12 @@ function _calculateBusinessExpensesAddons(monthLabel){
 function _calculateWageWeekly(){
   const bizRecurItems=_bizRecurItems();
   const wage=bizRecurItems.find(r=>r.name==='Wage (to self)');
-  return wage?_toWeekly(wage.amount||0,wage.cadence):0;
+  if(!wage) return 0;
+  // Figure may be entered in the Amount column OR the Note column — use whichever holds a number.
+  let amt=parseFloat(wage.amount);
+  if(!(amt>0)) amt=parseFloat(wage.note);
+  if(!(amt>0)) return 0;
+  return _toWeekly(amt,wage.cadence);
 }
 function _calculateSecondHandWeekly(){
   return _secondHandTotal()/(_daysSinceJune()/7);
