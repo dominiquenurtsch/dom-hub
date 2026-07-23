@@ -286,6 +286,17 @@ select.form-input{cursor:pointer;background:#1a1a1a}
 .pin-error{font-size:0.7rem;color:#e85d5d;height:20px;margin-bottom:4px;opacity:0;transition:opacity 0.2s}
 .pin-error.show{opacity:1}
 
+/* ─── Save button (floating) ─── */
+.save-fab{position:fixed;right:24px;bottom:24px;z-index:900;display:inline-flex;align-items:center;gap:8px;padding:13px 20px;border-radius:40px;border:1px solid rgba(28,27,27,0.12);background:#1c1b1b;color:#f9f8f3;font-family:var(--font);font-size:0.85rem;font-weight:600;letter-spacing:0.02em;cursor:pointer;box-shadow:0 8px 30px rgba(28,27,27,0.22);transition:all 0.25s cubic-bezier(0.4,0,0.2,1);padding-bottom:calc(13px + env(safe-area-inset-bottom, 0px))}
+.save-fab:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(28,27,27,0.3)}
+.save-fab:active{transform:translateY(0)}
+.save-fab-icon{font-size:0.95rem;line-height:1}
+.save-fab.dirty{background:#b8863b;border-color:#b8863b}
+.save-fab.saving{background:#6b6862;pointer-events:none}
+.save-fab.saved{background:#4a7a52;border-color:#4a7a52}
+.save-fab.error{background:#c0503f;border-color:#c0503f}
+@media(max-width:600px){.save-fab{right:16px;bottom:16px;padding:14px 22px;font-size:0.9rem}}
+
 /* ─── Tablet (≤900px) ─── */
 @media(max-width:900px){
 .sidebar{transform:translateX(-100%);width:280px;background:rgba(249,248,243,0.97);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px)}
@@ -654,6 +665,12 @@ select.form-input{cursor:pointer;background:#1a1a1a}
 
   </main>
 </div>
+
+<!-- ═══ SAVE BUTTON (explicit push to server) ═══ -->
+<button class="save-fab" id="save-fab" onclick="saveNow()" aria-label="Save changes">
+  <span class="save-fab-icon" id="save-fab-icon">✓</span>
+  <span class="save-fab-label" id="save-fab-label">Save</span>
+</button>
 
 <!-- ═══ ACTIVE WORKOUT MODAL ═══ -->
 <div class="modal-overlay" id="workout-modal">
@@ -4182,22 +4199,52 @@ async function _syncPull(){
     return {ok:true,hadData:keys.length>0};
   }catch(e){ console.warn('sync pull failed',e); return {ok:false,hadData:false}; }
 }
-async function _syncPush(){
+// ── Save button state ──
+let _dirty=false, _savedTimer=null;
+function _setSave(state,label){
+  const fab=document.getElementById('save-fab'), icon=document.getElementById('save-fab-icon'), lab=document.getElementById('save-fab-label');
+  if(!fab) return;
+  fab.classList.remove('dirty','saving','saved','error');
+  if(state) fab.classList.add(state);
+  const icons={dirty:'●',saving:'⋯',saved:'✓',error:'!'}, labels={dirty:'Save',saving:'Saving…',saved:'Saved',error:'Retry'};
+  icon.textContent=icons[state]||'✓';
+  lab.textContent=label||labels[state]||'Saved';
+}
+function _markDirty(){
+  if(_syncHydrating) return;
+  _dirty=true; clearTimeout(_savedTimer); _setSave('dirty');
+  // background safety-net push (in case they forget to tap Save), longer + non-blocking
+  clearTimeout(_syncPushTimer); _syncPushTimer=setTimeout(()=>saveNow(true),4000);
+}
+// Explicit save — immediate push with visual confirmation. This is the primary path.
+async function saveNow(silent){
+  clearTimeout(_syncPushTimer);
+  if(!silent) _setSave('saving');
   try{
     const r=await fetch('/api/state',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({state:_collectState()})});
     _syncPushOk=r.ok;
-  }catch(e){ _syncPushOk=false; console.warn('sync push failed',e); }
+    if(r.ok){
+      _dirty=false; _setSave('saved');
+      clearTimeout(_savedTimer); _savedTimer=setTimeout(()=>{ if(!_dirty) _setSave('','Saved'); },2500);
+    } else { _setSave('error'); }
+  }catch(e){ _syncPushOk=false; _setSave('error'); console.warn('save failed',e); }
 }
-function _schedulePush(){
-  if(_syncHydrating) return;
-  clearTimeout(_syncPushTimer);
-  _syncPushTimer=setTimeout(_syncPush,1200);
+// Safety net: flush on tab close / background (mobile Safari freezes tabs instantly).
+function _flushBeacon(){
+  if(!_dirty) return;
+  try{
+    const blob=new Blob([JSON.stringify({state:_collectState()})],{type:'application/json'});
+    navigator.sendBeacon('/api/state',blob);
+    _dirty=false;
+  }catch(e){}
 }
+window.addEventListener('pagehide',_flushBeacon);
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden') _flushBeacon(); });
 function _enableSyncPush(){
   const orig=localStorage.setItem.bind(localStorage);
   localStorage.setItem=function(k,v){
     orig(k,v);
-    if(!_syncHydrating && k && k.indexOf('dom_')===0 && _SYNC_SKIP.indexOf(k)===-1) _schedulePush();
+    if(!_syncHydrating && k && k.indexOf('dom_')===0 && _SYNC_SKIP.indexOf(k)===-1) _markDirty();
   };
 }
 
@@ -4215,8 +4262,9 @@ async function boot(){
   renderSubstackIdeas();
   renderSubstackStats();
   renderSubstackWatch();
-  _enableSyncPush();                        // start mirroring edits AFTER hydration
-  if(pull.ok && !pull.hadData) _syncPush(); // seed empty server with current local state
+  _enableSyncPush();                        // start tracking edits AFTER hydration
+  _setSave('','Saved');                     // baseline: nothing to save yet
+  if(pull.ok && !pull.hadData) saveNow(true); // seed empty server with current local state
 }
 boot();
 </script>
