@@ -1,2 +1,4 @@
 # Local data snapshots (private client/financial data) — served live via published CSV in prod
 /data/
+.vercel
+.env*
