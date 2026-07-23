@@ -390,6 +390,7 @@ select.form-input{cursor:pointer;background:#1a1a1a}
       <div class="nav-item" data-tab="instagram"><span class="nav-icon">◎</span><span>Instagram Stats</span></div>
       <div class="nav-item" data-tab="acct-personal"><span class="nav-icon">◇</span><span>Accounting — Personal</span></div>
       <div class="nav-item" data-tab="acct-business"><span class="nav-icon">◆</span><span>Accounting — Business</span></div>
+      <div class="nav-item" data-tab="dividends"><span class="nav-icon">§</span><span>Dividends</span></div>
       <div class="nav-item" data-tab="substack"><span class="nav-icon">✒</span><span>Substack</span></div>
       <div class="nav-item" data-tab="website"><span class="nav-icon">◈</span><span>Website</span></div>
       <div class="nav-item" data-tab="properties"><span class="nav-icon">🏠</span><span>Investment Properties</span></div>
@@ -443,6 +444,14 @@ select.form-input{cursor:pointer;background:#1a1a1a}
         <button class="subtab-add" onclick="financesSnapshotAddMonth()">+</button>
       </div>
       <div id="finances-snapshot-content"></div>
+    </div>
+
+    <!-- ═══ DIVIDENDS TAB ═══ -->
+    <div class="tab-panel" id="tab-dividends">
+      <div class="section-header"><h2>Dividends</h2></div>
+      <p class="section-lead">Dividends you pay yourself. 35% tax is calculated automatically — tick once you've moved that amount into your savings account.</p>
+      <div class="metrics-grid" id="dividends-stats"></div>
+      <div id="dividends-content"></div>
     </div>
 
     <!-- ═══ CALENDAR TAB ═══ -->
@@ -4191,6 +4200,65 @@ function renderFinancesSnapshot(monthLabel){
   document.getElementById('finances-snapshot-content').innerHTML=html;
 }
 
+// ─── Dividends tracker ───
+const DIV_TAX_RATE=0.35;
+function _divLog(){ try{const r=localStorage.getItem('dom_dividend_log'); if(r) return JSON.parse(r);}catch(e){} return []; }
+function _saveDivLog(a){ localStorage.setItem('dom_dividend_log',JSON.stringify(a)); }
+function divAdd(){
+  const a=_divLog();
+  const id='dv-'+Date.now()+'-'+Math.floor(Math.random()*1000);
+  const today=new Date().toISOString().slice(0,10);
+  a.push({id,date:today,amount:null,setAside:false,note:''});
+  _saveDivLog(a); renderDividends();
+  setTimeout(()=>{const el=document.querySelector('input[data-div-amount-row="'+id+'"]');if(el)el.focus();},30);
+}
+function divEdit(id,field,value){
+  const a=_divLog(); const it=a.find(x=>x.id===id); if(!it) return;
+  if(field==='amount') it.amount=(value===''?null:parseFloat(value));
+  else if(field==='setAside') it.setAside=!!value;
+  else it[field]=value;
+  _saveDivLog(a); renderDividends();
+}
+function divRemove(id){ _saveDivLog(_divLog().filter(x=>x.id!==id)); renderDividends(); }
+function renderDividends(){
+  const rows=_divLog();
+  let totAmt=0, totTax=0, setAsideTax=0;
+  rows.forEach(r=>{ const amt=r.amount||0; const tax=amt*DIV_TAX_RATE; totAmt+=amt; totTax+=tax; if(r.setAside) setAsideTax+=tax; });
+  const outstanding=totTax-setAsideTax;
+  // stat tiles
+  const st=document.getElementById('dividends-stats');
+  if(st) st.innerHTML=
+    '<div class="card metric-tile"><div class="metric-value">'+fmtMoney(totAmt)+'</div><div class="metric-label">Total dividends paid</div></div>'
+    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(totTax)+'</div><div class="metric-label">Tax owed (35%)</div></div>'
+    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(setAsideTax)+'</div><div class="metric-label">Tax set aside</div></div>'
+    +'<div class="card metric-tile"><div class="metric-value" style="color:'+(outstanding>0?'var(--red-soft)':'inherit')+'">'+fmtMoney(outstanding)+'</div><div class="metric-label">Tax still to set aside</div></div>';
+  // table
+  let html='<div class="card jt-wrap"><table class="jt"><thead><tr>'
+    +'<th style="width:15%">Date</th><th class="num" style="width:14%">Amount</th><th class="num" style="width:14%">Tax (35%)</th><th style="width:14%">Set aside?</th><th>Notes</th><th style="width:30px"></th>'
+    +'</tr></thead><tbody>';
+  rows.forEach(r=>{
+    const k="'"+r.id.replace(/'/g,"\\'")+"'";
+    const tax=(r.amount||0)*DIV_TAX_RATE;
+    html+='<tr>'
+      +'<td><input class="jt-in" type="date" value="'+_esc(r.date||'')+'" onchange="divEdit('+k+',\'date\',this.value)"></td>'
+      +'<td class="num"><input class="jt-in jt-num" data-div-amount-row="'+_esc(r.id)+'" value="'+(r.amount!=null?r.amount:'')+'" placeholder="—" inputmode="decimal" onchange="divEdit('+k+',\'amount\',this.value)"></td>'
+      +'<td class="num">'+fmtMoney(tax)+'</td>'
+      +'<td style="text-align:center"><input type="checkbox" '+(r.setAside?'checked':'')+' onchange="divEdit('+k+',\'setAside\',this.checked)" style="width:18px;height:18px;cursor:pointer"></td>'
+      +'<td><input class="jt-in" value="'+_esc(r.note||'')+'" placeholder="—" onchange="divEdit('+k+',\'note\',this.value)"></td>'
+      +'<td class="reorder-cell"><span class="del-row" onclick="divRemove('+k+')" title="Remove">×</span></td>'
+      +'</tr>';
+  });
+  html+='<tr style="border-top:2px solid rgba(28,27,27,0.15);font-weight:600">'
+    +'<td style="font-weight:700">Total</td>'
+    +'<td class="num" style="font-weight:700">'+fmtMoney(totAmt)+'</td>'
+    +'<td class="num" style="font-weight:700">'+fmtMoney(totTax)+'</td>'
+    +'<td colspan="3"></td>'
+    +'</tr>';
+  html+='<tr class="add-row"><td colspan="6"><button class="add-brand-btn" onclick="divAdd()">+ Add dividend</button></td></tr>';
+  html+='</tbody></table></div>';
+  document.getElementById('dividends-content').innerHTML=html;
+}
+
 // ─── Server sync (Vercel KV / Upstash Redis via /api/state) ───
 // Editable data lives in localStorage for instant UX; this layer mirrors it
 // to the server so it survives cache clears and syncs across Dom's devices.
@@ -4283,6 +4351,7 @@ async function boot(){
   renderSubstackIdeas();
   renderSubstackStats();
   renderSubstackWatch();
+  renderDividends();
   _enableSyncPush();                        // start tracking edits AFTER hydration
   _setSave('','Saved');                     // baseline: nothing to save yet
   if(pull.ok && !pull.hadData) saveNow(true); // seed empty server with current local state
