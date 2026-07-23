@@ -137,6 +137,8 @@ body{font-family:var(--font);color:var(--text);min-height:100vh;overflow-x:hidde
 .cli-card:hover{border-color:rgba(28,27,27,0.2);box-shadow:var(--glass-shadow)}
 .cli-brand{font-family:var(--serif);font-size:1.05rem;font-weight:600;color:var(--black);line-height:1.2;margin-bottom:2px}
 .cli-loc{display:inline-block;font-size:0.58rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);border:1px solid var(--glass-border);padding:2px 8px;border-radius:20px;margin-bottom:10px}
+.cli-edit-toggle{flex-shrink:0;cursor:pointer;color:var(--text-faint);font-size:0.85rem;line-height:1;padding:4px 7px;border-radius:6px;border:1px solid transparent;transition:all .15s;user-select:none}
+.cli-edit-toggle:hover{background:rgba(28,27,27,0.06);color:var(--teal);border-color:var(--glass-border)}
 .cli-row{display:flex;gap:8px;font-size:0.78rem;color:var(--text-secondary);margin-top:6px;line-height:1.4}
 .cli-row .k{color:var(--text-faint);min-width:52px;flex-shrink:0;font-size:0.7rem;padding-top:1px}
 .cli-row a{color:var(--teal);text-decoration:none;word-break:break-word}
@@ -3050,9 +3052,16 @@ function _secondHandTotal(){
   return total;
 }
 
+function _clientEdits(){ try{return JSON.parse(localStorage.getItem('dom_clients_edits')||'{}');}catch(e){return {};} }
+function _saveClientEdits(o){ localStorage.setItem('dom_clients_edits',JSON.stringify(o)); }
 function loadClients(){
   fetch('/api/clients',{cache:'no-store'}).then(r=>r.json()).then(data=>{
-    _cliClients=_newClients().concat(parseClientsCsv(data.clients||''));
+    const edits=_clientEdits();
+    const sheet=parseClientsCsv(data.clients||'').map(c=>{
+      const key='sheet::'+c.brand;                 // stable key = brand name
+      return Object.assign({}, c, edits[key]||{}, {key, _sheet:true});  // apply saved overrides
+    });
+    _cliClients=_newClients().concat(sheet);
     _cliJobs=parseIncomeCsv(data.income||'').concat(_newRows());
     const live=data.live&&(data.live.clients||data.live.income);
     document.getElementById('clients-source').innerHTML='<span class="cal-leg"><span class="cal-leg-dot" style="background:'+(live?'#5f7a5a':'#a3663d')+'"></span>'+(live?'Live sync':'Snapshot')+'</span>';
@@ -3086,15 +3095,22 @@ function addNewBrand(){
   setTimeout(()=>{ const el=document.querySelector('input[data-newclient-brand="'+key+'"]'); if(el) el.focus(); },30);
 }
 function clientEdit(key, field, value){
-  const arr=_newClients(); const c=arr.find(x=>x.key===key); if(c){ c[field]=value; _saveNewClients(arr); }
+  if(typeof key==='string' && key.indexOf('sheet::')===0){
+    // edit to a brand that came from the Sheet — persist as an override
+    const o=_clientEdits(); o[key]=o[key]||{}; o[key][field]=value; _saveClientEdits(o);
+  } else {
+    const arr=_newClients(); const c=arr.find(x=>x.key===key); if(c){ c[field]=value; _saveNewClients(arr); }
+  }
   const live=_cliClients.find(x=>x.key===key); if(live) live[field]=value;
-  renderAddressBook();
+  renderAddressBook(); renderSydneyContacts();
 }
 function removeNewBrand(key){
   _saveNewClients(_newClients().filter(c=>c.key!==key));
   _cliClients=_cliClients.filter(c=>c.key!==key);
   renderAddressBook();
 }
+const _editingClients=new Set();
+function clientEditToggle(key){ if(_editingClients.has(key))_editingClients.delete(key); else _editingClients.add(key); renderAddressBook(); }
 function renderAddressBook(){
   const q=(document.getElementById('cli-search').value||'').toLowerCase().trim();
   const list=_cliClients.filter(c=>{
@@ -3105,11 +3121,15 @@ function renderAddressBook(){
   if(!list.length){ el.innerHTML='<div class="empty-state"><div class="icon">▦</div><h3>No matches</h3></div>'; return; }
   let html='<div class="cli-count">'+list.length+' of '+_cliClients.length+' brands</div><div class="cli-grid">';
   for(const c of list){
-    if(c.isNew){
-      const k="'"+c.key.replace(/'/g,"\\'")+"'";
+    const k="'"+c.key.replace(/'/g,"\\'")+"'";
+    const editing=c.isNew||_editingClients.has(c.key);
+    if(editing){
+      const head=c.isNew
+        ? '<input class="cli-edit cli-edit-brand" placeholder="Brand name" value="'+_esc(c.brand)+'" data-newclient-brand="'+_esc(c.key)+'" onchange="clientEdit('+k+',\'brand\',this.value)"><span class="del-row" onclick="removeNewBrand('+k+')" title="Remove">×</span>'
+        : '<span class="cli-brand" style="flex:1;min-width:0">'+_esc(c.brand)+'</span><span class="del-row" onclick="clientEditToggle('+k+')" title="Done">✓</span>';
       html+='<div class="cli-card cli-card-new">'
-        +'<div class="cli-card-new-head"><input class="cli-edit cli-edit-brand" placeholder="Brand name" value="'+_esc(c.brand)+'" data-newclient-brand="'+_esc(c.key)+'" onchange="clientEdit('+k+',\'brand\',this.value)"><span class="del-row" onclick="removeNewBrand('+k+')" title="Remove">×</span></div>'
-        +'<input class="cli-edit" placeholder="Location" value="'+_esc(c.location)+'" onchange="clientEdit('+k+',\'location\',this.value)">'
+        +'<div class="cli-card-new-head">'+head+'</div>'
+        +'<input class="cli-edit" placeholder="Location (type Sydney to add to Sydney Meetings)" value="'+_esc(c.location)+'" onchange="clientEdit('+k+',\'location\',this.value)">'
         +'<input class="cli-edit" placeholder="Contact name(s)" value="'+_esc(c.contact)+'" onchange="clientEdit('+k+',\'contact\',this.value)">'
         +'<input class="cli-edit" placeholder="Email" value="'+_esc(c.email)+'" onchange="clientEdit('+k+',\'email\',this.value)">'
         +'<input class="cli-edit" placeholder="LinkedIn URL" value="'+_esc(c.linkedin)+'" onchange="clientEdit('+k+',\'linkedin\',this.value)">'
@@ -3119,7 +3139,8 @@ function renderAddressBook(){
     }
     const notes=[c.plans,c.status].filter(Boolean).join('\n');
     const li=/^https?:/i.test(c.linkedin)?'<div class="cli-row"><span class="k">LinkedIn</span><span><a href="'+_esc(c.linkedin)+'" target="_blank" rel="noopener">profile</a></span></div>':'';
-    html+='<div class="cli-card"><div class="cli-brand">'+_esc(c.brand)+'</div>'
+    html+='<div class="cli-card">'
+      +'<div style="display:flex;align-items:flex-start;gap:8px"><div class="cli-brand" style="flex:1;min-width:0">'+_esc(c.brand)+'</div><span class="cli-edit-toggle" onclick="clientEditToggle('+k+')" title="Edit">✎</span></div>'
       +(c.location?'<span class="cli-loc">'+_esc(c.location)+'</span>':'')
       +(c.contact?'<div class="cli-row"><span class="k">Contact</span><span>'+_esc(c.contact).replace(/\n/g,' · ')+'</span></div>':'')
       +'<div class="cli-row"><span class="k">Email</span><span>'+_mailLinks(c.email)+'</span></div>'
