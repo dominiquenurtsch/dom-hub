@@ -4153,18 +4153,72 @@ function renderFinancesSnapshot(monthLabel){
   document.getElementById('finances-snapshot-content').innerHTML=html;
 }
 
+// ─── Server sync (Vercel KV / Upstash Redis via /api/state) ───
+// Editable data lives in localStorage for instant UX; this layer mirrors it
+// to the server so it survives cache clears and syncs across Dom's devices.
+// All dom_* keys are synced dynamically (no hardcoded list to fall out of date).
+const _SYNC_SKIP=['dom_hub_auth'];
+let _syncHydrating=false, _syncPushTimer=null, _syncPushOk=true;
+function _collectState(){
+  const s={};
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(k && k.indexOf('dom_')===0 && _SYNC_SKIP.indexOf(k)===-1) s[k]=localStorage.getItem(k);
+  }
+  return s;
+}
+async function _syncPull(){
+  try{
+    const r=await fetch('/api/state',{cache:'no-store'});
+    if(!r.ok) return {ok:false,hadData:false};
+    const data=await r.json();
+    const state=data.state||{};
+    const keys=Object.keys(state);
+    if(keys.length){
+      _syncHydrating=true;
+      keys.forEach(k=>{ try{ localStorage.setItem(k,state[k]); }catch(e){} });
+      _syncHydrating=false;
+    }
+    return {ok:true,hadData:keys.length>0};
+  }catch(e){ console.warn('sync pull failed',e); return {ok:false,hadData:false}; }
+}
+async function _syncPush(){
+  try{
+    const r=await fetch('/api/state',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({state:_collectState()})});
+    _syncPushOk=r.ok;
+  }catch(e){ _syncPushOk=false; console.warn('sync push failed',e); }
+}
+function _schedulePush(){
+  if(_syncHydrating) return;
+  clearTimeout(_syncPushTimer);
+  _syncPushTimer=setTimeout(_syncPush,1200);
+}
+function _enableSyncPush(){
+  const orig=localStorage.setItem.bind(localStorage);
+  localStorage.setItem=function(k,v){
+    orig(k,v);
+    if(!_syncHydrating && k && k.indexOf('dom_')===0 && _SYNC_SKIP.indexOf(k)===-1) _schedulePush();
+  };
+}
+
 // ─── Init ───
-loadAll();
-loadCalendar();
-loadClients();
-renderInvestmentProperties();
-renderAcctPersonalAll();
-renderBizAll();
-loadSubstack();
-renderSubstackTrends();
-renderSubstackIdeas();
-renderSubstackStats();
-renderSubstackWatch();
+async function boot(){
+  const pull=await _syncPull();            // hydrate from server first (best-effort)
+  loadAll();
+  loadCalendar();
+  loadClients();
+  renderInvestmentProperties();
+  renderAcctPersonalAll();
+  renderBizAll();
+  loadSubstack();
+  renderSubstackTrends();
+  renderSubstackIdeas();
+  renderSubstackStats();
+  renderSubstackWatch();
+  _enableSyncPush();                        // start mirroring edits AFTER hydration
+  if(pull.ok && !pull.hadData) _syncPush(); // seed empty server with current local state
+}
+boot();
 </script>
 </body>
 </html>
