@@ -4111,12 +4111,23 @@ function _calculateWageWeekly(){
   if(!(amt>0)) return 0;
   return _toWeekly(amt,wage.cadence);
 }
-function _calculateSecondHandWeekly(){
-  return _secondHandTotal()/(_daysSinceJune()/7);
+function _calculateSecondHandWeekly(monthName){
+  // Month-only: sum SECOND HAND income for the given month, as a weekly-equivalent (×12÷52).
+  const edits=_incEdits(); let total=0;
+  const mUp=(monthName||'').toUpperCase();
+  for(const j of _cliJobs){
+    const ef=_jobEff(j,edits);
+    if(ef.status==='SECOND HAND' && (!mUp || (j.month||'').toUpperCase().startsWith(mUp))) total+=ef.fee||0;
+  }
+  return total*12/52;
 }
 function _calculateBusinessIncomeWeekly(){
   const stats=_businessIncomeStats();
   return stats.curInc*12/52;
+}
+function _refreshSnapshot(){
+  const active=document.querySelector('#tab-finances-snapshot .subtab[data-sub].active');
+  renderFinancesSnapshot(active?active.dataset.sub:'july');
 }
 function renderFinancesSnapshot(monthLabel){
   const monthMap={'july':'July','august':'August','september':'September','october':'October','november':'November','december':'December','january':'January','february':'February','march':'March','april':'April','may':'May','june':'June'};
@@ -4131,7 +4142,11 @@ function renderFinancesSnapshot(monthLabel){
   const bizExpTotal=bizExpRecur+bizExpAddon;
   const bizIncome=_calculateBusinessIncomeWeekly();
   const wageWeekly=_calculateWageWeekly();
-  const secondHandWeekly=_calculateSecondHandWeekly();
+  const secondHandWeekly=_calculateSecondHandWeekly(monthName);
+  const divAmt=parseFloat(localStorage.getItem('dom_dividends_1'))||0;
+  const divCad=localStorage.getItem('dom_dividends_cadence')||'weekly';
+  const divWeekly=divCad==='monthly'?divAmt*12/52:divAmt;
+  const totalWeeklyIncome=wageWeekly+secondHandWeekly+divWeekly;
   const totalActualIncome=bizIncome-bizExpTotal;
 
   let html='<div class="metrics-grid" style="margin-bottom:20px">';
@@ -4145,7 +4160,8 @@ function renderFinancesSnapshot(monthLabel){
   html+='<div class="metrics-grid" style="margin-bottom:16px">';
   html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(wageWeekly)+'</div><div class="metric-label">Weekly wage</div></div>';
   html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(secondHandWeekly)+'</div><div class="metric-label">Weekly second hand</div></div>';
-  html+='<div class="card metric-tile"><div class="metric-value"><input type="number" class="jt-in jt-num" value="0" placeholder="—" style="width:60px;text-align:right" data-div-amount="1" onchange="localStorage.setItem(\'dom_dividends_\'+this.dataset.divAmount,this.value)"></div><div class="metric-label">Dividends <select style="width:100px;margin-top:4px;padding:4px;border:1px solid var(--glass-border);border-radius:6px" onchange="this.dataset.cadence=this.value;localStorage.setItem(\'dom_dividends_cadence\',this.value)"><option>weekly</option><option>monthly</option></select></div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value"><input type="number" class="jt-in jt-num" value="'+divAmt+'" placeholder="—" style="width:60px;text-align:right" data-div-amount="1" onchange="localStorage.setItem(\'dom_dividends_1\',this.value);_refreshSnapshot()"></div><div class="metric-label">Dividends <select style="width:100px;margin-top:4px;padding:4px;border:1px solid var(--glass-border);border-radius:6px" onchange="localStorage.setItem(\'dom_dividends_cadence\',this.value);_refreshSnapshot()"><option'+(divCad==='weekly'?' selected':'')+'>weekly</option><option'+(divCad==='monthly'?' selected':'')+'>monthly</option></select></div></div>';
+  html+='<div class="card metric-tile"><div class="metric-value">'+fmtMoney(totalWeeklyIncome)+'</div><div class="metric-label">Total weekly income</div></div>';
   html+='</div>';
   html+='</div>';
 
