@@ -184,6 +184,10 @@ body{font-family:var(--font);color:var(--text);min-height:100vh;overflow-x:hidde
 .jt-in:hover,.jt-sel:hover{background:rgba(28,27,27,0.04)}
 .jt-in:focus,.jt-sel:focus{background:#fff;border-color:var(--teal);box-shadow:0 0 0 2px rgba(28,27,27,0.05)}
 .jt-in::placeholder{color:var(--text-faint)}
+.jt-ta{width:100%;border:1px solid transparent;background:transparent;font-family:var(--font);font-size:0.8rem;color:var(--text);padding:7px 8px;border-radius:7px;outline:none;transition:background .15s,border .15s;resize:none;overflow:hidden;line-height:1.4;white-space:pre-wrap;word-break:break-word;field-sizing:content;min-height:1.4em}
+.jt-ta:hover{background:rgba(28,27,27,0.04)}
+.jt-ta:focus{background:#fff;border-color:var(--teal);box-shadow:0 0 0 2px rgba(28,27,27,0.05)}
+.jt-ta::placeholder{color:var(--text-faint)}
 .jt-num{text-align:right;font-variant-numeric:tabular-nums}
 .jt-sel{cursor:pointer;font-size:0.62rem;font-weight:600;letter-spacing:0.04em;-webkit-appearance:none;appearance:none;text-align:left}
 .jt-sel.st-invoiced{color:#4c6147}
@@ -3076,6 +3080,11 @@ function clientsSub(which){
   document.getElementById('clients-jobs').style.display = which==='jobs'?'block':'none';
 }
 
+// Auto-growing textareas for free-text (content/notes). Native field-sizing
+// handles it where supported; otherwise fall back to JS height adjustment.
+const _FIELD_SIZING=(typeof CSS!=='undefined'&&CSS.supports&&CSS.supports('field-sizing','content'));
+function _grow(el){ if(!el||_FIELD_SIZING)return; el.style.height='auto'; el.style.height=el.scrollHeight+'px'; }
+function _growAll(root){ if(_FIELD_SIZING)return; (root||document).querySelectorAll('textarea.jt-ta').forEach(_grow); }
 function _mailLinks(email){
   if(!email) return '<span style="color:var(--text-faint)">—</span>';
   return email.split(/[\s,;]+/).filter(e=>e.includes('@')).map(e=>'<a href="mailto:'+_esc(e)+'">'+_esc(e)+'</a>').join('<br>')||_esc(email);
@@ -3252,7 +3261,7 @@ function renderJobs(){
         +'<td><input class="jt-in" value="'+_esc(ef.brand)+'" placeholder="Brand name" '+(isNew?'data-newbrand="'+_esc(j.key)+'"':'')+' onchange="jobEdit('+_jsKey(j.key)+',\'brand\',this.value)"></td>'
         +'<td><select class="jt-sel st-'+_statusSlug(ef.status)+'" onchange="jobEdit('+_jsKey(j.key)+',\'status\',this.value)">'+opts+'</select></td>'
         +'<td><input class="jt-in" value="'+_esc(ef.invoice)+'" placeholder="—" onchange="jobEdit('+_jsKey(j.key)+',\'invoice\',this.value)"></td>'
-        +'<td><input class="jt-in" value="'+_esc(ef.content)+'" placeholder="—" onchange="jobEdit('+_jsKey(j.key)+',\'content\',this.value)"></td>'
+        +'<td><textarea class="jt-ta" rows="1" placeholder="—" oninput="_grow(this)" onchange="jobEdit('+_jsKey(j.key)+',\'content\',this.value)">'+_esc(ef.content)+'</textarea></td>'
         +numCell(j.key,'fee',ef.fee)+numCell(j.key,'gst',ef.gst)+numCell(j.key,'total',ef.total)
         +'</tr>';
     });
@@ -3260,6 +3269,7 @@ function renderJobs(){
     html+='</tbody></table></div>';
   }
   document.getElementById('cli-jobs-content').innerHTML=html||'<div class="empty-state"><div class="icon">◇</div><h3>No jobs</h3></div>';
+  _growAll();
 }
 
 // ════════════════════════════════════════
@@ -4345,8 +4355,8 @@ function _sydTripTable(type){
       +'<td><input class="jt-in" data-syd-brand="'+_esc(r.id)+'" value="'+_esc(r.brand||'')+'" placeholder="Brand" onchange="sydTripEdit('+k+',\'brand\',this.value)"></td>'
       +'<td><input class="jt-in" value="'+_esc(r.contact||'')+'" placeholder="Contact" onchange="sydTripEdit('+k+',\'contact\',this.value)"></td>'
       +'<td><input class="jt-in" value="'+_esc(r.location||'')+'" placeholder="Location" onchange="sydTripEdit('+k+',\'location\',this.value)"></td>'
-      +'<td><input class="jt-in" value="'+_esc(r.content||'')+'" placeholder="Planned content" onchange="sydTripEdit('+k+',\'content\',this.value)"></td>'
-      +'<td><input class="jt-in" value="'+_esc(r.note||'')+'" placeholder="—" onchange="sydTripEdit('+k+',\'note\',this.value)"></td>'
+      +'<td><textarea class="jt-ta" rows="1" placeholder="Planned content" oninput="_grow(this)" onchange="sydTripEdit('+k+',\'content\',this.value)">'+_esc(r.content||'')+'</textarea></td>'
+      +'<td><textarea class="jt-ta" rows="1" placeholder="—" oninput="_grow(this)" onchange="sydTripEdit('+k+',\'note\',this.value)">'+_esc(r.note||'')+'</textarea></td>'
       +'<td class="reorder-cell"><span class="del-row" onclick="sydTripRemove('+k+')" title="Remove">×</span></td>'
       +'</tr>';
   });
@@ -4358,6 +4368,7 @@ function _sydTripsBy(type){ return _sydTrips().filter(t=>t.type===type); }
 function renderSydneyTrips(){
   const up=document.getElementById('sydney-upcoming'); if(up) up.innerHTML=_sydTripTable('upcoming');
   const pa=document.getElementById('sydney-past'); if(pa) pa.innerHTML=_sydTripTable('past');
+  _growAll();
 }
 
 // ─── Server sync (Vercel KV / Upstash Redis via /api/state) ───
