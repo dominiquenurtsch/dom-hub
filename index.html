@@ -4325,7 +4325,7 @@ function _saveSydTrips(a){ localStorage.setItem('dom_sydney_trips',JSON.stringif
 function sydTripAdd(type){
   const a=_sydTrips();
   const id='syd-'+Date.now()+'-'+Math.floor(Math.random()*1000);
-  a.push({id,type,date:'',brand:'',contact:'',location:'Sydney',note:''});
+  a.push({id,type,date:'',time:'',brand:'',contact:'',location:'Sydney',content:'',note:''});
   _saveSydTrips(a); renderSydneyTrips();
   setTimeout(()=>{const el=document.querySelector('input[data-syd-brand="'+id+'"]');if(el)el.focus();},30);
 }
@@ -4334,21 +4334,23 @@ function sydTripRemove(id){ _saveSydTrips(_sydTrips().filter(x=>x.id!==id)); ren
 function _sydTripTable(type){
   const rows=_sydTripsBy(type);
   let html='<div class="card jt-wrap"><table class="jt"><thead><tr>'
-    +'<th style="width:14%">Date</th><th style="width:20%">Brand</th><th style="width:18%">Contact</th><th style="width:16%">Location</th><th>Notes</th><th style="width:30px"></th>'
+    +'<th style="width:11%">Date</th><th style="width:9%">Time</th><th style="width:15%">Brand</th><th style="width:14%">Contact</th><th style="width:12%">Location</th><th style="width:19%">Planned content</th><th>Notes</th><th style="width:30px"></th>'
     +'</tr></thead><tbody>';
-  if(!rows.length){ html+='<tr><td colspan="6" style="text-align:center;color:var(--text-faint);padding:16px">No '+(type==='upcoming'?'planned':'past')+' trips yet.</td></tr>'; }
+  if(!rows.length){ html+='<tr><td colspan="8" style="text-align:center;color:var(--text-faint);padding:16px">No '+(type==='upcoming'?'planned':'past')+' trips yet.</td></tr>'; }
   rows.forEach(r=>{
     const k="'"+r.id.replace(/'/g,"\\'")+"'";
     html+='<tr>'
       +'<td><input class="jt-in" type="date" value="'+_esc(r.date||'')+'" onchange="sydTripEdit('+k+',\'date\',this.value)"></td>'
+      +'<td><input class="jt-in" type="time" value="'+_esc(r.time||'')+'" onchange="sydTripEdit('+k+',\'time\',this.value)"></td>'
       +'<td><input class="jt-in" data-syd-brand="'+_esc(r.id)+'" value="'+_esc(r.brand||'')+'" placeholder="Brand" onchange="sydTripEdit('+k+',\'brand\',this.value)"></td>'
       +'<td><input class="jt-in" value="'+_esc(r.contact||'')+'" placeholder="Contact" onchange="sydTripEdit('+k+',\'contact\',this.value)"></td>'
       +'<td><input class="jt-in" value="'+_esc(r.location||'')+'" placeholder="Location" onchange="sydTripEdit('+k+',\'location\',this.value)"></td>'
+      +'<td><input class="jt-in" value="'+_esc(r.content||'')+'" placeholder="Planned content" onchange="sydTripEdit('+k+',\'content\',this.value)"></td>'
       +'<td><input class="jt-in" value="'+_esc(r.note||'')+'" placeholder="—" onchange="sydTripEdit('+k+',\'note\',this.value)"></td>'
       +'<td class="reorder-cell"><span class="del-row" onclick="sydTripRemove('+k+')" title="Remove">×</span></td>'
       +'</tr>';
   });
-  html+='<tr class="add-row"><td colspan="6"><button class="add-brand-btn" onclick="sydTripAdd(\''+type+'\')">+ Add '+(type==='upcoming'?'planned meeting':'past meeting')+'</button></td></tr>';
+  html+='<tr class="add-row"><td colspan="8"><button class="add-brand-btn" onclick="sydTripAdd(\''+type+'\')">+ Add '+(type==='upcoming'?'planned meeting':'past meeting')+'</button></td></tr>';
   html+='</tbody></table></div>';
   return html;
 }
