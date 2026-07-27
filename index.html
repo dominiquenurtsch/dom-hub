@@ -188,6 +188,13 @@ body{font-family:var(--font);color:var(--text);min-height:100vh;overflow-x:hidde
 .jt-ta:hover{background:rgba(28,27,27,0.04)}
 .jt-ta:focus{background:#fff;border-color:var(--teal);box-shadow:0 0 0 2px rgba(28,27,27,0.05)}
 .jt-ta::placeholder{color:var(--text-faint)}
+.draft-card{margin-bottom:16px}
+.draft-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.draft-title{flex:1;min-width:0;font-family:var(--serif);font-size:1.15rem;font-weight:600;color:var(--black);border:none;background:transparent;outline:none;padding:4px 2px;border-bottom:1px solid transparent;transition:border .15s}
+.draft-title:focus{border-bottom-color:var(--glass-border)}
+.draft-title::placeholder{color:var(--text-faint)}
+.draft-body{min-height:200px;font-size:0.9rem;line-height:1.65;padding:10px 12px}
+.draft-foot{display:flex;justify-content:space-between;margin-top:10px;font-size:0.62rem;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-faint)}
 .jt-num{text-align:right;font-variant-numeric:tabular-nums}
 .jt-sel{cursor:pointer;font-size:0.62rem;font-weight:600;letter-spacing:0.04em;-webkit-appearance:none;appearance:none;text-align:left}
 .jt-sel.st-invoiced{color:#4c6147}
@@ -583,6 +590,7 @@ select.form-input{cursor:pointer;background:#1a1a1a}
       </div>
       <div class="subtabs">
         <button class="subtab active" data-sub="workspace" onclick="substackSub('workspace')">Workspace</button>
+        <button class="subtab" data-sub="drafts" onclick="substackSub('drafts')">Drafts</button>
         <button class="subtab" data-sub="performance" onclick="substackSub('performance')">Performance</button>
       </div>
 
@@ -593,6 +601,12 @@ select.form-input{cursor:pointer;background:#1a1a1a}
 
         <div class="job-month">Article Ideas</div>
         <div id="substack-ideas-wrap"></div>
+      </div>
+
+      <div id="substack-drafts" style="display:none">
+        <div class="job-month">Drafts</div>
+        <p class="section-lead" style="margin-top:-6px">Write your articles in full here. Auto-saves — tap Save to sync across devices.</p>
+        <div id="substack-drafts-wrap"></div>
       </div>
 
       <div id="substack-performance" style="display:none">
@@ -3782,7 +3796,42 @@ let _substackPosts=[];
 function substackSub(which){
   document.querySelectorAll('#tab-substack .subtab').forEach(b=>b.classList.toggle('active',b.dataset.sub===which));
   document.getElementById('substack-workspace').style.display=which==='workspace'?'block':'none';
+  document.getElementById('substack-drafts').style.display=which==='drafts'?'block':'none';
   document.getElementById('substack-performance').style.display=which==='performance'?'block':'none';
+}
+
+// ── Substack drafts (write full articles) ──
+function _subDrafts(){ try{return JSON.parse(localStorage.getItem('dom_substack_drafts')||'[]');}catch(e){return [];} }
+function _saveSubDrafts(a){ localStorage.setItem('dom_substack_drafts',JSON.stringify(a)); }
+function _wordCount(s){ s=(s||'').trim(); return s?s.split(/\s+/).length:0; }
+function subDraftAdd(){
+  const a=_subDrafts();
+  const id='dr-'+Date.now()+'-'+Math.floor(Math.random()*1000);
+  a.unshift({id,title:'',body:'',updated:Date.now()});
+  _saveSubDrafts(a); renderSubstackDrafts();
+  setTimeout(()=>{const el=document.querySelector('input[data-draft-title="'+id+'"]');if(el)el.focus();},30);
+}
+function subDraftEdit(id,field,value){
+  const a=_subDrafts(); const d=a.find(x=>x.id===id); if(!d)return;
+  d[field]=value; d.updated=Date.now(); _saveSubDrafts(a);
+  if(field==='body'){ const wc=document.querySelector('[data-draft-wc="'+id+'"]'); if(wc) wc.textContent=_wordCount(value)+' words'; }
+}
+function subDraftRemove(id){ if(!confirm('Delete this draft?'))return; _saveSubDrafts(_subDrafts().filter(x=>x.id!==id)); renderSubstackDrafts(); }
+function renderSubstackDrafts(){
+  const wrap=document.getElementById('substack-drafts-wrap'); if(!wrap) return;
+  const drafts=_subDrafts();
+  let html='<button class="add-brand-btn" style="margin-bottom:14px" onclick="subDraftAdd()">+ New draft</button>';
+  if(!drafts.length){ wrap.innerHTML=html+'<div class="empty-state"><div class="icon">✒</div><h3>No drafts yet</h3><p style="font-size:0.75rem;color:var(--text-muted)">Start writing your next article.</p></div>'; return; }
+  drafts.forEach(d=>{
+    const k="'"+d.id.replace(/'/g,"\\'")+"'";
+    html+='<div class="card draft-card">'
+      +'<div class="draft-head"><input class="draft-title" data-draft-title="'+_esc(d.id)+'" placeholder="Article title" value="'+_esc(d.title||'')+'" onchange="subDraftEdit('+k+',\'title\',this.value)"><span class="del-row" onclick="subDraftRemove('+k+')" title="Delete draft">×</span></div>'
+      +'<textarea class="jt-ta draft-body" rows="6" placeholder="Write your article…" oninput="_grow(this);subDraftEdit('+k+',\'body\',this.value)">'+_esc(d.body||'')+'</textarea>'
+      +'<div class="draft-foot"><span data-draft-wc="'+_esc(d.id)+'">'+_wordCount(d.body)+' words</span><span>'+(d.updated?('Edited '+fmtShort(new Date(d.updated).toISOString())):'')+'</span></div>'
+      +'</div>';
+  });
+  wrap.innerHTML=html;
+  _growAll(wrap);
 }
 
 function loadSubstack(){
@@ -4463,6 +4512,7 @@ async function boot(){
   renderSubstackIdeas();
   renderSubstackStats();
   renderSubstackWatch();
+  renderSubstackDrafts();
   renderDividends();
   renderSydneyContacts();
   renderSydneyTrips();
