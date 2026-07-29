@@ -195,6 +195,13 @@ body{font-family:var(--font);color:var(--text);min-height:100vh;overflow-x:hidde
 .draft-title::placeholder{color:var(--text-faint)}
 .draft-body{min-height:200px;font-size:0.9rem;line-height:1.65;padding:10px 12px}
 .draft-foot{display:flex;justify-content:space-between;margin-top:10px;font-size:0.62rem;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-faint)}
+.pfw-travel-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px}
+.tv-card{padding:18px}
+.tv-head{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.tv-row{margin-bottom:9px}
+.tv-two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tv-k{display:block;font-size:0.56rem;letter-spacing:0.09em;text-transform:uppercase;color:var(--text-faint);margin-bottom:3px}
+.tv-row .jt-in,.tv-row .jt-ta{border:1px solid var(--glass-border);background:rgba(255,255,255,0.5)}
 .jt-num{text-align:right;font-variant-numeric:tabular-nums}
 .jt-sel{cursor:pointer;font-size:0.62rem;font-weight:600;letter-spacing:0.04em;-webkit-appearance:none;appearance:none;text-align:left}
 .jt-sel.st-invoiced{color:#4c6147}
@@ -401,6 +408,7 @@ select.form-input{cursor:pointer;background:#1a1a1a}
       <div class="nav-item" data-tab="calendar"><span class="nav-icon">▤</span><span>Calendar</span></div>
       <div class="nav-item" data-tab="clients"><span class="nav-icon">▦</span><span>Client Database</span></div>
       <div class="nav-item" data-tab="sydney"><span class="nav-icon">✈</span><span>Sydney Meetings</span></div>
+      <div class="nav-item" data-tab="pfw"><span class="nav-icon">✦</span><span>Paris Fashion Week</span></div>
       <div class="nav-item" data-tab="instagram"><span class="nav-icon">◎</span><span>Instagram Stats</span></div>
       <div class="nav-item" data-tab="acct-personal"><span class="nav-icon">◇</span><span>Accounting — Personal</span></div>
       <div class="nav-item" data-tab="acct-business"><span class="nav-icon">◆</span><span>Accounting — Business</span></div>
@@ -480,6 +488,23 @@ select.form-input{cursor:pointer;background:#1a1a1a}
       <div id="sydney-contacts"></div>
       <div id="sydney-upcoming" style="display:none"></div>
       <div id="sydney-past" style="display:none"></div>
+    </div>
+
+    <!-- ═══ PARIS FASHION WEEK TAB ═══ -->
+    <div class="tab-panel" id="tab-pfw">
+      <div class="section-header"><h2>Paris Fashion Week</h2></div>
+      <p class="section-lead">Milan · Regensburg · Paris — shows, travel, brand outreach and expenses in one place.</p>
+      <div class="metrics-grid" id="pfw-stats"></div>
+      <div class="subtabs">
+        <button class="subtab active" data-sub="schedule" onclick="pfwSub('schedule')">Schedule</button>
+        <button class="subtab" data-sub="travel" onclick="pfwSub('travel')">Travel</button>
+        <button class="subtab" data-sub="outreach" onclick="pfwSub('outreach')">Brand Outreach</button>
+        <button class="subtab" data-sub="expenses" onclick="pfwSub('expenses')">Expenses</button>
+      </div>
+      <div id="pfw-schedule"></div>
+      <div id="pfw-travel" style="display:none"></div>
+      <div id="pfw-outreach" style="display:none"></div>
+      <div id="pfw-expenses" style="display:none"></div>
     </div>
 
     <!-- ═══ CALENDAR TAB ═══ -->
@@ -4420,6 +4445,150 @@ function renderSydneyTrips(){
   _growAll();
 }
 
+// ─── Paris Fashion Week (Milan · Regensburg · Paris) ───
+const PFW_CITY=['Milan','Regensburg','Paris'];
+const PFW_INVITE=['—','Requested','Invited','Confirmed','Declined'];
+const PFW_STATUS=['Pending','Confirmed','Declined'];
+function _pfwEvents(){ try{return JSON.parse(localStorage.getItem('dom_pfw_events')||'[]');}catch(e){return [];} }
+function _savePfwEvents(a){ localStorage.setItem('dom_pfw_events',JSON.stringify(a)); }
+function _pfwOutreach(){ try{return JSON.parse(localStorage.getItem('dom_pfw_outreach')||'[]');}catch(e){return [];} }
+function _savePfwOutreach(a){ localStorage.setItem('dom_pfw_outreach',JSON.stringify(a)); }
+function _pfwExpenses(){ try{return JSON.parse(localStorage.getItem('dom_pfw_expenses')||'[]');}catch(e){return [];} }
+function _savePfwExpenses(a){ localStorage.setItem('dom_pfw_expenses',JSON.stringify(a)); }
+function _pfwTravel(){
+  try{const r=localStorage.getItem('dom_pfw_travel'); if(r)return JSON.parse(r);}catch(e){}
+  return PFW_CITY.map((c,i)=>({id:'trav-'+i+'-'+c.toLowerCase(),dest:c,arrive:'',depart:'',flights:'',hotel:'',address:'',checkin:'',checkout:'',conf:'',note:''}));
+}
+function _savePfwTravel(a){ localStorage.setItem('dom_pfw_travel',JSON.stringify(a)); }
+function pfwSub(which){
+  document.querySelectorAll('#tab-pfw .subtab').forEach(b=>b.classList.toggle('active',b.dataset.sub===which));
+  ['schedule','travel','outreach','expenses'].forEach(s=>{const el=document.getElementById('pfw-'+s); if(el)el.style.display=s===which?'block':'none';});
+}
+function renderPfw(){ renderPfwSchedule(); renderPfwTravel(); renderPfwOutreach(); renderPfwExpenses(); renderPfwStats(); }
+function renderPfwStats(){
+  const el=document.getElementById('pfw-stats'); if(!el)return;
+  const shows=_pfwEvents(), out=_pfwOutreach();
+  const showsConf=shows.filter(e=>e.invite==='Confirmed').length;
+  const brandsConf=out.filter(o=>o.status==='Confirmed').length;
+  const confVal=out.filter(o=>o.status==='Confirmed').reduce((s,o)=>s+(o.price||0),0);
+  const exp=_pfwExpenses().reduce((s,e)=>s+(e.amount||0),0);
+  el.innerHTML=
+    '<div class="card metric-tile"><div class="metric-value">'+showsConf+' / '+shows.length+'</div><div class="metric-label">Shows confirmed</div></div>'
+    +'<div class="card metric-tile"><div class="metric-value">'+brandsConf+' / '+out.length+'</div><div class="metric-label">Brands confirmed</div></div>'
+    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(confVal)+'</div><div class="metric-label">Confirmed brand value</div></div>'
+    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(exp)+'</div><div class="metric-label">Total expenses</div></div>';
+}
+// Schedule
+function pfwEventAdd(){ const a=_pfwEvents(); const id='pe-'+Date.now()+'-'+Math.floor(Math.random()*1000); a.push({id,date:'',time:'',city:'Paris',show:'',location:'',invite:'—',contact:'',note:''}); _savePfwEvents(a); renderPfwSchedule(); renderPfwStats(); setTimeout(()=>{const el=document.querySelector('input[data-pfw-show="'+id+'"]');if(el)el.focus();},30); }
+function pfwEventEdit(id,field,value){ const a=_pfwEvents(); const it=a.find(x=>x.id===id); if(!it)return; it[field]=value; _savePfwEvents(a); if(field==='invite')renderPfwStats(); if(field==='date')renderPfwSchedule(); }
+function pfwEventRemove(id){ _savePfwEvents(_pfwEvents().filter(x=>x.id!==id)); renderPfwSchedule(); renderPfwStats(); }
+function renderPfwSchedule(){
+  const el=document.getElementById('pfw-schedule'); if(!el)return;
+  const rows=_pfwEvents().slice().sort((a,b)=>{const da=(a.date||'9999-99-99')+(a.time||'99:99'),db=(b.date||'9999-99-99')+(b.time||'99:99');return da<db?-1:da>db?1:0;});
+  let html='<div class="card jt-wrap"><table class="jt"><thead><tr>'
+    +'<th style="width:10%">Date</th><th style="width:7%">Time</th><th style="width:10%">City</th><th style="width:16%">Show / Event</th><th style="width:15%">Location</th><th style="width:11%">Invite</th><th style="width:13%">Contact</th><th>Notes</th><th style="width:30px"></th>'
+    +'</tr></thead><tbody>';
+  if(!rows.length) html+='<tr><td colspan="9" style="text-align:center;color:var(--text-faint);padding:16px">No shows yet — add Milan, Regensburg &amp; Paris events.</td></tr>';
+  rows.forEach(r=>{
+    const k="'"+r.id.replace(/'/g,"\\'")+"'";
+    const citySel=PFW_CITY.map(c=>'<option'+(c===r.city?' selected':'')+'>'+c+'</option>').join('');
+    const invSel=PFW_INVITE.map(s=>'<option'+(s===r.invite?' selected':'')+'>'+s+'</option>').join('');
+    html+='<tr>'
+      +'<td><input class="jt-in" type="date" value="'+_esc(r.date||'')+'" onchange="pfwEventEdit('+k+',\'date\',this.value)"></td>'
+      +'<td><input class="jt-in" type="time" value="'+_esc(r.time||'')+'" onchange="pfwEventEdit('+k+',\'time\',this.value)"></td>'
+      +'<td><select class="jt-in jt-sel" onchange="pfwEventEdit('+k+',\'city\',this.value)">'+citySel+'</select></td>'
+      +'<td><input class="jt-in" data-pfw-show="'+_esc(r.id)+'" value="'+_esc(r.show||'')+'" placeholder="Show / event" onchange="pfwEventEdit('+k+',\'show\',this.value)"></td>'
+      +'<td><input class="jt-in" value="'+_esc(r.location||'')+'" placeholder="Location / venue" onchange="pfwEventEdit('+k+',\'location\',this.value)"></td>'
+      +'<td><select class="jt-in jt-sel" onchange="pfwEventEdit('+k+',\'invite\',this.value)">'+invSel+'</select></td>'
+      +'<td><input class="jt-in" value="'+_esc(r.contact||'')+'" placeholder="Contact" onchange="pfwEventEdit('+k+',\'contact\',this.value)"></td>'
+      +'<td><textarea class="jt-ta" rows="1" placeholder="—" oninput="_grow(this)" onchange="pfwEventEdit('+k+',\'note\',this.value)">'+_esc(r.note||'')+'</textarea></td>'
+      +'<td class="reorder-cell"><span class="del-row" onclick="pfwEventRemove('+k+')" title="Remove">×</span></td>'
+      +'</tr>';
+  });
+  html+='<tr class="add-row"><td colspan="9"><button class="add-brand-btn" onclick="pfwEventAdd()">+ Add show / event</button></td></tr>';
+  html+='</tbody></table></div>';
+  el.innerHTML=html; _growAll(el);
+}
+// Travel
+function pfwTravelAdd(){ const a=_pfwTravel(); const id='trav-'+Date.now()+'-'+Math.floor(Math.random()*1000); a.push({id,dest:'',arrive:'',depart:'',flights:'',hotel:'',address:'',checkin:'',checkout:'',conf:'',note:''}); _savePfwTravel(a); renderPfwTravel(); }
+function pfwTravelEdit(id,field,value){ const a=_pfwTravel(); const it=a.find(x=>x.id===id); if(!it)return; it[field]=value; _savePfwTravel(a); }
+function pfwTravelRemove(id){ _savePfwTravel(_pfwTravel().filter(x=>x.id!==id)); renderPfwTravel(); }
+function _tvRow(label,inner){ return '<div class="tv-row"><span class="tv-k">'+label+'</span>'+inner+'</div>'; }
+function renderPfwTravel(){
+  const el=document.getElementById('pfw-travel'); if(!el)return;
+  let html='<div class="pfw-travel-grid">';
+  _pfwTravel().forEach(t=>{
+    const k="'"+t.id.replace(/'/g,"\\'")+"'";
+    html+='<div class="card tv-card">'
+      +'<div class="tv-head"><input class="cli-edit cli-edit-brand" style="flex:1;min-width:0" placeholder="Destination" value="'+_esc(t.dest||'')+'" onchange="pfwTravelEdit('+k+',\'dest\',this.value)"><span class="del-row" onclick="pfwTravelRemove('+k+')" title="Remove">×</span></div>'
+      +'<div class="tv-two">'+_tvRow('Arrive','<input class="jt-in" type="date" value="'+_esc(t.arrive||'')+'" onchange="pfwTravelEdit('+k+',\'arrive\',this.value)">')+_tvRow('Depart','<input class="jt-in" type="date" value="'+_esc(t.depart||'')+'" onchange="pfwTravelEdit('+k+',\'depart\',this.value)">')+'</div>'
+      +_tvRow('Flights','<textarea class="jt-ta" rows="1" placeholder="Airline, flight no, times…" oninput="_grow(this)" onchange="pfwTravelEdit('+k+',\'flights\',this.value)">'+_esc(t.flights||'')+'</textarea>')
+      +_tvRow('Hotel','<input class="jt-in" placeholder="Hotel name" value="'+_esc(t.hotel||'')+'" onchange="pfwTravelEdit('+k+',\'hotel\',this.value)">')
+      +_tvRow('Address','<input class="jt-in" placeholder="Address" value="'+_esc(t.address||'')+'" onchange="pfwTravelEdit('+k+',\'address\',this.value)">')
+      +'<div class="tv-two">'+_tvRow('Check-in','<input class="jt-in" type="date" value="'+_esc(t.checkin||'')+'" onchange="pfwTravelEdit('+k+',\'checkin\',this.value)">')+_tvRow('Check-out','<input class="jt-in" type="date" value="'+_esc(t.checkout||'')+'" onchange="pfwTravelEdit('+k+',\'checkout\',this.value)">')+'</div>'
+      +_tvRow('Confirmation','<input class="jt-in" placeholder="Booking ref" value="'+_esc(t.conf||'')+'" onchange="pfwTravelEdit('+k+',\'conf\',this.value)">')
+      +_tvRow('Notes','<textarea class="jt-ta" rows="1" placeholder="—" oninput="_grow(this)" onchange="pfwTravelEdit('+k+',\'note\',this.value)">'+_esc(t.note||'')+'</textarea>')
+      +'</div>';
+  });
+  html+='</div><button class="add-brand-btn" style="margin-top:12px" onclick="pfwTravelAdd()">+ Add destination</button>';
+  el.innerHTML=html; _growAll(el);
+}
+// Brand outreach
+function pfwOutAdd(){ const a=_pfwOutreach(); const id='po-'+Date.now()+'-'+Math.floor(Math.random()*1000); a.push({id,brand:'',contact:'',status:'Pending',price:null,note:''}); _savePfwOutreach(a); renderPfwOutreach(); renderPfwStats(); setTimeout(()=>{const el=document.querySelector('input[data-pfw-brand="'+id+'"]');if(el)el.focus();},30); }
+function pfwOutEdit(id,field,value){ const a=_pfwOutreach(); const it=a.find(x=>x.id===id); if(!it)return; it[field]=(field==='price'?(value===''?null:parseFloat(value)):value); _savePfwOutreach(a); if(field==='status'||field==='price'){renderPfwOutreach();renderPfwStats();} }
+function pfwOutRemove(id){ _savePfwOutreach(_pfwOutreach().filter(x=>x.id!==id)); renderPfwOutreach(); renderPfwStats(); }
+function renderPfwOutreach(){
+  const el=document.getElementById('pfw-outreach'); if(!el)return;
+  const rows=_pfwOutreach(); let total=0; rows.forEach(r=>{total+=r.price||0;});
+  let html='<div class="card jt-wrap"><table class="jt"><thead><tr>'
+    +'<th style="width:20%">Brand</th><th style="width:20%">Contact</th><th style="width:14%">Status</th><th class="num" style="width:14%">Price</th><th>Notes</th><th style="width:30px"></th>'
+    +'</tr></thead><tbody>';
+  if(!rows.length) html+='<tr><td colspan="6" style="text-align:center;color:var(--text-faint);padding:16px">No outreach yet.</td></tr>';
+  rows.forEach(r=>{
+    const k="'"+r.id.replace(/'/g,"\\'")+"'";
+    const stSel=PFW_STATUS.map(s=>'<option'+(s===r.status?' selected':'')+'>'+s+'</option>').join('');
+    html+='<tr>'
+      +'<td><input class="jt-in" data-pfw-brand="'+_esc(r.id)+'" value="'+_esc(r.brand||'')+'" placeholder="Brand" onchange="pfwOutEdit('+k+',\'brand\',this.value)"></td>'
+      +'<td><input class="jt-in" value="'+_esc(r.contact||'')+'" placeholder="Contact" onchange="pfwOutEdit('+k+',\'contact\',this.value)"></td>'
+      +'<td><select class="jt-in jt-sel" onchange="pfwOutEdit('+k+',\'status\',this.value)">'+stSel+'</select></td>'
+      +'<td class="num"><input class="jt-in jt-num" value="'+(r.price!=null?r.price:'')+'" placeholder="—" inputmode="decimal" onchange="pfwOutEdit('+k+',\'price\',this.value)"></td>'
+      +'<td><textarea class="jt-ta" rows="1" placeholder="—" oninput="_grow(this)" onchange="pfwOutEdit('+k+',\'note\',this.value)">'+_esc(r.note||'')+'</textarea></td>'
+      +'<td class="reorder-cell"><span class="del-row" onclick="pfwOutRemove('+k+')" title="Remove">×</span></td>'
+      +'</tr>';
+  });
+  html+='<tr style="border-top:2px solid rgba(28,27,27,0.15)"><td style="font-weight:700">Total</td><td></td><td></td><td class="num" style="font-weight:700">'+fmtMoney(total)+'</td><td colspan="2"></td></tr>';
+  html+='<tr class="add-row"><td colspan="6"><button class="add-brand-btn" onclick="pfwOutAdd()">+ Add brand</button></td></tr>';
+  html+='</tbody></table></div>';
+  el.innerHTML=html; _growAll(el);
+}
+// Expenses
+function pfwExpAdd(){ const a=_pfwExpenses(); const id='px-'+Date.now()+'-'+Math.floor(Math.random()*1000); a.push({id,date:'',city:'Paris',desc:'',amount:null}); _savePfwExpenses(a); renderPfwExpenses(); renderPfwStats(); setTimeout(()=>{const el=document.querySelector('input[data-pfw-exp="'+id+'"]');if(el)el.focus();},30); }
+function pfwExpEdit(id,field,value){ const a=_pfwExpenses(); const it=a.find(x=>x.id===id); if(!it)return; it[field]=(field==='amount'?(value===''?null:parseFloat(value)):value); _savePfwExpenses(a); if(field==='amount'){renderPfwExpenses();renderPfwStats();} }
+function pfwExpRemove(id){ _savePfwExpenses(_pfwExpenses().filter(x=>x.id!==id)); renderPfwExpenses(); renderPfwStats(); }
+function renderPfwExpenses(){
+  const el=document.getElementById('pfw-expenses'); if(!el)return;
+  const rows=_pfwExpenses(); let total=0; rows.forEach(r=>{total+=r.amount||0;});
+  let html='<div class="card jt-wrap"><table class="jt"><thead><tr>'
+    +'<th style="width:14%">Date</th><th style="width:14%">City</th><th>Description</th><th class="num" style="width:16%">Amount</th><th style="width:30px"></th>'
+    +'</tr></thead><tbody>';
+  if(!rows.length) html+='<tr><td colspan="5" style="text-align:center;color:var(--text-faint);padding:16px">No expenses yet.</td></tr>';
+  rows.forEach(r=>{
+    const k="'"+r.id.replace(/'/g,"\\'")+"'";
+    const citySel=PFW_CITY.map(c=>'<option'+(c===r.city?' selected':'')+'>'+c+'</option>').join('');
+    html+='<tr>'
+      +'<td><input class="jt-in" type="date" value="'+_esc(r.date||'')+'" onchange="pfwExpEdit('+k+',\'date\',this.value)"></td>'
+      +'<td><select class="jt-in jt-sel" onchange="pfwExpEdit('+k+',\'city\',this.value)">'+citySel+'</select></td>'
+      +'<td><input class="jt-in" data-pfw-exp="'+_esc(r.id)+'" value="'+_esc(r.desc||'')+'" placeholder="Description" onchange="pfwExpEdit('+k+',\'desc\',this.value)"></td>'
+      +'<td class="num"><input class="jt-in jt-num" value="'+(r.amount!=null?r.amount:'')+'" placeholder="—" inputmode="decimal" onchange="pfwExpEdit('+k+',\'amount\',this.value)"></td>'
+      +'<td class="reorder-cell"><span class="del-row" onclick="pfwExpRemove('+k+')" title="Remove">×</span></td>'
+      +'</tr>';
+  });
+  html+='<tr style="border-top:2px solid rgba(28,27,27,0.15)"><td style="font-weight:700">Total</td><td></td><td></td><td class="num" style="font-weight:700">'+fmtMoney(total)+'</td><td></td></tr>';
+  html+='<tr class="add-row"><td colspan="5"><button class="add-brand-btn" onclick="pfwExpAdd()">+ Add expense</button></td></tr>';
+  html+='</tbody></table></div>';
+  el.innerHTML=html;
+}
+
 // ─── Server sync (Vercel KV / Upstash Redis via /api/state) ───
 // Editable data lives in localStorage for instant UX; this layer mirrors it
 // to the server so it survives cache clears and syncs across Dom's devices.
@@ -4514,6 +4683,7 @@ async function boot(){
   renderSubstackWatch();
   renderSubstackDrafts();
   renderDividends();
+  renderPfw();
   renderSydneyContacts();
   renderSydneyTrips();
   _enableSyncPush();                        // start tracking edits AFTER hydration
