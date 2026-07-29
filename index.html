@@ -4417,13 +4417,15 @@ function sydTripEdit(id,field,value){ const a=_sydTrips(); const it=a.find(x=>x.
 function sydTripRemove(id){ _saveSydTrips(_sydTrips().filter(x=>x.id!==id)); renderSydneyTrips(); }
 function _sydTripTable(type){
   const rows=_sydTripsBy(type);
+  const tQ="'"+type+"'";
   let html='<div class="card jt-wrap"><table class="jt"><thead><tr>'
-    +'<th style="width:11%">Date</th><th style="width:9%">Time</th><th style="width:15%">Brand</th><th style="width:14%">Contact</th><th style="width:12%">Location</th><th style="width:19%">Planned content</th><th>Notes</th><th style="width:30px"></th>'
+    +'<th style="width:26px"></th><th style="width:11%">Date</th><th style="width:9%">Time</th><th style="width:15%">Brand</th><th style="width:14%">Contact</th><th style="width:12%">Location</th><th style="width:19%">Planned content</th><th>Notes</th><th style="width:30px"></th>'
     +'</tr></thead><tbody>';
-  if(!rows.length){ html+='<tr><td colspan="8" style="text-align:center;color:var(--text-faint);padding:16px">No '+(type==='upcoming'?'planned':'past')+' trips yet.</td></tr>'; }
+  if(!rows.length){ html+='<tr><td colspan="9" style="text-align:center;color:var(--text-faint);padding:16px">No '+(type==='upcoming'?'planned':'past')+' trips yet.</td></tr>'; }
   rows.forEach(r=>{
     const k="'"+r.id.replace(/'/g,"\\'")+"'";
-    html+='<tr>'
+    html+='<tr ondragover="sydDragOver(event)" ondragleave="sydDragLeave(event)" ondrop="sydDrop(event,'+k+','+tQ+')">'
+      +'<td class="reorder-cell"><span class="drag-handle" draggable="true" ondragstart="sydDragStart(event,'+k+','+tQ+')" ondragend="sydDragEnd(event)" title="Drag to reorder">⠿</span></td>'
       +'<td><input class="jt-in" type="date" value="'+_esc(r.date||'')+'" onchange="sydTripEdit('+k+',\'date\',this.value)"></td>'
       +'<td><input class="jt-in" type="time" value="'+_esc(r.time||'')+'" onchange="sydTripEdit('+k+',\'time\',this.value)"></td>'
       +'<td><input class="jt-in" data-syd-brand="'+_esc(r.id)+'" value="'+_esc(r.brand||'')+'" placeholder="Brand" onchange="sydTripEdit('+k+',\'brand\',this.value)"></td>'
@@ -4434,11 +4436,32 @@ function _sydTripTable(type){
       +'<td class="reorder-cell"><span class="del-row" onclick="sydTripRemove('+k+')" title="Remove">×</span></td>'
       +'</tr>';
   });
-  html+='<tr class="add-row"><td colspan="8"><button class="add-brand-btn" onclick="sydTripAdd(\''+type+'\')">+ Add '+(type==='upcoming'?'planned meeting':'past meeting')+'</button></td></tr>';
+  html+='<tr class="add-row"><td colspan="9"><button class="add-brand-btn" onclick="sydTripAdd(\''+type+'\')">+ Add '+(type==='upcoming'?'planned meeting':'past meeting')+'</button></td></tr>';
   html+='</tbody></table></div>';
   return html;
 }
 function _sydTripsBy(type){ return _sydTrips().filter(t=>t.type===type); }
+// Drag-to-reorder for Sydney trip rows (handle-based, keeps inputs editable)
+let _sydDragId=null,_sydDragType=null;
+function sydDragStart(e,id,type){ _sydDragId=id;_sydDragType=type; e.dataTransfer.effectAllowed='move'; try{e.dataTransfer.setData('text/plain',String(id));}catch(err){} const row=e.currentTarget.closest('tr'); if(row)row.classList.add('dragging'); }
+function sydDragOver(e){ if(_sydDragId==null)return; e.preventDefault(); e.dataTransfer.dropEffect='move'; e.currentTarget.classList.add('drag-over'); }
+function sydDragLeave(e){ e.currentTarget.classList.remove('drag-over'); }
+function sydDrop(e,targetId,type){
+  e.preventDefault(); e.currentTarget.classList.remove('drag-over');
+  const dr=document.querySelector('#tab-sydney tr.dragging'); if(dr)dr.classList.remove('dragging');
+  if(_sydDragId==null||type!==_sydDragType||targetId===_sydDragId){ _sydDragId=null;_sydDragType=null; return; }
+  const rect=e.currentTarget.getBoundingClientRect();
+  const before=(e.clientY-rect.top)<rect.height/2;
+  const a=_sydTrips();
+  const fromIdx=a.findIndex(x=>x.id===_sydDragId); if(fromIdx<0){_sydDragId=null;_sydDragType=null;return;}
+  const moved=a.splice(fromIdx,1)[0];
+  let toIdx=a.findIndex(x=>x.id===targetId); if(toIdx<0)toIdx=a.length; if(!before)toIdx++;
+  a.splice(toIdx,0,moved);
+  _saveSydTrips(a);
+  _sydDragId=null;_sydDragType=null;
+  renderSydneyTrips();
+}
+function sydDragEnd(e){ const row=e.currentTarget.closest('tr'); if(row)row.classList.remove('dragging'); document.querySelectorAll('#tab-sydney tr.drag-over').forEach(r=>r.classList.remove('drag-over')); _sydDragId=null;_sydDragType=null; }
 function renderSydneyTrips(){
   const up=document.getElementById('sydney-upcoming'); if(up) up.innerHTML=_sydTripTable('upcoming');
   const pa=document.getElementById('sydney-past'); if(pa) pa.innerHTML=_sydTripTable('past');
