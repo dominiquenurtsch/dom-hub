@@ -184,6 +184,13 @@ body{font-family:var(--font);color:var(--text);min-height:100vh;overflow-x:hidde
 .jt-in:hover,.jt-sel:hover{background:rgba(28,27,27,0.04)}
 .jt-in:focus,.jt-sel:focus{background:#fff;border-color:var(--teal);box-shadow:0 0 0 2px rgba(28,27,27,0.05)}
 .jt-in::placeholder{color:var(--text-faint)}
+.goal-bar{background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:var(--radius);padding:16px 20px;margin-bottom:18px;box-shadow:var(--glass-shadow)}
+.goal-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:10px}
+.goal-label{font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);font-weight:600}
+.goal-val{font-family:var(--serif);font-size:1.05rem;font-weight:600;color:var(--black);white-space:nowrap}
+.goal-track{height:12px;border-radius:20px;background:rgba(28,27,27,0.08);overflow:hidden}
+.goal-fill{height:100%;border-radius:20px;background:var(--teal);transition:width .6s cubic-bezier(0.4,0,0.2,1)}
+.goal-sub{margin-top:8px;font-size:0.66rem;color:var(--text-faint);letter-spacing:0.04em}
 .jt-ta{width:100%;border:1px solid transparent;background:transparent;font-family:var(--font);font-size:0.8rem;color:var(--text);padding:7px 8px;border-radius:7px;outline:none;transition:background .15s,border .15s;resize:none;overflow:hidden;line-height:1.4;white-space:pre-wrap;word-break:break-word;field-sizing:content;min-height:1.4em}
 .jt-ta:hover{background:rgba(28,27,27,0.04)}
 .jt-ta:focus{background:#fff;border-color:var(--teal);box-shadow:0 0 0 2px rgba(28,27,27,0.05)}
@@ -553,6 +560,7 @@ select.form-input{cursor:pointer;background:#1a1a1a}
       </div>
       <div id="clients-jobs">
         <div class="metrics-grid" id="cli-stats"></div>
+        <div id="cli-goal"></div>
         <div id="cli-jobs-content"></div>
       </div>
       <div id="clients-book" style="display:none">
@@ -3278,6 +3286,16 @@ function renderJobs(){
     +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(biz.yearInc)+'</div><div class="metric-label">Tax year · from Jul</div></div>'
     +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(biz.giftCur)+'</div><div class="metric-label">'+_titleCase(curM)+' · gifting</div></div>'
     +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(secondYear)+'</div><div class="metric-label">Second hand · from Jun</div></div>';
+  // tax-year income goal progress bar
+  const TAX_GOAL=500000;
+  const pct=Math.max(0,Math.min(100,biz.yearInc/TAX_GOAL*100));
+  const toGo=Math.max(0,TAX_GOAL-biz.yearInc);
+  const goalEl=document.getElementById('cli-goal');
+  if(goalEl) goalEl.innerHTML='<div class="goal-bar">'
+    +'<div class="goal-head"><span class="goal-label">Tax year income goal</span><span class="goal-val">'+fmtMoney(biz.yearInc)+' / '+fmtMoney(TAX_GOAL)+'</span></div>'
+    +'<div class="goal-track"><div class="goal-fill" style="width:'+pct.toFixed(1)+'%"></div></div>'
+    +'<div class="goal-sub">'+pct.toFixed(1)+'% of goal · '+fmtMoney(toGo)+' to go</div>'
+    +'</div>';
   // ── table, grouped by month, latest month first, rows custom-orderable ──
   const groups=[], gmap={};
   for(const j of _cliJobs){ if(!gmap[j.month]){ gmap[j.month]={month:j.month,items:[]}; groups.push(gmap[j.month]); } gmap[j.month].items.push(j); }
