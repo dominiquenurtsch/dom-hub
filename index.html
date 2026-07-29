@@ -3262,7 +3262,7 @@ function _businessIncomeStats(){
   for(const j of _cliJobs){
     const ef=_jobEff(j,edits); const fee=ef.fee||0; const mUp=(j.month||'').toUpperCase();
     const isCur=mUp.startsWith(curM), isPrior=mUp.startsWith(priorM);
-    if(ef.status==='INVOICED'||ef.status==='CONFIRMED'){ yearInc+=fee; if(isCur)curInc+=fee; if(isPrior)priorInc+=fee; }
+    if(ef.status==='INVOICED'||ef.status==='CONFIRMED'){ if(mUp!=='JUNE') yearInc+=fee; if(isCur)curInc+=fee; if(isPrior)priorInc+=fee; }
     else if(ef.status==='GIFTING' && isCur){ giftCur+=fee; }
   }
   return {curInc,priorInc,yearInc,giftCur,curM,priorM};
@@ -3275,7 +3275,7 @@ function renderJobs(){
   document.getElementById('cli-stats').innerHTML=
     '<div class="card metric-tile"><div class="metric-value">'+fmtMoney(biz.curInc)+'</div><div class="metric-label">'+_titleCase(curM)+' · income</div></div>'
     +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(biz.priorInc)+'</div><div class="metric-label">'+_titleCase(priorM)+' · income</div></div>'
-    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(biz.yearInc)+'</div><div class="metric-label">Tax year · from Jun</div></div>'
+    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(biz.yearInc)+'</div><div class="metric-label">Tax year · from Jul</div></div>'
     +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(biz.giftCur)+'</div><div class="metric-label">'+_titleCase(curM)+' · gifting</div></div>'
     +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(secondYear)+'</div><div class="metric-label">Second hand · from Jun</div></div>';
   // ── table, grouped by month, latest month first, rows custom-orderable ──
