@@ -191,6 +191,15 @@ body{font-family:var(--font);color:var(--text);min-height:100vh;overflow-x:hidde
 .goal-track{height:12px;border-radius:20px;background:rgba(28,27,27,0.08);overflow:hidden}
 .goal-fill{height:100%;border-radius:20px;background:var(--teal);transition:width .6s cubic-bezier(0.4,0,0.2,1)}
 .goal-sub{margin-top:8px;font-size:0.66rem;color:var(--text-faint);letter-spacing:0.04em}
+.pin-phase{font-family:var(--serif);font-size:0.98rem;font-weight:600;color:var(--black);margin:16px 4px 6px}
+.pin-phase:first-child{margin-top:6px}
+.pin-task{display:flex;gap:12px;align-items:flex-start;padding:11px 12px;border-radius:10px;transition:background .15s}
+.pin-task:hover{background:rgba(28,27,27,0.03)}
+.pin-task input[type=checkbox]{width:18px;height:18px;margin-top:1px;cursor:pointer;flex-shrink:0;accent-color:var(--teal)}
+.pin-task label{font-size:0.85rem;line-height:1.5;color:var(--text-secondary);cursor:pointer}
+.pin-task.done label{color:var(--text-faint);text-decoration:line-through}
+.pin-strategy li{margin:0 0 10px 0;font-size:0.85rem;line-height:1.55;color:var(--text-secondary)}
+.pin-strategy strong{color:var(--text)}
 .jt-ta{width:100%;border:1px solid transparent;background:transparent;font-family:var(--font);font-size:0.8rem;color:var(--text);padding:7px 8px;border-radius:7px;outline:none;transition:background .15s,border .15s;resize:none;overflow:hidden;line-height:1.4;white-space:pre-wrap;word-break:break-word;field-sizing:content;min-height:1.4em}
 .jt-ta:hover{background:rgba(28,27,27,0.04)}
 .jt-ta:focus{background:#fff;border-color:var(--teal);box-shadow:0 0 0 2px rgba(28,27,27,0.05)}
@@ -421,6 +430,7 @@ select.form-input{cursor:pointer;background:#1a1a1a}
       <div class="nav-item" data-tab="acct-business"><span class="nav-icon">◆</span><span>Accounting — Business</span></div>
       <div class="nav-item" data-tab="dividends"><span class="nav-icon">§</span><span>Dividends</span></div>
       <div class="nav-item" data-tab="substack"><span class="nav-icon">✒</span><span>Substack</span></div>
+      <div class="nav-item" data-tab="pinterest"><span class="nav-icon">❉</span><span>Pinterest</span></div>
       <div class="nav-item" data-tab="website"><span class="nav-icon">◈</span><span>Website</span></div>
       <div class="nav-item" data-tab="properties"><span class="nav-icon">🏠</span><span>Investment Properties</span></div>
     </nav>
@@ -653,6 +663,21 @@ select.form-input{cursor:pointer;background:#1a1a1a}
         <div class="job-month">Substacks to Watch</div>
         <div id="substack-watch-wrap"></div>
       </div>
+    </div>
+
+    <!-- ═══ PINTEREST TAB ═══ -->
+    <div class="tab-panel" id="tab-pinterest">
+      <div class="section-header"><h2>Pinterest</h2></div>
+      <p class="section-lead">Manage Pinterest ads for the $29 Paris guide — and work through the launch checklist.</p>
+      <div class="metrics-grid" id="pin-stats"></div>
+      <div class="subtabs">
+        <button class="subtab active" data-sub="todo" onclick="pinSub('todo')">Setup Checklist</button>
+        <button class="subtab" data-sub="ads" onclick="pinSub('ads')">Ad Campaigns</button>
+        <button class="subtab" data-sub="strategy" onclick="pinSub('strategy')">Strategy</button>
+      </div>
+      <div id="pin-todo"></div>
+      <div id="pin-ads" style="display:none"></div>
+      <div id="pin-strategy" style="display:none"></div>
     </div>
 
     <!-- ═══ WEBSITE TAB ═══ -->
@@ -3088,6 +3113,16 @@ function removeNewJob(key){
   const e=_incEdits(); delete e[key]; localStorage.setItem('dom_income_edits',JSON.stringify(e));
   renderJobs();
 }
+// Delete any brand. New rows are removed outright; Sheet rows are hidden
+// (dashboard-only, persisted in dom_income_hidden) since we can't edit the Sheet.
+function _incHidden(){ try{return JSON.parse(localStorage.getItem('dom_income_hidden')||'[]');}catch(e){return [];} }
+function jobDelete(key,isNew){
+  if(!confirm('Remove this brand from the list?')) return;
+  if(isNew){ removeNewJob(key); return; }
+  const h=_incHidden(); if(!h.map(String).includes(String(key))){ h.push(key); localStorage.setItem('dom_income_hidden',JSON.stringify(h)); }
+  _cliJobs=_cliJobs.filter(j=>String(j.key)!==String(key));
+  renderJobs();
+}
 function _statusDefault(j){ return j.type==='Gifting'?'GIFTING':(j.type==='Event'?'CONFIRMED':j.status.toUpperCase()); }
 function _jobEff(j, edits){
   const e=edits[j.key]||{};
@@ -3113,7 +3148,8 @@ function loadClients(){
       return Object.assign({}, c, edits[key]||{}, {key, _sheet:true});  // apply saved overrides
     });
     _cliClients=_newClients().concat(sheet);
-    _cliJobs=parseIncomeCsv(data.income||'').concat(_newRows());
+    const _hiddenJobs=new Set(_incHidden().map(String));
+    _cliJobs=parseIncomeCsv(data.income||'').concat(_newRows()).filter(j=>!_hiddenJobs.has(String(j.key)));
     const live=data.live&&(data.live.clients||data.live.income);
     document.getElementById('clients-source').innerHTML='<span class="cal-leg"><span class="cal-leg-dot" style="background:'+(live?'#5f7a5a':'#a3663d')+'"></span>'+(live?'Live sync':'Snapshot')+'</span>';
     document.getElementById('clients-updated').textContent='Updated '+new Date().toLocaleTimeString('en-AU',{hour:'numeric',minute:'2-digit'});
@@ -3314,7 +3350,7 @@ function renderJobs(){
       const isNew=typeof j.key==='string'&&j.key.indexOf('new-')===0;
       html+='<tr ondragover="jobDragOver(event)" ondragleave="jobDragLeave(event)" ondrop="jobDrop(event,'+mQ+','+_jsKey(j.key)+')">'
         +'<td class="reorder-cell"><span class="drag-handle" draggable="true" ondragstart="jobDragStart(event,'+mQ+','+_jsKey(j.key)+')" ondragend="jobDragEnd(event)" title="Drag to reorder">⠿</span>'
-          +(isNew?'<span class="del-row" onclick="removeNewJob('+_jsKey(j.key)+')" title="Remove row">×</span>':'')+'</td>'
+          +'<span class="del-row" onclick="jobDelete('+_jsKey(j.key)+','+(isNew?'true':'false')+')" title="Remove brand">×</span></td>'
         +'<td><input class="jt-in" value="'+_esc(ef.brand)+'" placeholder="Brand name" '+(isNew?'data-newbrand="'+_esc(j.key)+'"':'')+' onchange="jobEdit('+_jsKey(j.key)+',\'brand\',this.value)"></td>'
         +'<td><select class="jt-sel st-'+_statusSlug(ef.status)+'" onchange="jobEdit('+_jsKey(j.key)+',\'status\',this.value)">'+opts+'</select></td>'
         +'<td><input class="jt-in" value="'+_esc(ef.invoice)+'" placeholder="—" onchange="jobEdit('+_jsKey(j.key)+',\'invoice\',this.value)"></td>'
@@ -4630,6 +4666,108 @@ function renderPfwExpenses(){
   el.innerHTML=html;
 }
 
+// ─── Pinterest (ads + launch checklist) ───
+const _PIN_TASKS_SEED=[
+  {phase:'Phase 1 · Set up tracking (do first)', text:`Add Pinterest's conversion tag to your sales/checkout page (Pinterest Business → Ads → Conversion setup) — without it you're blind on cost-per-sale.`},
+  {phase:'Phase 1 · Set up tracking (do first)', text:`Confirm the checkout has a clear "Thank you"/confirmation URL — the tag fires there to track purchases.`},
+  {phase:'Phase 2 · Build creative assets', text:`Create 5 vertical pin designs (1000×1500px): book cover, "top mistakes" listicle, quote/excerpt, testimonial-style, and a lead-magnet pin (free mini Paris checklist for an email).`},
+  {phase:'Phase 2 · Build creative assets', text:`Write a short, benefit-driven description for each pin with search keywords ("Paris trip planning", "moving to Paris", "Paris itinerary").`},
+  {phase:'Phase 2 · Build creative assets', text:`Set up the lead magnet: a 1–2 page free Paris checklist PDF + an email opt-in form (Mailchimp/ConvertKit free tier if needed).`},
+  {phase:'Phase 3 · Post organic pins (free, before ad spend)', text:`Create a Pinterest Business account (if you don't have one) and verify your website.`},
+  {phase:'Phase 3 · Post organic pins (free, before ad spend)', text:`Post all 5 pins organically, linking to your sales page (or lead magnet).`},
+  {phase:'Phase 3 · Post organic pins (free, before ad spend)', text:`Wait 3–5 days, then check Pinterest Analytics for which pins get the most clicks/saves.`},
+  {phase:'Phase 4 · Launch small ad test', text:`Pick your top 2–3 performing organic pins.`},
+  {phase:'Phase 4 · Launch small ad test', text:`Launch a Traffic or Conversion campaign at $5–10/day total, split across those pins.`},
+  {phase:'Phase 4 · Launch small ad test', text:`Target broad interests/keywords: "Paris travel", "France trip planning", "solo travel Europe" — let the algorithm narrow it.`},
+  {phase:'Phase 4 · Launch small ad test', text:`Let it run 7–10 days minimum before judging — don't kill it after day 2.`},
+  {phase:'Phase 5 · Review & decide', text:`Check cost-per-click and cost-per-sale in Pinterest Ads Manager.`},
+  {phase:'Phase 5 · Review & decide', text:`If cost-per-sale is under ~$15–20, increase the daily budget 20–30% on the winning pin.`},
+  {phase:'Phase 5 · Review & decide', text:`If it's above ~$25–29, pause direct-sale ads and shift budget to the lead-magnet pin (capture emails, sell via email).`},
+  {phase:'Phase 5 · Review & decide', text:`Keep posting new organic pins weekly — free and compounding over time.`},
+];
+function _pinTasks(){
+  try{const r=localStorage.getItem('dom_pin_tasks'); if(r)return JSON.parse(r);}catch(e){}
+  return _PIN_TASKS_SEED.map((t,i)=>({id:'pt'+i,phase:t.phase,text:t.text,done:false}));
+}
+function _savePinTasks(a){ localStorage.setItem('dom_pin_tasks',JSON.stringify(a)); }
+function pinTaskToggle(id,checked){ const a=_pinTasks(); const t=a.find(x=>x.id===id); if(!t)return; t.done=!!checked; _savePinTasks(a); renderPinTasks(); renderPinStats(); }
+function _pinCampaigns(){ try{return JSON.parse(localStorage.getItem('dom_pin_campaigns')||'[]');}catch(e){return [];} }
+function _savePinCampaigns(a){ localStorage.setItem('dom_pin_campaigns',JSON.stringify(a)); }
+const PIN_AD_STATUS=['Draft','Testing','Active','Paused','Winner'];
+function pinSub(which){
+  document.querySelectorAll('#tab-pinterest .subtab').forEach(b=>b.classList.toggle('active',b.dataset.sub===which));
+  ['todo','ads','strategy'].forEach(s=>{const el=document.getElementById('pin-'+s); if(el)el.style.display=s===which?'block':'none';});
+}
+function renderPinterest(){ renderPinTasks(); renderPinAds(); renderPinStrategy(); renderPinStats(); }
+function renderPinStats(){
+  const el=document.getElementById('pin-stats'); if(!el)return;
+  const tasks=_pinTasks(); const done=tasks.filter(t=>t.done).length;
+  const camps=_pinCampaigns();
+  const spend=camps.reduce((s,c)=>s+(parseFloat(c.spend)||0),0);
+  const sales=camps.reduce((s,c)=>s+(parseFloat(c.sales)||0),0);
+  const cps=sales>0?spend/sales:0;
+  el.innerHTML=
+    '<div class="card metric-tile"><div class="metric-value">'+done+' / '+tasks.length+'</div><div class="metric-label">Checklist done</div></div>'
+    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(spend)+'</div><div class="metric-label">Total ad spend</div></div>'
+    +'<div class="card metric-tile"><div class="metric-value">'+sales+'</div><div class="metric-label">Sales from ads</div></div>'
+    +'<div class="card metric-tile"><div class="metric-value">'+(sales>0?'$'+cps.toFixed(2):'—')+'</div><div class="metric-label">Cost per sale</div></div>';
+}
+function renderPinTasks(){
+  const el=document.getElementById('pin-todo'); if(!el)return;
+  const tasks=_pinTasks();
+  let html='<div class="card" style="padding:10px 12px">'; let lastPhase=null;
+  tasks.forEach(t=>{
+    if(t.phase!==lastPhase){ html+='<div class="pin-phase">'+_esc(t.phase)+'</div>'; lastPhase=t.phase; }
+    const k="'"+t.id+"'";
+    html+='<div class="pin-task'+(t.done?' done':'')+'"><input type="checkbox" id="ptk-'+t.id+'" '+(t.done?'checked':'')+' onchange="pinTaskToggle('+k+',this.checked)"><label for="ptk-'+t.id+'">'+_esc(t.text)+'</label></div>';
+  });
+  html+='</div>';
+  el.innerHTML=html;
+}
+function pinCampAdd(){ const a=_pinCampaigns(); const id='pc-'+Date.now()+'-'+Math.floor(Math.random()*1000); a.push({id,name:'',status:'Draft',budget:null,spend:null,clicks:null,sales:null,note:''}); _savePinCampaigns(a); renderPinAds(); renderPinStats(); setTimeout(()=>{const el=document.querySelector('input[data-pin-name="'+id+'"]');if(el)el.focus();},30); }
+function pinCampEdit(id,field,value){ const a=_pinCampaigns(); const it=a.find(x=>x.id===id); if(!it)return; const numF=['budget','spend','clicks','sales']; it[field]=(numF.includes(field)?(value===''?null:parseFloat(value)):value); _savePinCampaigns(a); if(field!=='name'&&field!=='note'){renderPinAds();renderPinStats();} }
+function pinCampRemove(id){ _savePinCampaigns(_pinCampaigns().filter(x=>x.id!==id)); renderPinAds(); renderPinStats(); }
+function renderPinAds(){
+  const el=document.getElementById('pin-ads'); if(!el)return;
+  const rows=_pinCampaigns();
+  let html='<div class="card jt-wrap"><table class="jt"><thead><tr>'
+    +'<th style="width:17%">Pin / Campaign</th><th style="width:11%">Status</th><th class="num" style="width:9%">Daily $</th><th class="num" style="width:9%">Spend</th><th class="num" style="width:8%">Clicks</th><th class="num" style="width:8%">CPC</th><th class="num" style="width:7%">Sales</th><th class="num" style="width:9%">Cost/sale</th><th>Notes</th><th style="width:30px"></th>'
+    +'</tr></thead><tbody>';
+  if(!rows.length) html+='<tr><td colspan="10" style="text-align:center;color:var(--text-faint);padding:16px">No campaigns yet — add your first pin ad.</td></tr>';
+  rows.forEach(r=>{
+    const k="'"+r.id.replace(/'/g,"\\'")+"'";
+    const stSel=PIN_AD_STATUS.map(s=>'<option'+(s===r.status?' selected':'')+'>'+s+'</option>').join('');
+    const spend=parseFloat(r.spend)||0, clicks=parseFloat(r.clicks)||0, sales=parseFloat(r.sales)||0;
+    const cpc=clicks>0?'$'+(spend/clicks).toFixed(2):'—';
+    const cps=sales>0?'$'+(spend/sales).toFixed(2):'—';
+    html+='<tr>'
+      +'<td><input class="jt-in" data-pin-name="'+_esc(r.id)+'" value="'+_esc(r.name||'')+'" placeholder="Pin / campaign" onchange="pinCampEdit('+k+',\'name\',this.value)"></td>'
+      +'<td><select class="jt-in jt-sel" onchange="pinCampEdit('+k+',\'status\',this.value)">'+stSel+'</select></td>'
+      +'<td class="num"><input class="jt-in jt-num" value="'+(r.budget!=null?r.budget:'')+'" placeholder="—" inputmode="decimal" onchange="pinCampEdit('+k+',\'budget\',this.value)"></td>'
+      +'<td class="num"><input class="jt-in jt-num" value="'+(r.spend!=null?r.spend:'')+'" placeholder="—" inputmode="decimal" onchange="pinCampEdit('+k+',\'spend\',this.value)"></td>'
+      +'<td class="num"><input class="jt-in jt-num" value="'+(r.clicks!=null?r.clicks:'')+'" placeholder="—" inputmode="numeric" onchange="pinCampEdit('+k+',\'clicks\',this.value)"></td>'
+      +'<td class="num">'+cpc+'</td>'
+      +'<td class="num"><input class="jt-in jt-num" value="'+(r.sales!=null?r.sales:'')+'" placeholder="—" inputmode="numeric" onchange="pinCampEdit('+k+',\'sales\',this.value)"></td>'
+      +'<td class="num">'+cps+'</td>'
+      +'<td><textarea class="jt-ta" rows="1" placeholder="—" oninput="_grow(this)" onchange="pinCampEdit('+k+',\'note\',this.value)">'+_esc(r.note||'')+'</textarea></td>'
+      +'<td class="reorder-cell"><span class="del-row" onclick="pinCampRemove('+k+')" title="Remove">×</span></td>'
+      +'</tr>';
+  });
+  html+='<tr class="add-row"><td colspan="10"><button class="add-brand-btn" onclick="pinCampAdd()">+ Add campaign</button></td></tr>';
+  html+='</tbody></table></div>';
+  el.innerHTML=html; _growAll(el);
+}
+function renderPinStrategy(){
+  const el=document.getElementById('pin-strategy'); if(!el)return;
+  el.innerHTML='<div class="card pin-strategy"><ul style="margin:0;padding-left:18px">'
+    +'<li><strong>Test small:</strong> $5–10/day for a week or two, across 3–5 pin creatives (book cover, a "5 mistakes people make planning Paris" listicle, a quote/testimonial pin).</li>'
+    +'<li><strong>Track the right metric:</strong> cost-per-click <em>and</em> cost-per-sale — not just clicks.</li>'
+    +'<li><strong>Scale the winner:</strong> if cost-per-sale lands under ~$15–20, put more budget on whichever pin wins.</li>'
+    +'<li><strong>Test a lead magnet too:</strong> run some clicks to a free mini Paris checklist to capture emails, then sell the $29 guide via email. Lists convert far better than cold landing pages and let you resell later — compounding the "basically free" economics.</li>'
+    +'<li><strong>Low risk:</strong> since there\'s essentially no cost to you either way, this is a safe bet to test.</li>'
+    +'</ul></div>';
+}
+
 // ─── Server sync (Vercel KV / Upstash Redis via /api/state) ───
 // Editable data lives in localStorage for instant UX; this layer mirrors it
 // to the server so it survives cache clears and syncs across Dom's devices.
@@ -4725,6 +4863,7 @@ async function boot(){
   renderSubstackDrafts();
   renderDividends();
   renderPfw();
+  renderPinterest();
   renderSydneyContacts();
   renderSydneyTrips();
   _enableSyncPush();                        // start tracking edits AFTER hydration
