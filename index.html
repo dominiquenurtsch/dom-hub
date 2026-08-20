@@ -248,6 +248,7 @@ body{font-family:var(--font);color:var(--text);min-height:100vh;overflow-x:hidde
 .jt-num{text-align:right;font-variant-numeric:tabular-nums}
 .jt-sel{cursor:pointer;font-size:0.62rem;font-weight:600;letter-spacing:0.04em;-webkit-appearance:none;appearance:none;text-align:left}
 .jt-sel.st-invoiced{color:#4c6147}
+.jt-sel.st-to-invoice{color:#b8863b}
 .jt-sel.st-confirmed{color:#3f5872}
 .jt-sel.st-gifting{color:#8a5533}
 .jt-sel.st-pending{color:var(--text-muted)}
@@ -3273,7 +3274,7 @@ function renderAddressBook(){
   el.innerHTML=html;
 }
 
-const _STATUSES=['INVOICED','CONFIRMED','GIFTING','PENDING','SECOND HAND'];
+const _STATUSES=['INVOICED','TO INVOICE','CONFIRMED','GIFTING','PENDING','SECOND HAND'];
 function _statusSlug(s){ return (s||'').toLowerCase().replace(/\s+/g,'-'); }
 function _titleCase(m){ m=(m||'').split(' ')[0]; return m?m.charAt(0)+m.slice(1).toLowerCase():'—'; }
 
@@ -3335,7 +3336,7 @@ function _businessIncomeStats(){
   for(const j of _cliJobs){
     const ef=_jobEff(j,edits); const fee=ef.fee||0; const mUp=(j.month||'').toUpperCase();
     const isCur=mUp.startsWith(curM), isPrior=mUp.startsWith(priorM);
-    if(ef.status==='INVOICED'||ef.status==='CONFIRMED'){ if(mUp!=='JUNE') yearInc+=fee; if(isCur)curInc+=fee; if(isPrior)priorInc+=fee; }
+    if(ef.status==='INVOICED'||ef.status==='CONFIRMED'||ef.status==='TO INVOICE'){ if(mUp!=='JUNE') yearInc+=fee; if(isCur)curInc+=fee; if(isPrior)priorInc+=fee; }
     else if(ef.status==='GIFTING' && isCur){ giftCur+=fee; }
   }
   return {curInc,priorInc,yearInc,giftCur,curM,priorM};
