@@ -245,6 +245,11 @@ body{font-family:var(--font);color:var(--text);min-height:100vh;overflow-x:hidde
 .of-mini-add{font-size:0.72rem;color:var(--text-faint);cursor:pointer;padding:4px 2px}
 .of-mini-add:hover{color:var(--teal)}
 .of-hint{font-size:0.62rem;color:var(--text-faint);margin:-6px 0 12px}
+.day-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.day-card{padding:16px;display:flex;flex-direction:column;gap:10px}
+.day-head{display:flex;align-items:center;gap:10px}
+.day-label{flex:1;min-width:0;font-family:var(--serif);font-size:1rem;font-weight:600;color:var(--black);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.day-note{min-height:130px;font-size:0.88rem;line-height:1.6;border:1px solid var(--glass-border);background:rgba(255,255,255,0.5)}
 .jt-num{text-align:right;font-variant-numeric:tabular-nums}
 .jt-sel{cursor:pointer;font-size:0.62rem;font-weight:600;letter-spacing:0.04em;-webkit-appearance:none;appearance:none;text-align:left}
 .jt-sel.st-invoiced{color:#4c6147}
@@ -546,12 +551,14 @@ select.form-input{cursor:pointer;background:#1a1a1a}
         <button class="subtab" data-sub="outreach" onclick="pfwSub('outreach')">Brand Outreach</button>
         <button class="subtab" data-sub="expenses" onclick="pfwSub('expenses')">Expenses</button>
         <button class="subtab" data-sub="outfits" onclick="pfwSub('outfits')">Outfits</button>
+        <button class="subtab" data-sub="days" onclick="pfwSub('days')">Day Plan</button>
       </div>
       <div id="pfw-schedule"></div>
       <div id="pfw-travel" style="display:none"></div>
       <div id="pfw-outreach" style="display:none"></div>
       <div id="pfw-expenses" style="display:none"></div>
       <div id="pfw-outfits" style="display:none"></div>
+      <div id="pfw-days" style="display:none"></div>
     </div>
 
     <!-- ═══ CALENDAR TAB ═══ -->
@@ -4569,9 +4576,9 @@ function _pfwTravel(){
 function _savePfwTravel(a){ localStorage.setItem('dom_pfw_travel',JSON.stringify(a)); }
 function pfwSub(which){
   document.querySelectorAll('#tab-pfw .subtab').forEach(b=>b.classList.toggle('active',b.dataset.sub===which));
-  ['schedule','travel','outreach','expenses','outfits'].forEach(s=>{const el=document.getElementById('pfw-'+s); if(el)el.style.display=s===which?'block':'none';});
+  ['schedule','travel','outreach','expenses','outfits','days'].forEach(s=>{const el=document.getElementById('pfw-'+s); if(el)el.style.display=s===which?'block':'none';});
 }
-function renderPfw(){ renderPfwSchedule(); renderPfwTravel(); renderPfwOutreach(); renderPfwExpenses(); renderPfwOutfits(); renderPfwStats(); }
+function renderPfw(){ renderPfwSchedule(); renderPfwTravel(); renderPfwOutreach(); renderPfwExpenses(); renderPfwOutfits(); renderPfwDays(); renderPfwStats(); }
 function renderPfwStats(){
   const el=document.getElementById('pfw-stats'); if(!el)return;
   const shows=_pfwEvents(), out=_pfwOutreach();
@@ -4807,6 +4814,27 @@ function renderPfwShopping(){
   html+='<tr class="add-row"><td colspan="6"><button class="add-brand-btn" onclick="shopAdd()">+ Add item</button></td></tr>';
   html+='</tbody></table></div>';
   wrap.innerHTML=html;
+}
+// Day Plan — one big note per date
+function _pfwDays(){ try{return JSON.parse(localStorage.getItem('dom_pfw_days')||'[]');}catch(e){return [];} }
+function _savePfwDays(a){ localStorage.setItem('dom_pfw_days',JSON.stringify(a)); }
+function pfwDayAdd(){ const a=_pfwDays(); const id='dy-'+Date.now()+'-'+Math.floor(Math.random()*1000); a.push({id,date:'',note:''}); _savePfwDays(a); renderPfwDays(); setTimeout(()=>{const el=document.querySelector('input[data-pfwday="'+id+'"]');if(el)el.focus();},30); }
+function pfwDayEdit(id,field,val){ const a=_pfwDays(); const it=a.find(x=>x.id===id); if(!it)return; it[field]=val; _savePfwDays(a); if(field==='date')renderPfwDays(); }
+function pfwDayRemove(id){ if(!confirm('Delete this day?'))return; _savePfwDays(_pfwDays().filter(x=>x.id!==id)); renderPfwDays(); }
+function _fmtDayLabel(d){ if(!d)return 'No date'; const dt=new Date(d+'T00:00:00'); return isNaN(dt)?d:dt.toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long'}); }
+function renderPfwDays(){
+  const el=document.getElementById('pfw-days'); if(!el)return;
+  const days=_pfwDays().slice().sort((a,b)=>{const da=a.date||'9999',db=b.date||'9999';return da<db?-1:da>db?1:0;});
+  let html='<div class="job-month">Day Plan</div><p class="of-hint">One note per day — jot the plan, timings, who you\'re seeing, anything.</p>';
+  html+='<div class="day-grid">';
+  days.forEach(d=>{ const k="'"+d.id.replace(/'/g,"\\'")+"'";
+    html+='<div class="card day-card">'
+      +'<div class="day-head"><input class="jt-in" type="date" style="width:150px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.5)" data-pfwday="'+_esc(d.id)+'" value="'+_esc(d.date||'')+'" onchange="pfwDayEdit('+k+',\'date\',this.value)"><span class="day-label">'+_esc(_fmtDayLabel(d.date))+'</span><span class="del-row" onclick="pfwDayRemove('+k+')" title="Delete day">×</span></div>'
+      +'<textarea class="jt-ta day-note" rows="5" placeholder="Plan for the day…" oninput="_grow(this)" onchange="pfwDayEdit('+k+',\'note\',this.value)">'+_esc(d.note||'')+'</textarea>'
+      +'</div>';
+  });
+  html+='</div><button class="add-brand-btn" style="margin-top:12px" onclick="pfwDayAdd()">+ Add day</button>';
+  el.innerHTML=html; _growAll(el);
 }
 
 // ─── Pinterest (ads + launch checklist) ───
