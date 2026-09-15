@@ -604,11 +604,17 @@ select.form-input{cursor:pointer;background:#1a1a1a}
       <div class="subtabs">
         <button class="subtab active" data-sub="jobs" onclick="clientsSub('jobs')">Jobs &amp; Income</button>
         <button class="subtab" data-sub="book" onclick="clientsSub('book')">Address Book</button>
+        <button class="subtab" data-sub="usage" onclick="clientsSub('usage')">Ad Usage</button>
       </div>
       <div id="clients-jobs">
         <div class="metrics-grid" id="cli-stats"></div>
         <div id="cli-goal"></div>
         <div id="cli-jobs-content"></div>
+      </div>
+      <div id="clients-usage" style="display:none">
+        <p class="section-lead">Track paid ad-usage rights — expiry is calculated from the invoice date + usage length, and flags when a licence is ending.</p>
+        <div class="metrics-grid" id="usage-stats"></div>
+        <div id="usage-content"></div>
       </div>
       <div id="clients-book" style="display:none">
         <input class="cli-search" id="cli-search" placeholder="Search brand, contact, email, location, notes…" oninput="renderAddressBook()" autocomplete="off">
@@ -3198,6 +3204,49 @@ function clientsSub(which){
   document.querySelectorAll('#tab-clients .subtab').forEach(b=>b.classList.toggle('active',b.dataset.sub===which));
   document.getElementById('clients-book').style.display = which==='book'?'block':'none';
   document.getElementById('clients-jobs').style.display = which==='jobs'?'block':'none';
+  document.getElementById('clients-usage').style.display = which==='usage'?'block':'none';
+}
+// ── Ad Usage tracker (paid usage rights that expire) ──
+function _adUsage(){ try{return JSON.parse(localStorage.getItem('dom_ad_usage')||'[]');}catch(e){return [];} }
+function _saveAdUsage(a){ localStorage.setItem('dom_ad_usage',JSON.stringify(a)); }
+function _usageExpiry(u){ if(!u.invDate||!(u.days>0))return null; const d=new Date(u.invDate+'T00:00:00'); if(isNaN(d))return null; d.setDate(d.getDate()+Number(u.days)); return d; }
+function _usageDaysLeft(u){ const e=_usageExpiry(u); if(!e)return null; const today=new Date(); today.setHours(0,0,0,0); return Math.round((e-today)/86400000); }
+function adUsageAdd(){ const a=_adUsage(); const id='au-'+Date.now()+'-'+Math.floor(Math.random()*1000); a.push({id,brand:'',invDate:'',amount:null,days:30,note:''}); _saveAdUsage(a); renderAdUsage(); setTimeout(()=>{const el=document.querySelector('input[data-usage-brand="'+id+'"]');if(el)el.focus();},30); }
+function adUsageEdit(id,field,val){ const a=_adUsage(); const it=a.find(x=>x.id===id); if(!it)return; const numF=['amount','days']; it[field]=(numF.includes(field)?(val===''?null:parseFloat(val)):val); _saveAdUsage(a); renderAdUsage(); }
+function adUsageRemove(id){ _saveAdUsage(_adUsage().filter(x=>x.id!==id)); renderAdUsage(); }
+function renderAdUsage(){
+  const el=document.getElementById('usage-content'); if(!el)return;
+  const rows=_adUsage().slice().sort((a,b)=>{const ea=_usageExpiry(a),eb=_usageExpiry(b);const va=ea?ea.getTime():Infinity,vb=eb?eb.getTime():Infinity;return va-vb;});
+  let active=0,expiring=0,totalVal=0;
+  rows.forEach(u=>{ totalVal+=u.amount||0; const dl=_usageDaysLeft(u); if(dl!=null&&dl>=0){active++; if(dl<=7)expiring++;} });
+  const st=document.getElementById('usage-stats');
+  if(st) st.innerHTML=
+    '<div class="card metric-tile"><div class="metric-value">'+active+'</div><div class="metric-label">Active licences</div></div>'
+    +'<div class="card metric-tile"><div class="metric-value" style="color:'+(expiring>0?'#b8863b':'inherit')+'">'+expiring+'</div><div class="metric-label">Expiring ≤ 7 days</div></div>'
+    +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(totalVal)+'</div><div class="metric-label">Total usage value</div></div>';
+  let html='<div class="card jt-wrap"><table class="jt"><thead><tr>'
+    +'<th style="width:18%">Brand</th><th style="width:13%">Invoice date</th><th class="num" style="width:11%">Amount</th><th style="width:10%">Usage (days)</th><th style="width:13%">Expires</th><th style="width:11%">Status</th><th>Notes</th><th style="width:30px"></th>'
+    +'</tr></thead><tbody>';
+  if(!rows.length) html+='<tr><td colspan="8" style="text-align:center;color:var(--text-faint);padding:16px">No ad-usage licences yet.</td></tr>';
+  rows.forEach(u=>{ const k="'"+u.id.replace(/'/g,"\\'")+"'";
+    const exp=_usageExpiry(u), dl=_usageDaysLeft(u);
+    const expStr=exp?exp.toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}):'—';
+    let status='—',col='var(--text-faint)';
+    if(dl!=null){ if(dl<0){status='Expired';col='#c0503f';} else if(dl<=7){status=dl+'d left';col='#b8863b';} else {status='Active';col='#4c6147';} }
+    html+='<tr>'
+      +'<td><input class="jt-in" data-usage-brand="'+_esc(u.id)+'" value="'+_esc(u.brand||'')+'" placeholder="Brand" onchange="adUsageEdit('+k+',\'brand\',this.value)"></td>'
+      +'<td><input class="jt-in" type="date" value="'+_esc(u.invDate||'')+'" onchange="adUsageEdit('+k+',\'invDate\',this.value)"></td>'
+      +'<td class="num"><input class="jt-in jt-num" value="'+(u.amount!=null?u.amount:'')+'" placeholder="—" inputmode="decimal" onchange="adUsageEdit('+k+',\'amount\',this.value)"></td>'
+      +'<td class="num"><input class="jt-in jt-num" value="'+(u.days!=null?u.days:'')+'" placeholder="30" inputmode="numeric" onchange="adUsageEdit('+k+',\'days\',this.value)"></td>'
+      +'<td>'+expStr+'</td>'
+      +'<td style="color:'+col+';font-weight:600;font-size:0.72rem">'+status+'</td>'
+      +'<td><textarea class="jt-ta" rows="1" placeholder="—" oninput="_grow(this)" onchange="adUsageEdit('+k+',\'note\',this.value)">'+_esc(u.note||'')+'</textarea></td>'
+      +'<td class="reorder-cell"><span class="del-row" onclick="adUsageRemove('+k+')" title="Remove">×</span></td>'
+      +'</tr>';
+  });
+  html+='<tr class="add-row"><td colspan="8"><button class="add-brand-btn" onclick="adUsageAdd()">+ Add ad-usage licence</button></td></tr>';
+  html+='</tbody></table></div>';
+  el.innerHTML=html; _growAll(el);
 }
 
 // Auto-growing textareas for free-text (content/notes). Native field-sizing
@@ -5035,6 +5084,7 @@ async function boot(){
   renderDividends();
   renderPfw();
   renderPinterest();
+  renderAdUsage();
   renderSydneyContacts();
   renderSydneyTrips();
   _enableSyncPush();                        // start tracking edits AFTER hydration
