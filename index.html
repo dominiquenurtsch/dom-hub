@@ -605,6 +605,11 @@ select.form-input{cursor:pointer;background:#1a1a1a}
         <button class="subtab active" data-sub="jobs" onclick="clientsSub('jobs')">Jobs &amp; Income</button>
         <button class="subtab" data-sub="book" onclick="clientsSub('book')">Address Book</button>
         <button class="subtab" data-sub="usage" onclick="clientsSub('usage')">Ad Usage</button>
+        <button class="subtab" data-sub="furniture" onclick="clientsSub('furniture')">Furniture Collabs</button>
+      </div>
+      <div id="clients-furniture" style="display:none">
+        <p class="section-lead">Furniture collaborations — same fields as Jobs &amp; Income.</p>
+        <div id="furniture-content"></div>
       </div>
       <div id="clients-jobs">
         <div class="metrics-grid" id="cli-stats"></div>
@@ -3205,6 +3210,53 @@ function clientsSub(which){
   document.getElementById('clients-book').style.display = which==='book'?'block':'none';
   document.getElementById('clients-jobs').style.display = which==='jobs'?'block':'none';
   document.getElementById('clients-usage').style.display = which==='usage'?'block':'none';
+  document.getElementById('clients-furniture').style.display = which==='furniture'?'block':'none';
+}
+// ── Furniture Collabs (same fields as Jobs & Income; standalone) ──
+function _furniture(){ try{return JSON.parse(localStorage.getItem('dom_furniture')||'[]');}catch(e){return [];} }
+function _saveFurniture(a){ localStorage.setItem('dom_furniture',JSON.stringify(a)); }
+function furnitureAdd(){ const a=_furniture(); const id='fc-'+Date.now()+'-'+Math.floor(Math.random()*1000); a.push({id,brand:'',status:'PENDING',invoice:'',content:'',fee:null,gst:null,total:null}); _saveFurniture(a); renderFurniture(); setTimeout(()=>{const el=document.querySelector('input[data-furn-brand="'+id+'"]');if(el)el.focus();},30); }
+function furnitureEdit(id,field,val){
+  const a=_furniture(); const it=a.find(x=>x.id===id); if(!it)return;
+  const numF=['fee','gst','total'];
+  it[field]=(numF.includes(field)?(val===''?null:parseFloat(val)):val);
+  if(field==='fee'){ const f=it.fee||0; it.gst=Math.round(f*0.1); it.total=f+(it.gst||0); }
+  else if(field==='gst'){ it.total=(it.fee||0)+(it.gst||0); }
+  _saveFurniture(a); renderFurniture();
+}
+function furnitureRemove(id){ _saveFurniture(_furniture().filter(x=>x.id!==id)); renderFurniture(); }
+let _furnDragId=null;
+function furnDragStart(e,id){ _furnDragId=id; e.dataTransfer.effectAllowed='move'; try{e.dataTransfer.setData('text/plain',String(id));}catch(err){} const r=e.currentTarget.closest('tr'); if(r)r.classList.add('dragging'); }
+function furnDragOver(e){ if(_furnDragId==null)return; e.preventDefault(); e.dataTransfer.dropEffect='move'; e.currentTarget.classList.add('drag-over'); }
+function furnDragLeave(e){ e.currentTarget.classList.remove('drag-over'); }
+function furnDrop(e,targetId){ e.preventDefault(); e.currentTarget.classList.remove('drag-over'); const dr=document.querySelector('#furniture-content tr.dragging'); if(dr)dr.classList.remove('dragging'); if(_furnDragId==null||targetId===_furnDragId){_furnDragId=null;return;} const rect=e.currentTarget.getBoundingClientRect(); const before=(e.clientY-rect.top)<rect.height/2; const a=_furniture(); const fi=a.findIndex(x=>x.id===_furnDragId); if(fi<0){_furnDragId=null;return;} const moved=a.splice(fi,1)[0]; let ti=a.findIndex(x=>x.id===targetId); if(ti<0)ti=a.length; if(!before)ti++; a.splice(ti,0,moved); _saveFurniture(a); _furnDragId=null; renderFurniture(); }
+function furnDragEnd(e){ const r=e.currentTarget.closest('tr'); if(r)r.classList.remove('dragging'); document.querySelectorAll('#furniture-content tr.drag-over').forEach(x=>x.classList.remove('drag-over')); _furnDragId=null; }
+function renderFurniture(){
+  const el=document.getElementById('furniture-content'); if(!el)return;
+  const rows=_furniture(); let tf=0,tg=0,tt=0;
+  rows.forEach(r=>{ tf+=r.fee||0; tg+=r.gst||0; tt+=r.total||0; });
+  let html='<div class="card jt-wrap"><table class="jt"><thead><tr>'
+    +'<th style="width:30px"></th><th style="width:18%">Brand</th><th style="width:12%">Status</th><th style="width:11%">Invoice #</th><th style="width:25%">Content</th><th class="num" style="width:9%">Fee</th><th class="num" style="width:8%">GST</th><th class="num" style="width:10%">Total</th><th style="width:30px"></th>'
+    +'</tr></thead><tbody>';
+  if(!rows.length) html+='<tr><td colspan="9" style="text-align:center;color:var(--text-faint);padding:16px">No furniture collabs yet.</td></tr>';
+  rows.forEach(r=>{ const k="'"+r.id.replace(/'/g,"\\'")+"'";
+    const opts=_STATUSES.map(s=>'<option'+(s===r.status?' selected':'')+'>'+s+'</option>').join('');
+    html+='<tr ondragover="furnDragOver(event)" ondragleave="furnDragLeave(event)" ondrop="furnDrop(event,'+k+')">'
+      +'<td class="reorder-cell"><span class="drag-handle" draggable="true" ondragstart="furnDragStart(event,'+k+')" ondragend="furnDragEnd(event)" title="Drag to reorder">⠿</span></td>'
+      +'<td><input class="jt-in" data-furn-brand="'+_esc(r.id)+'" value="'+_esc(r.brand||'')+'" placeholder="Brand name" onchange="furnitureEdit('+k+',\'brand\',this.value)"></td>'
+      +'<td><select class="jt-sel st-'+_statusSlug(r.status)+'" onchange="furnitureEdit('+k+',\'status\',this.value)">'+opts+'</select></td>'
+      +'<td><input class="jt-in" value="'+_esc(r.invoice||'')+'" placeholder="—" onchange="furnitureEdit('+k+',\'invoice\',this.value)"></td>'
+      +'<td><textarea class="jt-ta" rows="1" placeholder="—" oninput="_grow(this)" onchange="furnitureEdit('+k+',\'content\',this.value)">'+_esc(r.content||'')+'</textarea></td>'
+      +'<td class="num"><input class="jt-in jt-num" value="'+(r.fee!=null?r.fee:'')+'" placeholder="—" inputmode="decimal" onchange="furnitureEdit('+k+',\'fee\',this.value)"></td>'
+      +'<td class="num"><input class="jt-in jt-num" value="'+(r.gst!=null?r.gst:'')+'" placeholder="—" inputmode="decimal" onchange="furnitureEdit('+k+',\'gst\',this.value)"></td>'
+      +'<td class="num"><input class="jt-in jt-num" value="'+(r.total!=null?r.total:'')+'" placeholder="—" inputmode="decimal" onchange="furnitureEdit('+k+',\'total\',this.value)"></td>'
+      +'<td class="reorder-cell"><span class="del-row" onclick="furnitureRemove('+k+')" title="Remove">×</span></td>'
+      +'</tr>';
+  });
+  if(rows.length) html+='<tr style="border-top:2px solid rgba(28,27,27,0.15);font-weight:600"><td></td><td style="font-weight:700">Total</td><td colspan="3"></td><td class="num" style="font-weight:700">'+fmtMoney(tf)+'</td><td class="num" style="font-weight:700">'+fmtMoney(tg)+'</td><td class="num" style="font-weight:700">'+fmtMoney(tt)+'</td><td></td></tr>';
+  html+='<tr class="add-row"><td colspan="9"><button class="add-brand-btn" onclick="furnitureAdd()">+ Add furniture collab</button></td></tr>';
+  html+='</tbody></table></div>';
+  el.innerHTML=html; _growAll(el);
 }
 // ── Ad Usage tracker (paid usage rights that expire) ──
 function _adUsage(){ try{return JSON.parse(localStorage.getItem('dom_ad_usage')||'[]');}catch(e){return [];} }
@@ -5085,6 +5137,7 @@ async function boot(){
   renderPfw();
   renderPinterest();
   renderAdUsage();
+  renderFurniture();
   renderSydneyContacts();
   renderSydneyTrips();
   _enableSyncPush();                        // start tracking edits AFTER hydration
