@@ -3296,6 +3296,30 @@ function renderPipeline(){
   html+='</tbody></table></div>';
   el.innerHTML=html; _growAll(el);
 }
+// One-time seed of the pipeline with the brands Dom was chasing on 30 Oct 2026.
+// Runs only if the pipeline is empty and it has never seeded before.
+function _seedPipeline(){
+  try{
+    if(localStorage.getItem('dom_pipeline_seeded')) return;
+    if(_pipeline().length){ localStorage.setItem('dom_pipeline_seeded','1'); return; }
+    const S=[
+      ['Izzy (Black Friday reel)','Proposal sent','2026-11-02','Quoted separate fee for BF reel. Sale runs 12–30 Nov.'],
+      ['Neutrogena (Simay)','Waiting on them','2026-11-03','Gifting offer, asked about paid. Form closes Wed 4 Nov.'],
+      ['Pacific Fair boutique (Laura)','Waiting on them','2026-11-04','RSVP yes + asked for gifted Resort 27 outfit. Event Thu 12 Nov.'],
+      ['Kate','In talks','2026-11-04','Asked if rates negotiable. Asked her project + budget.'],
+      ['Dreame (Ethan)','Proposal sent','2026-11-06','Media kit + rates sent, with team for review.'],
+      ['One Daydream (management)','In talks','2026-11-06','Reviewing exclusive contract. Send requested changes / Arts Law review.'],
+      ['Tessa','Proposal sent','2026-11-13','Rate card shared (password PARTNERSHIPS).'],
+      ['Ena Pelly','Waiting on them','2026-12-04','No Nov budget, declined gifting, rates on file. Ask about early 2027.'],
+      ['L&M Home (Siân)','Waiting on them','2027-01-05','Paused till new year. Pitch new-year home refresh.'],
+      ['SAN LUEUR (Zana)','Waiting on them','2027-01-15','Declined affiliate, open to paid in new year.']
+    ];
+    const a=S.map((r,i)=>({id:'pl-seed-'+i,brand:r[0],stage:r[1],followUp:r[2],note:r[3]}));
+    _savePipeline(a);
+    localStorage.setItem('dom_pipeline_seeded','1');
+    renderPipeline();
+  }catch(e){ console.warn('pipeline seed failed',e); }
+}
 // ── Ad Usage tracker (paid usage rights that expire) ──
 function _adUsage(){ try{return JSON.parse(localStorage.getItem('dom_ad_usage')||'[]');}catch(e){return [];} }
 function _saveAdUsage(a){ localStorage.setItem('dom_ad_usage',JSON.stringify(a)); }
@@ -5180,6 +5204,7 @@ async function boot(){
   renderSydneyContacts();
   renderSydneyTrips();
   _enableSyncPush();                        // start tracking edits AFTER hydration
+  _seedPipeline();                          // one-time: brands from the 30 Oct follow-up list
   _setSave('','Saved');                     // baseline: nothing to save yet
   if(pull.ok && !pull.hadData) saveNow(true); // seed empty server with current local state
 }
