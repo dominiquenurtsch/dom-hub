@@ -614,6 +614,7 @@ select.form-input{cursor:pointer;background:#1a1a1a}
       <div id="clients-jobs">
         <div class="metrics-grid" id="cli-stats"></div>
         <div id="cli-goal"></div>
+        <div id="cli-pipeline"></div>
         <div id="cli-jobs-content"></div>
       </div>
       <div id="clients-usage" style="display:none">
@@ -3258,6 +3259,43 @@ function renderFurniture(){
   html+='</tbody></table></div>';
   el.innerHTML=html; _growAll(el);
 }
+// ── In the Pipeline (prospects + when to follow up) ──
+const PIPE_STAGES=['New lead','Reached out','In talks','Proposal sent','Waiting on them','Won','Lost'];
+function _pipeline(){ try{return JSON.parse(localStorage.getItem('dom_pipeline')||'[]');}catch(e){return [];} }
+function _savePipeline(a){ localStorage.setItem('dom_pipeline',JSON.stringify(a)); }
+function pipeAdd(){ const a=_pipeline(); const id='pl-'+Date.now()+'-'+Math.floor(Math.random()*1000); a.push({id,brand:'',stage:'New lead',followUp:'',note:''}); _savePipeline(a); renderPipeline(); setTimeout(()=>{const el=document.querySelector('input[data-pipe-brand="'+id+'"]');if(el)el.focus();},30); }
+function pipeEdit(id,field,val){ const a=_pipeline(); const it=a.find(x=>x.id===id); if(!it)return; it[field]=val; _savePipeline(a); if(field==='followUp'||field==='stage')renderPipeline(); }
+function pipeRemove(id){ _savePipeline(_pipeline().filter(x=>x.id!==id)); renderPipeline(); }
+function _followDaysLeft(d){ if(!d)return null; const dt=new Date(d+'T00:00:00'); if(isNaN(dt))return null; const t=new Date(); t.setHours(0,0,0,0); return Math.round((dt-t)/86400000); }
+function renderPipeline(){
+  const el=document.getElementById('cli-pipeline'); if(!el)return;
+  const rows=_pipeline().slice().sort((a,b)=>{const fa=a.followUp||'9999',fb=b.followUp||'9999';return fa<fb?-1:fa>fb?1:0;});
+  const open=rows.filter(r=>r.stage!=='Won'&&r.stage!=='Lost').length;
+  const overdue=rows.filter(r=>{const d=_followDaysLeft(r.followUp);return d!=null&&d<0&&r.stage!=='Won'&&r.stage!=='Lost';}).length;
+  let html='<div class="job-month" style="display:flex;align-items:center;gap:10px">In the Pipeline'
+    +'<span style="font-family:var(--font);font-size:0.6rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-faint)">'+open+' open'+(overdue>0?' · <span style="color:#c0503f">'+overdue+' to chase</span>':'')+'</span></div>';
+  html+='<div class="card jt-wrap" style="margin-bottom:22px"><table class="jt"><thead><tr>'
+    +'<th style="width:22%">Brand</th><th style="width:15%">Stage</th><th style="width:14%">Follow up</th><th style="width:12%">When</th><th>Notes</th><th style="width:30px"></th>'
+    +'</tr></thead><tbody>';
+  if(!rows.length) html+='<tr><td colspan="6" style="text-align:center;color:var(--text-faint);padding:16px">No prospects yet — add brands you want to chase.</td></tr>';
+  rows.forEach(r=>{ const k="'"+r.id.replace(/'/g,"\\'")+"'";
+    const stOpts=PIPE_STAGES.map(s=>'<option'+(s===r.stage?' selected':'')+'>'+s+'</option>').join('');
+    const dl=_followDaysLeft(r.followUp); let when='—',col='var(--text-faint)';
+    const done=(r.stage==='Won'||r.stage==='Lost');
+    if(dl!=null&&!done){ if(dl<0){when=(-dl)+'d overdue';col='#c0503f';} else if(dl===0){when='Today';col='#b8863b';} else if(dl<=3){when='In '+dl+'d';col='#b8863b';} else {when='In '+dl+'d';col='var(--text-muted)';} }
+    html+='<tr>'
+      +'<td><input class="jt-in" data-pipe-brand="'+_esc(r.id)+'" value="'+_esc(r.brand||'')+'" placeholder="Brand" onchange="pipeEdit('+k+',\'brand\',this.value)"></td>'
+      +'<td><select class="jt-in jt-sel" onchange="pipeEdit('+k+',\'stage\',this.value)">'+stOpts+'</select></td>'
+      +'<td><input class="jt-in" type="date" value="'+_esc(r.followUp||'')+'" onchange="pipeEdit('+k+',\'followUp\',this.value)"></td>'
+      +'<td style="color:'+col+';font-weight:600;font-size:0.72rem">'+when+'</td>'
+      +'<td><textarea class="jt-ta" rows="1" placeholder="—" oninput="_grow(this)" onchange="pipeEdit('+k+',\'note\',this.value)">'+_esc(r.note||'')+'</textarea></td>'
+      +'<td class="reorder-cell"><span class="del-row" onclick="pipeRemove('+k+')" title="Remove">×</span></td>'
+      +'</tr>';
+  });
+  html+='<tr class="add-row"><td colspan="6"><button class="add-brand-btn" onclick="pipeAdd()">+ Add to pipeline</button></td></tr>';
+  html+='</tbody></table></div>';
+  el.innerHTML=html; _growAll(el);
+}
 // ── Ad Usage tracker (paid usage rights that expire) ──
 function _adUsage(){ try{return JSON.parse(localStorage.getItem('dom_ad_usage')||'[]');}catch(e){return [];} }
 function _saveAdUsage(a){ localStorage.setItem('dom_ad_usage',JSON.stringify(a)); }
@@ -5138,6 +5176,7 @@ async function boot(){
   renderPinterest();
   renderAdUsage();
   renderFurniture();
+  renderPipeline();
   renderSydneyContacts();
   renderSydneyTrips();
   _enableSyncPush();                        // start tracking edits AFTER hydration
