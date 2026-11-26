@@ -250,6 +250,13 @@ body{font-family:var(--font);color:var(--text);min-height:100vh;overflow-x:hidde
 .day-head{display:flex;align-items:center;gap:10px}
 .day-label{flex:1;min-width:0;font-family:var(--serif);font-size:1rem;font-weight:600;color:var(--black);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .day-note{min-height:130px;font-size:0.88rem;line-height:1.6;border:1px solid var(--glass-border);background:rgba(255,255,255,0.5)}
+.usage-asset{position:relative;width:52px;height:52px;border-radius:8px;overflow:hidden;border:1px solid var(--glass-border)}
+.usage-asset img{width:100%;height:100%;object-fit:cover;display:block}
+.usage-asset .asset-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;background:rgba(0,0,0,0.28);font-size:0.85rem}
+.usage-asset .of-del{position:absolute;top:2px;right:2px;width:17px;height:17px;border-radius:50%;background:rgba(28,27,27,0.7);color:#fff;border:none;font-size:0.65rem;line-height:1;cursor:pointer;opacity:0;transition:opacity .15s;display:flex;align-items:center;justify-content:center}
+.usage-asset:hover .of-del{opacity:1}
+.asset-add{display:inline-block;font-size:0.66rem;color:var(--text-faint);cursor:pointer;border:1px dashed rgba(28,27,27,0.25);border-radius:6px;padding:6px 8px;white-space:nowrap}
+.asset-add:hover{color:var(--teal);border-color:var(--teal)}
 .jt-num{text-align:right;font-variant-numeric:tabular-nums}
 .jt-sel{cursor:pointer;font-size:0.62rem;font-weight:600;letter-spacing:0.04em;-webkit-appearance:none;appearance:none;text-align:left}
 .jt-sel.st-invoiced{color:#4c6147}
@@ -3322,7 +3329,30 @@ function _seedPipeline(){
 }
 // ── Ad Usage tracker (paid usage rights that expire) ──
 function _adUsage(){ try{return JSON.parse(localStorage.getItem('dom_ad_usage')||'[]');}catch(e){return [];} }
-function _saveAdUsage(a){ localStorage.setItem('dom_ad_usage',JSON.stringify(a)); }
+function _saveAdUsage(a){ return _safeSet('dom_ad_usage',JSON.stringify(a)); }
+function _videoThumb(file,maxDim){
+  return new Promise((resolve,reject)=>{
+    const url=URL.createObjectURL(file); const v=document.createElement('video');
+    v.muted=true; v.playsInline=true; v.preload='metadata'; let done=false;
+    function draw(){ if(done)return; let w=v.videoWidth,h=v.videoHeight; if(!w||!h){URL.revokeObjectURL(url);return reject();}
+      if(w>h&&w>maxDim){h=Math.round(h*maxDim/w);w=maxDim;}else if(h>=w&&h>maxDim){w=Math.round(w*maxDim/h);h=maxDim;}
+      const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(v,0,0,w,h);
+      done=true; URL.revokeObjectURL(url); resolve(c.toDataURL('image/jpeg',0.7)); }
+    v.onloadeddata=()=>{ try{ v.currentTime=Math.min(0.1,(v.duration||1)/2); }catch(e){ draw(); } };
+    v.onseeked=draw; v.onerror=()=>{URL.revokeObjectURL(url);reject();};
+    setTimeout(()=>draw(),1500); // fallback if seeked never fires
+    v.src=url;
+  });
+}
+function usageAssetFile(input,id){
+  const f=input.files&&input.files[0]; if(!f)return;
+  const isVid=(f.type||'').startsWith('video');
+  const p=isVid?_videoThumb(f,480):_imgToDataURL(f,560,0.68);
+  p.then(thumb=>{ const a=_adUsage(); const it=a.find(x=>x.id===id); if(it){ it.asset={thumb,type:isVid?'video':'image',name:f.name}; if(_saveAdUsage(a))renderAdUsage(); } })
+   .catch(()=>alert('Could not read that file.'));
+  input.value='';
+}
+function usageAssetClear(id){ const a=_adUsage(); const it=a.find(x=>x.id===id); if(it){ delete it.asset; _saveAdUsage(a); renderAdUsage(); } }
 function _usageExpiry(u){ if(!u.invDate||!(u.days>0))return null; const d=new Date(u.invDate+'T00:00:00'); if(isNaN(d))return null; d.setDate(d.getDate()+Number(u.days)); return d; }
 function _usageDaysLeft(u){ const e=_usageExpiry(u); if(!e)return null; const today=new Date(); today.setHours(0,0,0,0); return Math.round((e-today)/86400000); }
 function adUsageAdd(){ const a=_adUsage(); const id='au-'+Date.now()+'-'+Math.floor(Math.random()*1000); a.push({id,brand:'',invDate:'',amount:null,days:30,note:''}); _saveAdUsage(a); renderAdUsage(); setTimeout(()=>{const el=document.querySelector('input[data-usage-brand="'+id+'"]');if(el)el.focus();},30); }
@@ -3339,9 +3369,9 @@ function renderAdUsage(){
     +'<div class="card metric-tile"><div class="metric-value" style="color:'+(expiring>0?'#b8863b':'inherit')+'">'+expiring+'</div><div class="metric-label">Expiring ≤ 7 days</div></div>'
     +'<div class="card metric-tile"><div class="metric-value">'+fmtMoney(totalVal)+'</div><div class="metric-label">Total usage value</div></div>';
   let html='<div class="card jt-wrap"><table class="jt"><thead><tr>'
-    +'<th style="width:18%">Brand</th><th style="width:13%">Invoice date</th><th class="num" style="width:11%">Amount</th><th style="width:10%">Usage (days)</th><th style="width:13%">Expires</th><th style="width:11%">Status</th><th>Notes</th><th style="width:30px"></th>'
+    +'<th style="width:18%">Brand</th><th style="width:12%">Invoice date</th><th class="num" style="width:10%">Amount</th><th style="width:9%">Usage (days)</th><th style="width:12%">Expires</th><th style="width:10%">Status</th><th style="width:62px">Asset</th><th>Notes</th><th style="width:30px"></th>'
     +'</tr></thead><tbody>';
-  if(!rows.length) html+='<tr><td colspan="8" style="text-align:center;color:var(--text-faint);padding:16px">No ad-usage licences yet.</td></tr>';
+  if(!rows.length) html+='<tr><td colspan="9" style="text-align:center;color:var(--text-faint);padding:16px">No ad-usage licences yet.</td></tr>';
   rows.forEach(u=>{ const k="'"+u.id.replace(/'/g,"\\'")+"'";
     const exp=_usageExpiry(u), dl=_usageDaysLeft(u);
     const expStr=exp?exp.toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}):'—';
@@ -3354,11 +3384,12 @@ function renderAdUsage(){
       +'<td class="num"><input class="jt-in jt-num" value="'+(u.days!=null?u.days:'')+'" placeholder="30" inputmode="numeric" onchange="adUsageEdit('+k+',\'days\',this.value)"></td>'
       +'<td>'+expStr+'</td>'
       +'<td style="color:'+col+';font-weight:600;font-size:0.72rem">'+status+'</td>'
+      +'<td>'+(u.asset?'<div class="usage-asset"><img src="'+_esc(u.asset.thumb)+'" title="'+_esc(u.asset.name||'')+'">'+(u.asset.type==='video'?'<span class="asset-play">▶</span>':'')+'<button class="of-del" onclick="usageAssetClear('+k+')" title="Remove asset">×</button></div>':'<label class="asset-add">+ file<input type="file" accept="image/*,video/*" style="display:none" onchange="usageAssetFile(this,'+k+')"></label>')+'</td>'
       +'<td><textarea class="jt-ta" rows="1" placeholder="—" oninput="_grow(this)" onchange="adUsageEdit('+k+',\'note\',this.value)">'+_esc(u.note||'')+'</textarea></td>'
       +'<td class="reorder-cell"><span class="del-row" onclick="adUsageRemove('+k+')" title="Remove">×</span></td>'
       +'</tr>';
   });
-  html+='<tr class="add-row"><td colspan="8"><button class="add-brand-btn" onclick="adUsageAdd()">+ Add ad-usage licence</button></td></tr>';
+  html+='<tr class="add-row"><td colspan="9"><button class="add-brand-btn" onclick="adUsageAdd()">+ Add ad-usage licence</button></td></tr>';
   html+='</tbody></table></div>';
   el.innerHTML=html; _growAll(el);
 }
